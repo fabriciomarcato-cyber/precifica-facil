@@ -176,39 +176,45 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
     ];
 
     platforms.forEach(platform => {
-        let commissionPercent = 0;
+        let commissionRate = 0;
         let fixedFee = 0;
         let marginPercent = 0;
+        let contributionMargin = 0;
         
         switch (platform) {
             case Platform.ML_CLASSICO:
-                commissionPercent = settings.mercadoLivre.classicCommission / 100;
+                commissionRate = settings.mercadoLivre.classicCommission / 100;
                 fixedFee = desiredPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
+                contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.ML_PREMIUM:
-                commissionPercent = settings.mercadoLivre.premiumCommission / 100;
+                commissionRate = settings.mercadoLivre.premiumCommission / 100;
                 fixedFee = desiredPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
+                contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.SHOPEE:
-                commissionPercent = settings.shopee.commission / 100;
+                commissionRate = settings.shopee.commission / 100;
                 fixedFee = settings.shopee.fixedFee;
                 marginPercent = settings.shopee.contributionMargin / 100;
+                contributionMargin = settings.shopee.contributionMargin;
                 break;
             case Platform.TIKTOK_SHOP:
-                commissionPercent = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
+                commissionRate = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
                 fixedFee = settings.tiktok.fixedFee;
                 marginPercent = settings.tiktok.contributionMargin / 100;
+                contributionMargin = settings.tiktok.contributionMargin;
                 break;
             case Platform.INSTAGRAM:
-                commissionPercent = 0;
+                commissionRate = 0;
                 fixedFee = 0;
                 marginPercent = settings.instagram.contributionMargin / 100;
+                contributionMargin = settings.instagram.contributionMargin;
                 break;
         }
 
-        const commissionValue = desiredPrice * commissionPercent;
+        const commissionValue = desiredPrice * commissionRate;
         const taxValue = desiredPrice * taxPercent;
         const profitValue = desiredPrice * marginPercent;
         const maxCost = desiredPrice - fixedFee - commissionValue - taxValue - profitValue;
@@ -222,6 +228,9 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
             tax: taxValue,
             grossProfit: profitValue,
             calculatedMargin: marginPercent * 100,
+            contributionMarginPercent: contributionMargin,
+            commissionPercent: commissionRate * 100,
+            taxPercent: settings.simplesNacional,
         });
     });
 
@@ -230,41 +239,41 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
 
 export function simulateMargin(productCost: number, sellingPrice: number, settings: AppSettings): CalculationResult[] {
     const results: CalculationResult[] = [];
-    const taxPercent = settings.simplesNacional / 100;
+    const taxRate = settings.simplesNacional / 100;
     
     const platforms = [
         Platform.ML_CLASSICO, Platform.ML_PREMIUM, Platform.SHOPEE, Platform.TIKTOK_SHOP, Platform.INSTAGRAM
     ];
 
     platforms.forEach(platform => {
-        let commissionPercent = 0;
+        let commissionRate = 0;
         let fixedFee = 0;
 
         switch (platform) {
             case Platform.ML_CLASSICO:
-                commissionPercent = settings.mercadoLivre.classicCommission / 100;
+                commissionRate = settings.mercadoLivre.classicCommission / 100;
                 fixedFee = sellingPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
                 break;
             case Platform.ML_PREMIUM:
-                commissionPercent = settings.mercadoLivre.premiumCommission / 100;
+                commissionRate = settings.mercadoLivre.premiumCommission / 100;
                 fixedFee = sellingPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
                 break;
             case Platform.SHOPEE:
-                commissionPercent = settings.shopee.commission / 100;
+                commissionRate = settings.shopee.commission / 100;
                 fixedFee = settings.shopee.fixedFee;
                 break;
             case Platform.TIKTOK_SHOP:
-                commissionPercent = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
+                commissionRate = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
                 fixedFee = settings.tiktok.fixedFee;
                 break;
             case Platform.INSTAGRAM:
-                commissionPercent = 0;
+                commissionRate = 0;
                 fixedFee = 0;
                 break;
         }
 
-        const commissionValue = sellingPrice * commissionPercent;
-        const taxValue = sellingPrice * taxPercent;
+        const commissionValue = sellingPrice * commissionRate;
+        const taxValue = sellingPrice * taxRate;
         const grossProfit = sellingPrice - productCost - fixedFee - commissionValue - taxValue;
         const calculatedMargin = sellingPrice > 0 ? (grossProfit / sellingPrice) * 100 : 0;
 
@@ -277,6 +286,8 @@ export function simulateMargin(productCost: number, sellingPrice: number, settin
             tax: taxValue,
             grossProfit,
             calculatedMargin,
+            commissionPercent: commissionRate * 100,
+            taxPercent: settings.simplesNacional,
         });
     });
 

@@ -181,10 +181,49 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
                 Calcular Custo Máximo
             </button>
         </div>
-        <ResultsTable 
-            results={inverseResults}
-            headers={['Plataforma', 'Preço de Venda (R$)', 'Margem Calculada (%)', 'Taxa Fixa (R$)', 'Comissão (R$)', 'Simples Nacional (R$)', 'Custo Máximo do Produto (R$)']}
-        />
+        {inverseResults.length > 0 ? (
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {inverseResults.map((res) => (
+                    <div key={res.platform} className="bg-slate-100 p-4 rounded-lg border border-slate-200 flex flex-col">
+                        <h3 className="text-base font-bold text-gray-800 text-center mb-2">{res.platform}</h3>
+                        <p className="text-3xl font-extrabold text-green-600 text-center mb-4" title="Custo Máximo do Produto">{formatCurrency(res.maxProductCost)}</p>
+                        <div className="text-sm space-y-2 flex-grow">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Preço de Venda</span>
+                                <span className="font-medium text-gray-900">{formatCurrency(res.sellingPrice)}</span>
+                            </div>
+                             <div className="border-t border-gray-300 my-2"></div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Margem ({formatPercentage(res.contributionMarginPercent)})</span>
+                                <span className="font-medium text-gray-900">{formatCurrency(res.grossProfit)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Comissão ({formatPercentage(res.commissionPercent)})</span>
+                                <span className="font-medium text-gray-900">{formatCurrency(res.commission)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
+                                <span className="font-medium text-gray-900">{formatCurrency(res.tax)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">Taxa Fixa/Frete</span>
+                                <span className="font-medium text-gray-900">{formatCurrency(res.fixedFee)}</span>
+                            </div>
+                        </div>
+                        <div className="border-t border-gray-300 mt-4 pt-2">
+                              <div className="flex justify-between font-bold text-base">
+                                <span className="text-green-700">Custo Máximo</span>
+                                <span className="text-green-700">{formatCurrency(res.maxProductCost)}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        ) : (
+            <div className="text-center text-gray-500 py-12">
+                <p>Digite o preço de venda desejado e clique em "Calcular Custo Máximo".</p>
+            </div>
+        )}
       </Card>
 
       <Card title="Simulação de Margem por Preço de Venda">
@@ -218,10 +257,54 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
                 Simular Margem
             </button>
         </div>
-        <ResultsTable 
-            results={marginResults}
-            headers={['Plataforma', 'Custo Produto (R$)', 'Preço de Venda (R$)', 'Comissão (R$)', 'Taxa Fixa (R$)', 'Simples Nacional (R$)', 'Lucro Bruto (R$)', 'Margem Calculada (%)']}
-        />
+        {marginResults.length > 0 ? (
+           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+               {marginResults.map((res) => (
+                   <div key={res.platform} className="bg-slate-100 p-4 rounded-lg border border-slate-200 flex flex-col">
+                       <h3 className="text-base font-bold text-gray-800 text-center mb-2">{res.platform}</h3>
+                       <p className="text-3xl font-extrabold text-green-600 text-center" title="Lucro Bruto">{formatCurrency(res.grossProfit)}</p>
+                       <p className="text-lg font-bold text-blue-600 text-center mb-4" title="Margem Calculada">{formatPercentage(res.calculatedMargin)}</p>
+                       <div className="text-sm space-y-2 flex-grow">
+                            <div className="flex justify-between">
+                               <span className="text-gray-600">Custo do Produto</span>
+                               <span className="font-medium text-gray-900">{formatCurrency(res.productCost)}</span>
+                           </div>
+                           <div className="flex justify-between">
+                               <span className="text-gray-600">Preço de Venda</span>
+                               <span className="font-medium text-gray-900">{formatCurrency(res.sellingPrice)}</span>
+                           </div>
+                            <div className="border-t border-gray-300 my-2"></div>
+                           <div className="flex justify-between">
+                               <span className="text-gray-600">Comissão ({formatPercentage(res.commissionPercent)})</span>
+                               <span className="font-medium text-gray-900">{formatCurrency(res.commission)}</span>
+                           </div>
+                           <div className="flex justify-between">
+                               <span className="text-gray-600">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
+                               <span className="font-medium text-gray-900">{formatCurrency(res.tax)}</span>
+                           </div>
+                           <div className="flex justify-between">
+                               <span className="text-gray-600">Taxa Fixa/Frete</span>
+                               <span className="font-medium text-gray-900">{formatCurrency(res.fixedFee)}</span>
+                           </div>
+                       </div>
+                       <div className="border-t border-gray-300 mt-4 pt-2">
+                             <div className="flex justify-between font-bold text-base">
+                               <span className="text-green-700">Lucro Bruto</span>
+                               <span className="text-green-700">{formatCurrency(res.grossProfit)}</span>
+                           </div>
+                             <div className="flex justify-between font-bold text-sm">
+                               <span className="text-blue-700">Margem Final</span>
+                               <span className="text-blue-700">{formatPercentage(res.calculatedMargin)}</span>
+                           </div>
+                       </div>
+                   </div>
+               ))}
+           </div>
+       ) : (
+            <div className="text-center text-gray-500 py-12">
+                <p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p>
+            </div>
+       )}
       </Card>
     </>
   );
