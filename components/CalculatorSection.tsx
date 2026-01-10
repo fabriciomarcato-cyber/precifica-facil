@@ -8,14 +8,24 @@ import {
     formatCurrency,
     formatPercentage
 } from '../lib/calculator';
+import { getMarketplaceIcon } from './MarketplaceIcons';
 
 interface CalculatorSectionProps {
   settings: AppSettings;
 }
 
-const Card: React.FC<React.PropsWithChildren<{ title: string }>> = ({ title, children }) => (
+const WarningIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
+        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.031-1.742 3.031H4.42c-1.532 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+);
+
+const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; }>> = ({ title, subtitle, children }) => (
     <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">{title}</h2>
+        <div className="border-b pb-4 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+        </div>
         {children}
     </div>
 );
@@ -98,7 +108,10 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
 
   return (
     <>
-      <Card title="Demonstrativo de Cálculo de Preço">
+      <Card 
+        title="Demonstrativo de Cálculo de Preço"
+        subtitle="Informe o custo do produto e veja o preço de venda ideal em cada marketplace, já considerando comissões, impostos e taxas."
+      >
         <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="w-full sm:w-1/3">
                 <label htmlFor="productCost" className="block text-sm font-medium text-gray-700">Custo do Produto (R$):</label>
@@ -115,10 +128,15 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
         
         {priceResults.length > 0 ? (
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {priceResults.map((res) => (
-                    <div key={res.platform} className="bg-slate-100 p-4 rounded-lg border border-slate-200 flex flex-col">
-                        <h3 className="text-base font-bold text-gray-800 text-center mb-2">{res.platform}</h3>
-                        <p className="text-3xl font-extrabold text-blue-600 text-center mb-4">{formatCurrency(res.sellingPrice)}</p>
+                {priceResults.map((res) => {
+                    const isNegative = res.grossProfit < 0;
+                    return (
+                    <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                           {getMarketplaceIcon(res.platform)}
+                           <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                        </div>
+                        <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>{formatCurrency(res.sellingPrice)}</p>
                         <div className="text-sm space-y-2 flex-grow">
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Custo do Produto</span>
@@ -141,18 +159,24 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
                                 <span className="font-medium text-gray-900">{formatCurrency(res.fixedFee)}</span>
                             </div>
                         </div>
-                        <div className="border-t border-gray-300 mt-4 pt-2">
+                        <div className={`border-t mt-4 pt-2 ${isNegative ? 'border-red-200' : 'border-gray-300'}`}>
                               <div className="flex justify-between font-bold text-base">
-                                <span className="text-green-700">Lucro Bruto</span>
-                                <span className="text-green-700">{formatCurrency(res.grossProfit)}</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-green-700'}>Lucro Bruto</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-green-700'}>{formatCurrency(res.grossProfit)}</span>
                             </div>
                               <div className="flex justify-between font-bold text-sm">
-                                <span className="text-blue-700">Margem Final</span>
-                                <span className="text-blue-700">{formatPercentage(res.calculatedMargin)}</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-blue-700'}>Margem Final</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-blue-700'}>{formatPercentage(res.calculatedMargin)}</span>
                             </div>
+                             {isNegative && (
+                                <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs gap-1">
+                                    <WarningIcon className="w-4 h-4" />
+                                    <span>PREJUÍZO</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                ))}
+                )})}
             </div>
         ) : (
             <div className="text-center text-gray-500 py-12">
@@ -161,7 +185,10 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
         )}
       </Card>
       
-      <Card title="Cálculo Inverso - Qual Custo Comprar?">
+      <Card 
+        title="Cálculo Inverso - Qual Custo Comprar?"
+        subtitle="Defina o preço de venda e descubra qual é o custo máximo de compra para manter a margem de lucro."
+      >
         <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="w-full sm:w-auto">
                 <label htmlFor="desiredPrice" className="block text-sm font-medium text-gray-700">Preço de Venda Desejado (R$):</label>
@@ -183,10 +210,15 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
         </div>
         {inverseResults.length > 0 ? (
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {inverseResults.map((res) => (
-                    <div key={res.platform} className="bg-slate-100 p-4 rounded-lg border border-slate-200 flex flex-col">
-                        <h3 className="text-base font-bold text-gray-800 text-center mb-2">{res.platform}</h3>
-                        <p className="text-3xl font-extrabold text-green-600 text-center mb-4" title="Custo Máximo do Produto">{formatCurrency(res.maxProductCost)}</p>
+                {inverseResults.map((res) => {
+                    const isNegative = res.maxProductCost < 0;
+                    return (
+                    <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                           {getMarketplaceIcon(res.platform)}
+                           <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                        </div>
+                        <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-green-600'}`} title="Custo Máximo do Produto">{formatCurrency(res.maxProductCost)}</p>
                         <div className="text-sm space-y-2 flex-grow">
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Preço de Venda</span>
@@ -210,14 +242,20 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
                                 <span className="font-medium text-gray-900">{formatCurrency(res.fixedFee)}</span>
                             </div>
                         </div>
-                        <div className="border-t border-gray-300 mt-4 pt-2">
+                        <div className={`border-t mt-4 pt-2 ${isNegative ? 'border-red-200' : 'border-gray-300'}`}>
                               <div className="flex justify-between font-bold text-base">
-                                <span className="text-green-700">Custo Máximo</span>
-                                <span className="text-green-700">{formatCurrency(res.maxProductCost)}</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-green-700'}>Custo Máximo</span>
+                                <span className={isNegative ? 'text-red-700' : 'text-green-700'}>{formatCurrency(res.maxProductCost)}</span>
                             </div>
+                             {isNegative && (
+                                <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs text-center gap-1">
+                                    <WarningIcon className="w-4 h-4" />
+                                    <span>Custo inviável com esta margem/preço.</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                ))}
+                )})}
             </div>
         ) : (
             <div className="text-center text-gray-500 py-12">
@@ -226,7 +264,10 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
         )}
       </Card>
 
-      <Card title="Simulação de Margem por Preço de Venda">
+      <Card 
+        title="Simulação de Margem por Preço de Venda"
+        subtitle="Simule diferentes preços de venda e veja automaticamente o lucro e a margem em cada canal."
+      >
         <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="w-full sm:w-auto">
                 <label htmlFor="simProductCost" className="block text-sm font-medium text-gray-700">Custo Produto (R$):</label>
@@ -259,11 +300,16 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
         </div>
         {marginResults.length > 0 ? (
            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-               {marginResults.map((res) => (
-                   <div key={res.platform} className="bg-slate-100 p-4 rounded-lg border border-slate-200 flex flex-col">
-                       <h3 className="text-base font-bold text-gray-800 text-center mb-2">{res.platform}</h3>
-                       <p className="text-3xl font-extrabold text-green-600 text-center" title="Lucro Bruto">{formatCurrency(res.grossProfit)}</p>
-                       <p className="text-lg font-bold text-blue-600 text-center mb-4" title="Margem Calculada">{formatPercentage(res.calculatedMargin)}</p>
+               {marginResults.map((res) => {
+                   const isNegative = res.grossProfit < 0;
+                   return (
+                   <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                           {getMarketplaceIcon(res.platform)}
+                           <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                        </div>
+                       <p className={`text-3xl font-extrabold text-center ${isNegative ? 'text-red-600' : 'text-green-600'}`} title="Lucro Bruto">{formatCurrency(res.grossProfit)}</p>
+                       <p className={`text-lg font-bold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`} title="Margem Calculada">{formatPercentage(res.calculatedMargin)}</p>
                        <div className="text-sm space-y-2 flex-grow">
                             <div className="flex justify-between">
                                <span className="text-gray-600">Custo do Produto</span>
@@ -287,18 +333,24 @@ export default function CalculatorSection({ settings }: CalculatorSectionProps) 
                                <span className="font-medium text-gray-900">{formatCurrency(res.fixedFee)}</span>
                            </div>
                        </div>
-                       <div className="border-t border-gray-300 mt-4 pt-2">
+                       <div className={`border-t mt-4 pt-2 ${isNegative ? 'border-red-200' : 'border-gray-300'}`}>
                              <div className="flex justify-between font-bold text-base">
-                               <span className="text-green-700">Lucro Bruto</span>
-                               <span className="text-green-700">{formatCurrency(res.grossProfit)}</span>
+                               <span className={isNegative ? 'text-red-700' : 'text-green-700'}>Lucro Bruto</span>
+                               <span className={isNegative ? 'text-red-700' : 'text-green-700'}>{formatCurrency(res.grossProfit)}</span>
                            </div>
                              <div className="flex justify-between font-bold text-sm">
-                               <span className="text-blue-700">Margem Final</span>
-                               <span className="text-blue-700">{formatPercentage(res.calculatedMargin)}</span>
+                               <span className={isNegative ? 'text-red-700' : 'text-blue-700'}>Margem Final</span>
+                               <span className={isNegative ? 'text-red-700' : 'text-blue-700'}>{formatPercentage(res.calculatedMargin)}</span>
                            </div>
+                            {isNegative && (
+                                <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs gap-1">
+                                    <WarningIcon className="w-4 h-4" />
+                                    <span>PREJUÍZO</span>
+                                </div>
+                            )}
                        </div>
                    </div>
-               ))}
+               )})}
            </div>
        ) : (
             <div className="text-center text-gray-500 py-12">

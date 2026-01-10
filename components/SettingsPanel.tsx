@@ -1,6 +1,9 @@
+
 // FIX: Correctly import `useState` from React to resolve syntax and reference errors.
 import React, { useState } from 'react';
-import type { AppSettings } from '../types';
+// FIX: The Platform enum is used as a value in `marketplaceStyles`, so it must be imported as a value, not just a type.
+import { Platform, type AppSettings } from '../types';
+import { getMarketplaceIcon } from './MarketplaceIcons';
 
 interface SettingsPanelProps {
   initialSettings: AppSettings;
@@ -9,14 +12,50 @@ interface SettingsPanelProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; color: string }>> = ({ title, color, children }) => (
-  <div className={`${color} p-6 rounded-lg shadow-md border`}>
-    <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {children}
-    </div>
-  </div>
-);
+const marketplaceStyles = {
+    mercadoLivre: {
+        bg: 'bg-yellow-50',
+        border: 'border-yellow-400',
+        title: 'text-yellow-900',
+        platform: Platform.ML_CLASSICO,
+    },
+    shopee: {
+        bg: 'bg-orange-50',
+        border: 'border-orange-400',
+        title: 'text-orange-900',
+        platform: Platform.SHOPEE,
+    },
+    tiktok: {
+        bg: 'bg-gray-100',
+        border: 'border-gray-500',
+        title: 'text-gray-900',
+        platform: Platform.TIKTOK_SHOP,
+    },
+    instagram: {
+        bg: 'bg-indigo-50',
+        border: 'border-indigo-400',
+        title: 'text-indigo-900',
+        platform: Platform.INSTAGRAM,
+    }
+};
+
+type Marketplace = keyof typeof marketplaceStyles;
+
+const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; marketplace: Marketplace }>> = ({ title, marketplace, children }) => {
+    const style = marketplaceStyles[marketplace];
+    return (
+        <div className={`${style.bg} ${style.border} p-6 rounded-lg shadow-md border-2`}>
+            <div className="flex items-center gap-3 mb-4">
+                {getMarketplaceIcon(style.platform)}
+                <h3 className={`text-xl font-bold ${style.title}`}>{title}</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {children}
+            </div>
+        </div>
+    );
+};
+
 
 const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; isCurrency?: boolean }> = ({ label, value, onChange, isCurrency = false }) => (
   <div>
@@ -68,9 +107,9 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
         <div className="text-center mb-6">
             <button
             onClick={() => setIsOpen(true)}
-            className="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+            className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg animate-infrequent-pulse"
             >
-            Mostrar Configurações
+            Clique Aqui Para Configuração
             </button>
         </div>
     );
@@ -89,17 +128,29 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
       </div>
 
       <div className="space-y-6">
-        <div className="bg-white p-6 rounded-lg shadow-md border">
-           <h3 className="text-xl font-bold text-gray-900 mb-4">Imposto Geral</h3>
-            <InputField
-              label="Simples Nacional (%):"
-              value={settings.simplesNacional}
-              onChange={(e) => handleGeneralChange('simplesNacional', e.target.value)}
-            />
+        <div className="bg-blue-50 p-6 rounded-lg shadow-md border-2 border-blue-200">
+           <h3 className="text-xl font-bold text-blue-900 mb-4">Imposto Geral (Simples Nacional - Anexo I Comércio)</h3>
+            <div>
+              <label htmlFor="simplesNacional" className="block text-sm font-medium text-gray-800">Faixa de Faturamento (últimos 12 meses):</label>
+              <select
+                id="simplesNacional"
+                value={settings.simplesNacional}
+                onChange={(e) => handleGeneralChange('simplesNacional', e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
+              >
+                <option value="0">MEI - Isento (0%)</option>
+                <option value="4">1ª Faixa - Faturamento até R$ 180 mil (4,00%)</option>
+                <option value="7.3">2ª Faixa - Faturamento de R$ 180 mil a R$ 360 mil (7,30%)</option>
+                <option value="9.5">3ª Faixa - Faturamento de R$ 360 mil a R$ 720 mil (9,50%)</option>
+                <option value="10.7">4ª Faixa - Faturamento de R$ 720 mil a R$ 1,8 mi (10,70%)</option>
+                <option value="14.3">5ª Faixa - Faturamento de R$ 1,8 mi a R$ 3,6 mi (14,30%)</option>
+                <option value="19">6ª Faixa - Faturamento de R$ 3,6 mi a R$ 4,8 mi (19,00%)</option>
+              </select>
+            </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-          <SettingsCard title="Mercado Livre" color="bg-white">
+          <SettingsCard title="Mercado Livre" marketplace="mercadoLivre">
             <InputField label="Margem Contribuição ML (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Anúncio Clássico (%):" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
             <InputField label="Comissão Anúncio Premium (%):" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
@@ -107,20 +158,20 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
             <InputField label="Valor Frete Grátis Pago pelo Vendedor:" value={settings.mercadoLivre.shippingFee} onChange={(e) => handleInputChange('mercadoLivre', 'shippingFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
-          <SettingsCard title="Shopee" color="bg-white">
+          <SettingsCard title="Shopee" marketplace="shopee">
             <InputField label="Margem Contribuição Shopee (%):" value={settings.shopee.contributionMargin} onChange={(e) => handleInputChange('shopee', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Shopee (%):" value={settings.shopee.commission} onChange={(e) => handleInputChange('shopee', 'commission', e.target.value)} />
             <InputField label="Taxa Fixa Shopee:" value={settings.shopee.fixedFee} onChange={(e) => handleInputChange('shopee', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
           
-          <SettingsCard title="TikTok Shop" color="bg-white">
+          <SettingsCard title="TikTok Shop" marketplace="tiktok">
             <InputField label="Margem Contribuição TikTok (%):" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Fixa (%):" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
             <InputField label="Comissão Frete Grátis (%):" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
             <InputField label="Taxas Adicionais:" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
-          <SettingsCard title="Instagram" color="bg-white">
+          <SettingsCard title="Instagram" marketplace="instagram">
             <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
           </SettingsCard>
         </div>

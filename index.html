@@ -7,6 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Precifica Fácil</title>
   <script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @keyframes infrequent-pulse {
+    0%, 10%, 100% {
+      transform: scale(1);
+    }
+    5% {
+      transform: scale(1.05);
+    }
+  }
+  .animate-infrequent-pulse {
+    animation: infrequent-pulse 10s infinite;
+  }
+</style>
 <script type="importmap">
 {
   "imports": {

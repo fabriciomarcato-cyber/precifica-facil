@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSettings } from './hooks/useSettings';
 import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
+import ExplanationSection from './components/ExplanationSection';
 
 const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -36,7 +37,12 @@ export default function App() {
             setIsOpen={setShowSettings}
           />
           <CalculatorSection settings={settings} />
+          <ExplanationSection />
         </main>
+        
+        <footer className="text-center text-sm text-gray-500 mt-12 py-4 border-t border-gray-200">
+          <p>&copy; {new Date().getFullYear()} Precifica Fácil. Todos os direitos reservados.</p>
+        </footer>
       </div>
     </div>
   );

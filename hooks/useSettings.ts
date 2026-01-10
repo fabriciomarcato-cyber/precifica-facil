@@ -5,7 +5,7 @@ import { AppSettings } from '../types';
 const SETTINGS_KEY = 'precificaFacilSettings';
 
 const defaultSettings: AppSettings = {
-  simplesNacional: 6,
+  simplesNacional: 4,
   mercadoLivre: {
     contributionMargin: 17,
     classicCommission: 14,
