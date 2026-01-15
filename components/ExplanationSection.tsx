@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { Platform } from '../types';
+import { getMarketplaceIcon } from './MarketplaceIcons';
 
 const MarginIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -47,6 +49,21 @@ const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title:
     </div>
 );
 
+const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string }>> = ({ platform, formula, children }) => (
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
+        <div className="flex items-center mb-4">
+            {getMarketplaceIcon(platform)}
+            <h4 className="text-lg font-bold text-gray-800 ml-3">{platform}</h4>
+        </div>
+        <div className="bg-gray-100 p-3 rounded-md text-center mb-4">
+            <code className="text-sm text-gray-700 font-mono">{formula}</code>
+        </div>
+        <div className="text-gray-600 text-sm space-y-2">
+            {children}
+        </div>
+    </div>
+);
+
 export default function ExplanationSection() {
     return (
         <div className="mt-16">
@@ -78,6 +95,31 @@ export default function ExplanationSection() {
                         <p className="font-semibold text-yellow-900">👉 Quem é MEI não paga esse percentual sobre a venda, pois o imposto já é pago mensalmente em um valor fixo (DAS).</p>
                     </div>
                 </InfoCard>
+            </div>
+
+            <div className="mt-16">
+                 <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Resumo das Fórmulas de Cálculo</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FormulaCard platform={Platform.ML_CLASSICO} formula="(Custo + Taxa) / (1 - % Total)">
+                        <p>O cálculo do Mercado Livre é o mais complexo, pois a <strong>taxa fixa e a comissão podem mudar</strong> dependendo do preço final do produto.</p>
+                        <p>A calculadora resolve isso automaticamente, testando diferentes cenários para encontrar o preço exato que garante sua margem.</p>
+                    </FormulaCard>
+                    <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">
+                        <p>A Shopee utiliza uma comissão sobre a venda mais uma taxa fixa por item vendido.</p>
+                        <p>O <strong>"% Total"</strong> na fórmula é a soma da sua margem, da comissão da Shopee e do imposto (Simples Nacional).</p>
+                        <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                           <p className="font-semibold text-orange-800 text-xs">Atenção: Para produtos com preço de venda abaixo de R$ 10,00, a taxa fixa é substituída por uma cobrança de 50% do valor da venda.</p>
+                        </div>
+                    </FormulaCard>
+                    <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)">
+                        <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
+                        <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
+                    </FormulaCard>
+                    <FormulaCard platform={Platform.INSTAGRAM} formula="Custo / (1 - % Total)">
+                        <p>O cálculo para venda direta no Instagram (ou qualquer venda sem intermediários) é o mais simples, pois não há comissões ou taxas fixas.</p>
+                        <p>O <strong>"% Total"</strong> aqui é apenas a soma da sua margem de contribuição e do imposto.</p>
+                    </FormulaCard>
+                 </div>
             </div>
 
             <div className="mt-12 bg-indigo-50 border-2 border-indigo-200 p-8 rounded-xl shadow-lg">

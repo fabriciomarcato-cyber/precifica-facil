@@ -11,7 +11,6 @@ export interface MercadoLivreSettings {
   contributionMargin: number;
   classicCommission: number;
   premiumCommission: number;
-  fixedFee: number;
   shippingFee: number;
 }
 

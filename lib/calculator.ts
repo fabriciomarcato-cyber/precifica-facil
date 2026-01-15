@@ -2,123 +2,244 @@
 import { AppSettings, Platform, CalculationResult } from '../types';
 
 const MERCADO_LIVRE_SHIPPING_THRESHOLD = 79;
+const SHOPEE_LOW_PRICE_THRESHOLD = 10;
 
 export function formatCurrency(value: number | undefined | null): string {
-  if (value === undefined || value === null || isNaN(value)) {
+  if (value === undefined || value === null || !isFinite(value)) {
     return '---';
   }
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 export function formatPercentage(value: number | undefined | null): string {
-    if (value === undefined || value === null || isNaN(value)) {
+    if (value === undefined || value === null || !isFinite(value)) {
       return '---';
     }
     return `${value.toFixed(2)}%`;
 }
 
-function calculateSellingPrice(
-  productCost: number,
-  fixedCost: number,
-  totalPercentage: number
-): number {
-  if (1 - totalPercentage <= 0) return Infinity;
-  return (productCost + fixedCost) / (1 - totalPercentage);
+/**
+ * Determines the fixed fee and any commission override for Mercado Livre based on the selling price.
+ */
+function getMercadoLivreFees(price: number, settings: AppSettings) {
+    if (price < 12.50) {
+        return { fixedFee: 0, commissionOverridePercent: 0.50 }; // 50% commission
+    }
+    if (price >= 12.50 && price <= 29.00) {
+        return { fixedFee: 6.25, commissionOverridePercent: null };
+    }
+    if (price > 29.00 && price <= 50.00) {
+        return { fixedFee: 6.50, commissionOverridePercent: null };
+    }
+    if (price > 50.00 && price < MERCADO_LIVRE_SHIPPING_THRESHOLD) {
+        return { fixedFee: 6.75, commissionOverridePercent: null };
+    }
+    // For prices >= 79.00
+    return { fixedFee: settings.mercadoLivre.shippingFee, commissionOverridePercent: null };
 }
+
+/**
+ * Iteratively calculates the final selling price for Mercado Livre, as the fees depend on the final price.
+ */
+function calculateMercadoLivrePrice(
+  productCost: number,
+  baseCommissionPercent: number,
+  settings: AppSettings
+): { 
+    finalPrice: number, 
+    fixedFee: number, 
+    commissionValue: number, 
+    taxValue: number, 
+    grossProfit: number, 
+    calculatedMargin: number, 
+    commissionPercent: number 
+} {
+
+    const taxPercent = settings.simplesNacional / 100;
+    const marginPercent = settings.mercadoLivre.contributionMargin / 100;
+
+    let sellingPrice = productCost; // Initial guess
+    let iterations = 0;
+    const MAX_ITERATIONS = 10;
+
+    while (iterations < MAX_ITERATIONS) {
+        const fees = getMercadoLivreFees(sellingPrice, settings);
+        const currentCommissionPercent = fees.commissionOverridePercent !== null 
+            ? fees.commissionOverridePercent 
+            : baseCommissionPercent;
+        
+        const totalPercentage = marginPercent + currentCommissionPercent + taxPercent;
+
+        if (1 - totalPercentage <= 0) {
+            sellingPrice = Infinity;
+            break;
+        }
+        
+        const newSellingPrice = (productCost + fees.fixedFee) / (1 - totalPercentage);
+
+        if (!isFinite(sellingPrice) || !isFinite(newSellingPrice) || Math.abs(newSellingPrice - sellingPrice) < 0.01) {
+            sellingPrice = newSellingPrice;
+            break;
+        }
+
+        sellingPrice = newSellingPrice;
+        iterations++;
+    }
+
+    const finalFees = getMercadoLivreFees(sellingPrice, settings);
+    const finalCommissionPercent = finalFees.commissionOverridePercent !== null 
+        ? finalFees.commissionOverridePercent 
+        : baseCommissionPercent;
+    
+    const commissionValue = sellingPrice * finalCommissionPercent;
+    const taxValue = sellingPrice * taxPercent;
+    const grossProfit = sellingPrice - productCost - finalFees.fixedFee - commissionValue - taxValue;
+    const calculatedMargin = isFinite(sellingPrice) && sellingPrice > 0 ? (grossProfit / sellingPrice) * 100 : 0;
+
+    return {
+        finalPrice: sellingPrice,
+        fixedFee: finalFees.fixedFee,
+        commissionValue,
+        taxValue,
+        grossProfit,
+        calculatedMargin,
+        commissionPercent: finalCommissionPercent * 100
+    };
+}
+
+/**
+ * Determines the fee structure for Shopee based on the selling price.
+ */
+function getShopeeFeeLogic(price: number, settings: AppSettings) {
+    if (price < SHOPEE_LOW_PRICE_THRESHOLD) {
+        // The fixed fee is replaced by a 50% charge on the selling price.
+        return { fixedFeeValue: 0, additionalPercentage: 0.50 };
+    }
+    // For prices >= 10.00, use the configured fixed fee.
+    return { fixedFeeValue: settings.shopee.fixedFee, additionalPercentage: 0 };
+}
+
+/**
+ * Iteratively calculates the final selling price for Shopee.
+ */
+function calculateShopeePrice(
+  productCost: number,
+  settings: AppSettings
+): { 
+    finalPrice: number, 
+    fixedFee: number, 
+    commissionValue: number, 
+    taxValue: number, 
+    grossProfit: number, 
+    calculatedMargin: number, 
+    commissionPercent: number 
+} {
+    const taxPercent = settings.simplesNacional / 100;
+    const marginPercent = settings.shopee.contributionMargin / 100;
+    const baseCommissionPercent = settings.shopee.commission / 100;
+
+    let sellingPrice = productCost; // Initial guess
+    let iterations = 0;
+    const MAX_ITERATIONS = 10;
+
+    while (iterations < MAX_ITERATIONS) {
+        const feeLogic = getShopeeFeeLogic(sellingPrice, settings);
+        const totalPercentage = marginPercent + baseCommissionPercent + taxPercent + feeLogic.additionalPercentage;
+
+        if (1 - totalPercentage <= 0) {
+            sellingPrice = Infinity;
+            break;
+        }
+        
+        const newSellingPrice = (productCost + feeLogic.fixedFeeValue) / (1 - totalPercentage);
+
+        if (!isFinite(sellingPrice) || !isFinite(newSellingPrice) || Math.abs(newSellingPrice - sellingPrice) < 0.01) {
+            sellingPrice = newSellingPrice;
+            break;
+        }
+
+        sellingPrice = newSellingPrice;
+        iterations++;
+    }
+
+    let finalFixedFee: number;
+    if (sellingPrice < SHOPEE_LOW_PRICE_THRESHOLD) {
+        finalFixedFee = sellingPrice * 0.50;
+    } else {
+        // FIX: Corrected typo from `shpee` to `shopee`.
+        finalFixedFee = settings.shopee.fixedFee;
+    }
+    
+    const commissionValue = sellingPrice * baseCommissionPercent;
+    const taxValue = sellingPrice * taxPercent;
+    const grossProfit = sellingPrice - productCost - finalFixedFee - commissionValue - taxValue;
+    const calculatedMargin = isFinite(sellingPrice) && sellingPrice > 0 ? (grossProfit / sellingPrice) * 100 : 0;
+    
+    return {
+        finalPrice: sellingPrice,
+        fixedFee: finalFixedFee,
+        commissionValue,
+        taxValue,
+        grossProfit,
+        calculatedMargin,
+        commissionPercent: settings.shopee.commission
+    };
+}
+
 
 export function calculateIndividualPrices(productCost: number, settings: AppSettings): CalculationResult[] {
   const results: CalculationResult[] = [];
   const taxPercent = settings.simplesNacional / 100;
 
   // Mercado Livre Clássico
-  const mlClassicMargin = settings.mercadoLivre.contributionMargin / 100;
-  const mlClassicCommission = settings.mercadoLivre.classicCommission / 100;
-  let mlClassicTotalPercent = mlClassicMargin + mlClassicCommission + taxPercent;
-  let tempClassicPrice = calculateSellingPrice(productCost, settings.mercadoLivre.fixedFee, mlClassicTotalPercent);
-  
-  let mlClassicFinalPrice: number;
-  let mlClassicFixedFee: number;
+  const mlClassicCommissionPercent = settings.mercadoLivre.classicCommission / 100;
+  const classicResult = calculateMercadoLivrePrice(productCost, mlClassicCommissionPercent, settings);
 
-  if (tempClassicPrice >= MERCADO_LIVRE_SHIPPING_THRESHOLD) {
-    mlClassicFixedFee = settings.mercadoLivre.shippingFee;
-    mlClassicFinalPrice = calculateSellingPrice(productCost, mlClassicFixedFee, mlClassicTotalPercent);
-  } else {
-    mlClassicFixedFee = settings.mercadoLivre.fixedFee;
-    mlClassicFinalPrice = tempClassicPrice;
-  }
-  
-  const mlClassicCommissionValue = mlClassicFinalPrice * mlClassicCommission;
-  const mlClassicTaxValue = mlClassicFinalPrice * taxPercent;
-  const mlClassicGrossProfit = mlClassicFinalPrice - productCost - mlClassicFixedFee - mlClassicCommissionValue - mlClassicTaxValue;
-  
   results.push({
     platform: Platform.ML_CLASSICO,
-    sellingPrice: mlClassicFinalPrice,
+    sellingPrice: classicResult.finalPrice,
     productCost: productCost,
-    fixedFee: mlClassicFixedFee,
-    commission: mlClassicCommissionValue,
-    tax: mlClassicTaxValue,
-    grossProfit: mlClassicGrossProfit,
-    calculatedMargin: (mlClassicGrossProfit / mlClassicFinalPrice) * 100,
+    fixedFee: classicResult.fixedFee,
+    commission: classicResult.commissionValue,
+    tax: classicResult.taxValue,
+    grossProfit: classicResult.grossProfit,
+    calculatedMargin: classicResult.calculatedMargin,
     contributionMarginPercent: settings.mercadoLivre.contributionMargin,
-    commissionPercent: settings.mercadoLivre.classicCommission,
+    commissionPercent: classicResult.commissionPercent,
     taxPercent: settings.simplesNacional,
   });
 
   // Mercado Livre Premium
-  const mlPremiumMargin = settings.mercadoLivre.contributionMargin / 100;
-  const mlPremiumCommission = settings.mercadoLivre.premiumCommission / 100;
-  let mlPremiumTotalPercent = mlPremiumMargin + mlPremiumCommission + taxPercent;
-  let tempPremiumPrice = calculateSellingPrice(productCost, settings.mercadoLivre.fixedFee, mlPremiumTotalPercent);
-  
-  let mlPremiumFinalPrice: number;
-  let mlPremiumFixedFee: number;
-  
-  if (tempPremiumPrice >= MERCADO_LIVRE_SHIPPING_THRESHOLD) {
-      mlPremiumFixedFee = settings.mercadoLivre.shippingFee;
-      mlPremiumFinalPrice = calculateSellingPrice(productCost, mlPremiumFixedFee, mlPremiumTotalPercent);
-  } else {
-      mlPremiumFixedFee = settings.mercadoLivre.fixedFee;
-      mlPremiumFinalPrice = tempPremiumPrice;
-  }
-
-  const mlPremiumCommissionValue = mlPremiumFinalPrice * mlPremiumCommission;
-  const mlPremiumTaxValue = mlPremiumFinalPrice * taxPercent;
-  const mlPremiumGrossProfit = mlPremiumFinalPrice - productCost - mlPremiumFixedFee - mlPremiumCommissionValue - mlPremiumTaxValue;
+  const mlPremiumCommissionPercent = settings.mercadoLivre.premiumCommission / 100;
+  const premiumResult = calculateMercadoLivrePrice(productCost, mlPremiumCommissionPercent, settings);
   
   results.push({
     platform: Platform.ML_PREMIUM,
-    sellingPrice: mlPremiumFinalPrice,
+    sellingPrice: premiumResult.finalPrice,
     productCost: productCost,
-    fixedFee: mlPremiumFixedFee,
-    commission: mlPremiumCommissionValue,
-    tax: mlPremiumTaxValue,
-    grossProfit: mlPremiumGrossProfit,
-    calculatedMargin: (mlPremiumGrossProfit / mlPremiumFinalPrice) * 100,
+    fixedFee: premiumResult.fixedFee,
+    commission: premiumResult.commissionValue,
+    tax: premiumResult.taxValue,
+    grossProfit: premiumResult.grossProfit,
+    calculatedMargin: premiumResult.calculatedMargin,
     contributionMarginPercent: settings.mercadoLivre.contributionMargin,
-    commissionPercent: settings.mercadoLivre.premiumCommission,
+    commissionPercent: premiumResult.commissionPercent,
     taxPercent: settings.simplesNacional,
   });
 
   // Shopee
-  const shopeeMargin = settings.shopee.contributionMargin / 100;
-  const shopeeCommission = settings.shopee.commission / 100;
-  const shopeeTotalPercent = shopeeMargin + shopeeCommission + taxPercent;
-  const shopeePrice = calculateSellingPrice(productCost, settings.shopee.fixedFee, shopeeTotalPercent);
-  const shopeeCommissionValue = shopeePrice * shopeeCommission;
-  const shopeeTaxValue = shopeePrice * taxPercent;
-  const shopeeGrossProfit = shopeePrice - productCost - settings.shopee.fixedFee - shopeeCommissionValue - shopeeTaxValue;
+  const shopeeResult = calculateShopeePrice(productCost, settings);
   results.push({
     platform: Platform.SHOPEE,
-    sellingPrice: shopeePrice,
+    sellingPrice: shopeeResult.finalPrice,
     productCost: productCost,
-    fixedFee: settings.shopee.fixedFee,
-    commission: shopeeCommissionValue,
-    tax: shopeeTaxValue,
-    grossProfit: shopeeGrossProfit,
-    calculatedMargin: (shopeeGrossProfit / shopeePrice) * 100,
+    fixedFee: shopeeResult.fixedFee,
+    commission: shopeeResult.commissionValue,
+    tax: shopeeResult.taxValue,
+    grossProfit: shopeeResult.grossProfit,
+    calculatedMargin: shopeeResult.calculatedMargin,
     contributionMarginPercent: settings.shopee.contributionMargin,
-    commissionPercent: settings.shopee.commission,
+    commissionPercent: shopeeResult.commissionPercent,
     taxPercent: settings.simplesNacional,
   });
 
@@ -126,7 +247,7 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
   const tiktokMargin = settings.tiktok.contributionMargin / 100;
   const tiktokCommission = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
   const tiktokTotalPercent = tiktokMargin + tiktokCommission + taxPercent;
-  const tiktokPrice = calculateSellingPrice(productCost, settings.tiktok.fixedFee, tiktokTotalPercent);
+  const tiktokPrice = (productCost + settings.tiktok.fixedFee) / (1 - tiktokTotalPercent);
   const tiktokCommissionValue = tiktokPrice * tiktokCommission;
   const tiktokTaxValue = tiktokPrice * taxPercent;
   const tiktokGrossProfit = tiktokPrice - productCost - settings.tiktok.fixedFee - tiktokCommissionValue - tiktokTaxValue;
@@ -147,7 +268,7 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
   // Instagram
   const instagramMargin = settings.instagram.contributionMargin / 100;
   const instagramTotalPercent = instagramMargin + taxPercent;
-  const instagramPrice = calculateSellingPrice(productCost, 0, instagramTotalPercent);
+  const instagramPrice = productCost / (1 - instagramTotalPercent);
   const instagramTaxValue = instagramPrice * taxPercent;
   const instagramGrossProfit = instagramPrice - productCost - instagramTaxValue;
   results.push({
@@ -183,20 +304,28 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
         
         switch (platform) {
             case Platform.ML_CLASSICO:
-                commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = desiredPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
+                const baseClassicRate = settings.mercadoLivre.classicCommission / 100;
+                const classicFees = getMercadoLivreFees(desiredPrice, settings);
+                commissionRate = classicFees.commissionOverridePercent !== null ? classicFees.commissionOverridePercent : baseClassicRate;
+                fixedFee = classicFees.fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.ML_PREMIUM:
-                commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = desiredPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
+                const basePremiumRate = settings.mercadoLivre.premiumCommission / 100;
+                const premiumFees = getMercadoLivreFees(desiredPrice, settings);
+                commissionRate = premiumFees.commissionOverridePercent !== null ? premiumFees.commissionOverridePercent : basePremiumRate;
+                fixedFee = premiumFees.fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.SHOPEE:
                 commissionRate = settings.shopee.commission / 100;
-                fixedFee = settings.shopee.fixedFee;
+                if (desiredPrice < SHOPEE_LOW_PRICE_THRESHOLD) {
+                    fixedFee = desiredPrice * 0.50;
+                } else {
+                    fixedFee = settings.shopee.fixedFee;
+                }
                 marginPercent = settings.shopee.contributionMargin / 100;
                 contributionMargin = settings.shopee.contributionMargin;
                 break;
@@ -251,16 +380,24 @@ export function simulateMargin(productCost: number, sellingPrice: number, settin
 
         switch (platform) {
             case Platform.ML_CLASSICO:
-                commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = sellingPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
+                const baseClassicRate = settings.mercadoLivre.classicCommission / 100;
+                const classicFees = getMercadoLivreFees(sellingPrice, settings);
+                commissionRate = classicFees.commissionOverridePercent !== null ? classicFees.commissionOverridePercent : baseClassicRate;
+                fixedFee = classicFees.fixedFee;
                 break;
             case Platform.ML_PREMIUM:
-                commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = sellingPrice < MERCADO_LIVRE_SHIPPING_THRESHOLD ? settings.mercadoLivre.fixedFee : settings.mercadoLivre.shippingFee;
+                const basePremiumRate = settings.mercadoLivre.premiumCommission / 100;
+                const premiumFees = getMercadoLivreFees(sellingPrice, settings);
+                commissionRate = premiumFees.commissionOverridePercent !== null ? premiumFees.commissionOverridePercent : basePremiumRate;
+                fixedFee = premiumFees.fixedFee;
                 break;
             case Platform.SHOPEE:
                 commissionRate = settings.shopee.commission / 100;
-                fixedFee = settings.shopee.fixedFee;
+                if (sellingPrice < SHOPEE_LOW_PRICE_THRESHOLD) {
+                    fixedFee = sellingPrice * 0.50;
+                } else {
+                    fixedFee = settings.shopee.fixedFee;
+                }
                 break;
             case Platform.TIKTOK_SHOP:
                 commissionRate = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;

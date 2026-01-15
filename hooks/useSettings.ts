@@ -10,7 +10,6 @@ const defaultSettings: AppSettings = {
     contributionMargin: 17,
     classicCommission: 14,
     premiumCommission: 19,
-    fixedFee: 6.00,
     shippingFee: 24.00,
   },
   shopee: {

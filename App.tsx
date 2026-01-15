@@ -24,9 +24,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="flex items-center justify-center mb-8">
-          <CalculatorIcon className="w-10 h-10 text-blue-600" />
-          <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
+        <header className="text-center mb-8">
+          <div className="flex items-center justify-center">
+            <CalculatorIcon className="w-10 h-10 text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
+          </div>
+          <p className="text-lg text-gray-500 mt-2">Precificação inteligente para marketplaces</p>
         </header>
 
         <main>

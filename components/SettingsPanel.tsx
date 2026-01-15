@@ -154,7 +154,6 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
             <InputField label="Margem Contribuição ML (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Anúncio Clássico (%):" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
             <InputField label="Comissão Anúncio Premium (%):" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
-            <InputField label="Taxa Fixa Produtos abaixo de R$ 79,00:" value={settings.mercadoLivre.fixedFee} onChange={(e) => handleInputChange('mercadoLivre', 'fixedFee', e.target.value)} isCurrency/>
             <InputField label="Valor Frete Grátis Pago pelo Vendedor:" value={settings.mercadoLivre.shippingFee} onChange={(e) => handleInputChange('mercadoLivre', 'shippingFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
