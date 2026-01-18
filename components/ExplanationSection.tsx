@@ -4,13 +4,13 @@ import { Platform } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
 
 const MarginIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
 );
 
 const FeesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <line x1="19" y1="5" x2="5" y2="19" />
         <circle cx="6.5" cy="6.5" r="2.5" />
         <circle cx="17.5" cy="17.5" r="2.5" />
@@ -18,7 +18,7 @@ const FeesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 const ShippingIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11" />
         <path d="M14 9h4l4 4v4h-8v-4h-3" />
         <circle cx="6.5" cy="18.5" r="2.5" />
@@ -27,7 +27,7 @@ const ShippingIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 const TaxIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <path d="m21.21 15.89-1.21-1.21a2 2 0 0 0-2.83 0L14 17.83l-2.07-2.07a2 2 0 0 0-2.83 0L2.88 22.07" />
         <path d="M6.83 11.5L14 5l3.17 3.17" />
         <path d="M5 22v-2.07" />
@@ -115,9 +115,9 @@ export default function ExplanationSection() {
                         <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
                         <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
                     </FormulaCard>
-                    <FormulaCard platform={Platform.INSTAGRAM} formula="Custo / (1 - % Total)">
-                        <p>O cálculo para venda direta no Instagram (ou qualquer venda sem intermediários) é o mais simples, pois não há comissões ou taxas fixas.</p>
-                        <p>O <strong>"% Total"</strong> aqui é apenas a soma da sua margem de contribuição e do imposto.</p>
+                    <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)">
+                        <p>O cálculo para venda direta considera as taxas de pagamento que você configurar (maquininha, PIX, etc.), além da sua margem e imposto.</p>
+                        <p>O <strong>"% Total"</strong> é a soma da sua margem, do imposto e das taxas percentuais de pagamento.</p>
                     </FormulaCard>
                  </div>
             </div>

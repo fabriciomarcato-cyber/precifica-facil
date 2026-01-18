@@ -123,7 +123,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
           onClick={() => setIsOpen(false)}
           className="text-gray-500 hover:text-gray-800"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
 
@@ -171,7 +171,17 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
           </SettingsCard>
 
           <SettingsCard title="Instagram" marketplace="instagram">
-            <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
+            <div className="md:col-span-2">
+                <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
+            </div>
+            <div className="md:col-span-2 mt-4 pt-4 border-t border-indigo-200">
+                <h4 className="font-semibold text-indigo-800">Custos de Recebimento de Pagamento</h4>
+                <p className="text-xs text-gray-500 mb-2">Use estes campos para simular taxas de maquininha, PIX ou intermediadores de pagamento usados em vendas via Instagram.</p>
+            </div>
+            <InputField label="Taxa da Maquininha (%):" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
+            <InputField label="Taxa Fixa da Maquininha (R$):" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} isCurrency />
+            <InputField label="Taxa PIX (%):" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
+            <InputField label="Taxa Fixa PIX (R$):" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} isCurrency />
           </SettingsCard>
         </div>
 

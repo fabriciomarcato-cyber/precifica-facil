@@ -29,6 +29,10 @@ export interface TikTokShopSettings {
 
 export interface InstagramSettings {
   contributionMargin: number;
+  machineFeePercent: number;
+  machineFeeFixed: number;
+  pixFeePercent: number;
+  pixFeeFixed: number;
 }
 
 export interface AppSettings {

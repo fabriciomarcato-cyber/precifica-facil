@@ -25,6 +25,10 @@ const defaultSettings: AppSettings = {
   },
   instagram: {
     contributionMargin: 15,
+    machineFeePercent: 0,
+    machineFeeFixed: 0,
+    pixFeePercent: 0,
+    pixFeeFixed: 0,
   },
 };
 

@@ -267,21 +267,24 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
 
   // Instagram
   const instagramMargin = settings.instagram.contributionMargin / 100;
-  const instagramTotalPercent = instagramMargin + taxPercent;
-  const instagramPrice = productCost / (1 - instagramTotalPercent);
+  const instagramFixedFees = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;
+  const instagramPercentFees = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
+  const instagramTotalPercent = instagramMargin + taxPercent + instagramPercentFees;
+  const instagramPrice = (productCost + instagramFixedFees) / (1 - instagramTotalPercent);
+  const instagramCommissionValue = instagramPrice * instagramPercentFees;
   const instagramTaxValue = instagramPrice * taxPercent;
-  const instagramGrossProfit = instagramPrice - productCost - instagramTaxValue;
+  const instagramGrossProfit = instagramPrice - productCost - instagramFixedFees - instagramCommissionValue - instagramTaxValue;
   results.push({
     platform: Platform.INSTAGRAM,
     sellingPrice: instagramPrice,
     productCost: productCost,
-    fixedFee: 0,
-    commission: 0,
+    fixedFee: instagramFixedFees,
+    commission: instagramCommissionValue,
     tax: instagramTaxValue,
     grossProfit: instagramGrossProfit,
     calculatedMargin: (instagramGrossProfit / instagramPrice) * 100,
     contributionMarginPercent: settings.instagram.contributionMargin,
-    commissionPercent: 0,
+    commissionPercent: instagramPercentFees * 100,
     taxPercent: settings.simplesNacional,
   });
 
@@ -336,8 +339,8 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
                 contributionMargin = settings.tiktok.contributionMargin;
                 break;
             case Platform.INSTAGRAM:
-                commissionRate = 0;
-                fixedFee = 0;
+                commissionRate = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
+                fixedFee = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;
                 marginPercent = settings.instagram.contributionMargin / 100;
                 contributionMargin = settings.instagram.contributionMargin;
                 break;
@@ -404,8 +407,8 @@ export function simulateMargin(productCost: number, sellingPrice: number, settin
                 fixedFee = settings.tiktok.fixedFee;
                 break;
             case Platform.INSTAGRAM:
-                commissionRate = 0;
-                fixedFee = 0;
+                commissionRate = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
+                fixedFee = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;
                 break;
         }
 
