@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import { useSettings } from './hooks/useSettings';
+import { useAuth } from './hooks/useAuth';
+import LoginPage from './components/LoginPage';
 import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
 import ExplanationSection from './components/ExplanationSection';
 
 const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="16" height="20" x="4" y="2" rx="2" />
     <line x1="8" x2="16" y1="6" y2="6" />
     <line x1="16" x2="16" y1="14" y2="18" />
@@ -16,20 +18,48 @@ const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
+const LogoutIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+);
 
 export default function App() {
+  const { isAuthenticated, isAuthLoading, login, logout } = useAuth();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
+
+  if (isAuthLoading) {
+    return (
+        <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+            <p>Carregando...</p>
+        </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={login} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
           <div className="flex items-center justify-center">
             <CalculatorIcon className="w-10 h-10 text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
           </div>
           <p className="text-lg text-gray-500 mt-2">Precificação inteligente para marketplaces</p>
+           <button 
+                onClick={logout} 
+                className="absolute top-0 right-0 flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                aria-label="Sair da aplicação"
+            >
+                <LogoutIcon className="w-5 h-5" />
+                Sair
+            </button>
         </header>
 
         <main>
