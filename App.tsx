@@ -19,7 +19,7 @@ const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export default function App() {
   const { settings, setSettings } = useSettings();
-  const [showSettings, setShowSettings] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
