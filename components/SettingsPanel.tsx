@@ -10,7 +10,14 @@ interface SettingsPanelProps {
   onSave: (settings: AppSettings) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  accessLevel: 'restricted' | 'full';
 }
+
+const LockIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
+        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+    </svg>
+);
 
 const marketplaceStyles = {
     mercadoLivre: {
@@ -41,16 +48,24 @@ const marketplaceStyles = {
 
 type Marketplace = keyof typeof marketplaceStyles;
 
-const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; marketplace: Marketplace }>> = ({ title, marketplace, children }) => {
+const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; marketplace: Marketplace; disabled?: boolean }>> = ({ title, marketplace, children, disabled }) => {
     const style = marketplaceStyles[marketplace];
     return (
-        <div className={`${style.bg} ${style.border} p-6 rounded-lg shadow-md border-2`}>
-            <div className="flex items-center gap-3 mb-4">
-                {getMarketplaceIcon(style.platform)}
-                <h3 className={`text-xl font-bold ${style.title}`}>{title}</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {children}
+        <div className={`relative ${style.bg} ${style.border} p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
+            {disabled && (
+                 <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-lg z-10 flex-col p-4 text-center">
+                    <LockIcon className="w-8 h-8 text-gray-500 mb-2" />
+                    <span className="text-sm font-bold text-gray-600">Ative o acesso completo para usar este recurso</span>
+                 </div>
+            )}
+            <div className={disabled ? 'pointer-events-none' : ''}>
+                <div className="flex items-center gap-3 mb-4">
+                    {getMarketplaceIcon(style.platform)}
+                    <h3 className={`text-xl font-bold ${style.title}`}>{title}</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {children}
+                </div>
             </div>
         </div>
     );
@@ -76,8 +91,9 @@ const InputField: React.FC<{ label: string; value: number; onChange: (e: React.C
 );
 
 
-export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOpen }: SettingsPanelProps) {
+export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOpen, accessLevel }: SettingsPanelProps) {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
+  const isRestricted = accessLevel === 'restricted';
 
   const handleSave = () => {
     onSave(settings);
@@ -85,8 +101,6 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
     setIsOpen(false);
   };
   
-  // FIX: The `section` parameter is now correctly typed to exclude keys of AppSettings that are not objects.
-  // This resolves the "Spread types may only be created from object types" error.
   const handleInputChange = (section: Exclude<keyof AppSettings, 'simplesNacional'>, field: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
     setSettings(prev => {
@@ -95,8 +109,6 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
     });
   };
 
-  // FIX: The `field` parameter is now correctly typed to only allow 'simplesNacional',
-  // preventing a bug where an object property in settings could be overwritten with a number.
   const handleGeneralChange = (field: 'simplesNacional', value: string) => {
      const numericValue = parseFloat(value) || 0;
      setSettings(prev => ({...prev, [field]: numericValue }));
@@ -150,7 +162,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-          <SettingsCard title="Mercado Livre" marketplace="mercadoLivre">
+          <SettingsCard title="Mercado Livre" marketplace="mercadoLivre" disabled={isRestricted}>
             <InputField label="Margem Contribuição ML (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Anúncio Clássico (%):" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
             <InputField label="Comissão Anúncio Premium (%):" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
@@ -163,14 +175,14 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
             <InputField label="Taxa Fixa Shopee:" value={settings.shopee.fixedFee} onChange={(e) => handleInputChange('shopee', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
           
-          <SettingsCard title="TikTok Shop" marketplace="tiktok">
+          <SettingsCard title="TikTok Shop" marketplace="tiktok" disabled={isRestricted}>
             <InputField label="Margem Contribuição TikTok (%):" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Fixa (%):" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
             <InputField label="Comissão Frete Grátis (%):" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
             <InputField label="Taxas Adicionais:" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
-          <SettingsCard title="Instagram" marketplace="instagram">
+          <SettingsCard title="Instagram" marketplace="instagram" disabled={isRestricted}>
             <div className="md:col-span-2">
                 <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
             </div>

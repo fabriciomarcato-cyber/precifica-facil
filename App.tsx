@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useSettings } from './hooks/useSettings';
 import { useAuth } from './hooks/useAuth';
+import { useAccess } from './hooks/useAccess';
 import LoginPage from './components/LoginPage';
 import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
@@ -28,10 +29,11 @@ const LogoutIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export default function App() {
   const { isAuthenticated, isAuthLoading, login, logout } = useAuth();
+  const { accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage } = useAccess();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
 
-  if (isAuthLoading) {
+  if (isAuthLoading || isAccessLoading) {
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center items-center">
             <p>Carregando...</p>
@@ -68,8 +70,15 @@ export default function App() {
             onSave={setSettings}
             isOpen={showSettings}
             setIsOpen={setShowSettings}
+            accessLevel={accessLevel}
           />
-          <CalculatorSection settings={settings} />
+          <CalculatorSection 
+            settings={settings}
+            accessLevel={accessLevel}
+            activate={activate}
+            expiration={expiration}
+            accessMessage={accessMessage}
+          />
           <ExplanationSection />
         </main>
         
