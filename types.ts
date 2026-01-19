@@ -1,7 +1,7 @@
 
 export enum Platform {
-  ML_CLASSICO = 'ML Clássico',
-  ML_PREMIUM = 'ML Premium',
+  ML_CLASSICO = 'Mercado Livre Clássico',
+  ML_PREMIUM = 'Mercado Livre Premium',
   SHOPEE = 'Shopee',
   TIKTOK_SHOP = 'TikTok Shop',
   INSTAGRAM = 'Instagram',

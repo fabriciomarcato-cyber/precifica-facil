@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MainCalculatorIcon } from './CustomIcons';
+import { Calculator } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (user: string, pass: string) => Promise<boolean>;
@@ -28,7 +28,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-gray-200 p-8 space-y-8">
         <header className="text-center">
             <div className="flex items-center justify-center">
-                <MainCalculatorIcon className="w-10 h-10 text-blue-600" />
+                <Calculator className="w-10 h-10 text-blue-600" />
                 <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
             </div>
             <p className="text-lg text-gray-500 mt-2">Faça o login para continuar</p>

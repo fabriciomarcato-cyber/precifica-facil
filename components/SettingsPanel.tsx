@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 // FIX: The Platform enum is used as a value in `marketplaceStyles`, so it must be imported as a value, not just a type.
 import { Platform, type AppSettings } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { LockIcon, SettingsIcon } from './CustomIcons';
+import { Lock, Settings } from 'lucide-react';
 
 interface SettingsPanelProps {
   initialSettings: AppSettings;
@@ -14,49 +14,19 @@ interface SettingsPanelProps {
   accessLevel: 'restricted' | 'full';
 }
 
-const marketplaceStyles = {
-    mercadoLivre: {
-        bg: 'bg-yellow-50',
-        border: 'border-yellow-400',
-        title: 'text-yellow-900',
-        platform: Platform.ML_CLASSICO,
-    },
-    shopee: {
-        bg: 'bg-orange-50',
-        border: 'border-orange-400',
-        title: 'text-orange-900',
-        platform: Platform.SHOPEE,
-    },
-    tiktok: {
-        bg: 'bg-gray-100',
-        border: 'border-gray-500',
-        title: 'text-gray-900',
-        platform: Platform.TIKTOK_SHOP,
-    },
-    instagram: {
-        bg: 'bg-indigo-50',
-        border: 'border-indigo-400',
-        title: 'text-indigo-900',
-        platform: Platform.INSTAGRAM,
-    }
-};
-
-type Marketplace = keyof typeof marketplaceStyles;
-
-const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; marketplace: Marketplace; disabled?: boolean }>> = ({ title, marketplace, children, disabled }) => {
-    const style = marketplaceStyles[marketplace];
+const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform; disabled?: boolean }>> = ({ title, platform, children, disabled }) => {
     return (
-        <div className={`relative ${style.bg} ${style.border} p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
+        <div className={`relative bg-white border-gray-200 p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
             {disabled && (
                  <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-lg z-10 flex-col p-4 text-center">
-                    <LockIcon className="w-8 h-8 text-gray-500 mb-2" />
+                    <Lock className="w-8 h-8 text-gray-500 mb-2" />
                     <span className="text-sm font-bold text-gray-600">Ative o acesso completo para usar este recurso</span>
                  </div>
             )}
             <div className={disabled ? 'pointer-events-none' : ''}>
                 <div className="flex items-center gap-3 mb-4">
-                    {getMarketplaceIcon(style.platform)}
-                    <h3 className={`text-xl font-bold ${style.title}`}>{title}</h3>
+                    {getMarketplaceIcon(platform)}
+                    <h3 className={`text-xl font-bold text-gray-800`}>{title}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {children}
@@ -116,7 +86,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
             onClick={() => setIsOpen(true)}
             className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg animate-infrequent-pulse flex items-center gap-2 mx-auto"
             >
-            <SettingsIcon className="w-5 h-5"/>
+            <Settings className="w-5 h-5"/>
             Clique Aqui Para Configuração
             </button>
         </div>
@@ -158,32 +128,32 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-          <SettingsCard title="Mercado Livre" marketplace="mercadoLivre" disabled={isRestricted}>
-            <InputField label="Margem Contribuição ML (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
+          <SettingsCard title="Mercado Livre" platform={Platform.ML_CLASSICO} disabled={isRestricted}>
+            <InputField label="Margem Contribuição (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Anúncio Clássico (%):" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
             <InputField label="Comissão Anúncio Premium (%):" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
             <InputField label="Valor Frete Grátis Pago pelo Vendedor:" value={settings.mercadoLivre.shippingFee} onChange={(e) => handleInputChange('mercadoLivre', 'shippingFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
-          <SettingsCard title="Shopee" marketplace="shopee">
+          <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
             <InputField label="Margem Contribuição Shopee (%):" value={settings.shopee.contributionMargin} onChange={(e) => handleInputChange('shopee', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Shopee (%):" value={settings.shopee.commission} onChange={(e) => handleInputChange('shopee', 'commission', e.target.value)} />
             <InputField label="Taxa Fixa Shopee:" value={settings.shopee.fixedFee} onChange={(e) => handleInputChange('shopee', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
           
-          <SettingsCard title="TikTok Shop" marketplace="tiktok" disabled={isRestricted}>
+          <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP} disabled={isRestricted}>
             <InputField label="Margem Contribuição TikTok (%):" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
             <InputField label="Comissão Fixa (%):" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
             <InputField label="Comissão Frete Grátis (%):" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
             <InputField label="Taxas Adicionais:" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} isCurrency/>
           </SettingsCard>
 
-          <SettingsCard title="Instagram" marketplace="instagram" disabled={isRestricted}>
+          <SettingsCard title="Instagram" platform={Platform.INSTAGRAM} disabled={isRestricted}>
             <div className="md:col-span-2">
                 <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
             </div>
-            <div className="md:col-span-2 mt-4 pt-4 border-t border-indigo-200">
-                <h4 className="font-semibold text-indigo-800">Custos de Recebimento de Pagamento</h4>
+            <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
+                <h4 className="font-semibold text-gray-800">Custos de Recebimento de Pagamento</h4>
                 <p className="text-xs text-gray-500 mb-2">Use estes campos para simular taxas de maquininha, PIX ou intermediadores de pagamento usados em vendas via Instagram.</p>
             </div>
             <InputField label="Taxa da Maquininha (%):" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />

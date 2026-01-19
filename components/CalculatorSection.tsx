@@ -9,7 +9,7 @@ import {
     formatPercentage
 } from '../lib/calculator';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { LockIcon, WarningIcon, ActivationIcon } from './CustomIcons';
+import { Lock, AlertTriangle, KeyRound } from 'lucide-react';
 
 interface CalculatorSectionProps {
   settings: AppSettings;
@@ -45,7 +45,7 @@ const ActivationPanel: React.FC<{
     return (
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border-2 border-blue-500">
             <div className="flex items-center justify-center gap-3">
-                <ActivationIcon className="w-8 h-8 text-blue-600"/>
+                <KeyRound className="w-8 h-8 text-blue-600"/>
                 <h2 className="text-2xl font-bold text-gray-800 text-center">Ative o Acesso Completo</h2>
             </div>
             <p className="text-sm text-gray-500 mt-1 text-center">Use um código de acesso para liberar todas as calculadoras e recursos.</p>
@@ -75,7 +75,7 @@ const ActivationPanel: React.FC<{
 
 const FeatureLockOverlay: React.FC = () => (
     <div className="absolute inset-0 bg-gray-100 bg-opacity-80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl z-10 p-4 text-center">
-        <LockIcon className="w-12 h-12 text-gray-400 mb-4" />
+        <Lock className="w-12 h-12 text-gray-400 mb-4" />
         <h3 className="text-xl font-bold text-gray-700">Recurso Exclusivo</h3>
         <p className="text-gray-500">Este recurso está disponível apenas no acesso completo.</p>
         <p className="text-sm mt-2 text-blue-600 font-semibold">Ative seu acesso para continuar.</p>
@@ -85,9 +85,11 @@ const FeatureLockOverlay: React.FC = () => (
 const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
     <div className="p-4 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 h-full min-h-[300px]">
          {getMarketplaceIcon(platform)}
-         <h3 className="text-base font-bold text-gray-500 mt-2">{platform}</h3>
+         <h3 className="text-base font-bold text-gray-500 mt-2">
+            {(platform === Platform.ML_CLASSICO || platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : platform}
+         </h3>
          <div className="mt-4 text-center">
-            <LockIcon className="w-8 h-8 text-gray-400 mx-auto" />
+            <Lock className="w-8 h-8 text-gray-400 mx-auto" />
             <p className="text-xs text-gray-500 mt-2">Ative o acesso completo para ver este cálculo.</p>
          </div>
     </div>
@@ -192,11 +194,19 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                 {displayedPriceResults.map((res) => {
                     const isNegative = res.grossProfit < 0;
                     return (
-                    <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
-                        <div className="flex items-center justify-center gap-2 mb-2">
+                    <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                        { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                            <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>
+                                {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
+                            </span>
+                        )}
+                        <div className={`flex items-center gap-2 mb-2 ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                            {getMarketplaceIcon(res.platform)}
-                           <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                           <h3 className="text-base font-bold text-gray-800">
+                             {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
+                           </h3>
                         </div>
+                        <p className="text-gray-600 text-sm text-center">Preço mínimo de Venda</p>
                         <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>{formatCurrency(res.sellingPrice)}</p>
                         <div className="text-sm space-y-2 flex-grow">
                             <div className="flex justify-between">
@@ -231,7 +241,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                             </div>
                              {isNegative && (
                                 <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs gap-1">
-                                    <WarningIcon className="w-4 h-4" />
+                                    <AlertTriangle className="w-4 h-4" />
                                     <span>PREJUÍZO</span>
                                 </div>
                             )}
@@ -276,10 +286,17 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                 {inverseResults.map((res) => {
                     const isNegative = res.maxProductCost && res.maxProductCost < 0;
                     return (
-                        <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
-                            <div className="flex items-center justify-center gap-2 mb-2">
+                        <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                            { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>
+                                    {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
+                                </span>
+                            )}
+                            <div className={`flex items-center gap-2 mb-2 ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                                 {getMarketplaceIcon(res.platform)}
-                                <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                                <h3 className="text-base font-bold text-gray-800">
+                                    {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
+                                </h3>
                             </div>
                             <p className="text-gray-600 text-sm text-center">Custo Máximo do Produto</p>
                             <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>{formatCurrency(res.maxProductCost)}</p>
@@ -318,7 +335,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                 </div>
                                 {isNegative && (
                                     <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs gap-1">
-                                        <WarningIcon className="w-4 h-4" />
+                                        <AlertTriangle className="w-4 h-4" />
                                         <span>INVIÁVEL</span>
                                     </div>
                                 )}
@@ -374,10 +391,17 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                {marginResults.map((res) => {
                    const isNegative = res.grossProfit < 0;
                    return (
-                       <div key={res.platform} className={`p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
-                           <div className="flex items-center justify-center gap-2 mb-2">
+                       <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                           { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>
+                                    {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
+                                </span>
+                           )}
+                           <div className={`flex items-center gap-2 mb-2 ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                                {getMarketplaceIcon(res.platform)}
-                               <h3 className="text-base font-bold text-gray-800">{res.platform}</h3>
+                               <h3 className="text-base font-bold text-gray-800">
+                                   {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
+                               </h3>
                            </div>
                            <p className="text-gray-600 text-sm text-center">Lucro Bruto</p>
                            <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</p>
@@ -416,7 +440,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                </div>
                                {isNegative && (
                                    <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-xs gap-1">
-                                       <WarningIcon className="w-4 h-4" />
+                                       <AlertTriangle className="w-4 h-4" />
                                        <span>PREJUÍZO</span>
                                    </div>
                                )}

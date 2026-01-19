@@ -2,7 +2,7 @@
 import React from 'react';
 import { Platform } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { ExplanationFeesIcon, ExplanationMarginIcon, ExplanationShippingIcon, ExplanationTaxIcon } from './CustomIcons';
+import { Percent, DollarSign, Truck, Banknote } from 'lucide-react';
 
 const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title: string }>> = ({ icon, title, children }) => (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
@@ -34,7 +34,7 @@ export default function ExplanationSection() {
         <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Entenda os principais conceitos usados nos cálculos</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <InfoCard icon={<ExplanationMarginIcon />} title="Margem de Contribuição">
+                <InfoCard icon={<DollarSign className="w-6 h-6" />} title="Margem de Contribuição">
                     <p>É o lucro que sobra para você depois de pagar todas as despesas da venda.</p>
                     <p>Na prática, é o dinheiro que fica para o seu negócio crescer, pagar contas e gerar resultado.</p>
                     <div className="bg-slate-100 p-3 rounded-md mt-2">
@@ -43,17 +43,17 @@ export default function ExplanationSection() {
                     </div>
                 </InfoCard>
 
-                <InfoCard icon={<ExplanationFeesIcon />} title="Taxas dos Marketplaces">
+                <InfoCard icon={<Percent className="w-6 h-6" />} title="Taxas dos Marketplaces">
                     <p>Cada marketplace cobra uma comissão sobre a venda, além de algumas taxas fixas. Essas taxas variam de acordo com a plataforma e o tipo de anúncio.</p>
                     <p>Por isso, o mesmo produto pode ter preços e lucros diferentes no Mercado Livre, Shopee, TikTok Shop ou Instagram.</p>
                 </InfoCard>
 
-                <InfoCard icon={<ExplanationShippingIcon />} title="Frete Grátis">
+                <InfoCard icon={<Truck className="w-6 h-6" />} title="Frete Grátis">
                     <p>Em alguns marketplaces, o frete grátis é obrigatório acima de determinado valor. Nesse caso, o custo do frete sai do seu bolso e precisa ser considerado no cálculo.</p>
                     <p>Se o frete não for incluído no preço corretamente, a venda pode parecer boa, mas gerar prejuízo.</p>
                 </InfoCard>
 
-                <InfoCard icon={<ExplanationTaxIcon />} title="Imposto do Simples Nacional">
+                <InfoCard icon={<Banknote className="w-6 h-6" />} title="Imposto do Simples Nacional">
                     <p>O Simples Nacional é o imposto pago por empresas enquadradas nesse regime. Ele não é um valor fixo: normalmente começa em torno de 4% sobre o valor da venda e vai aumentando conforme o faturamento anual da empresa cresce.</p>
                     <p>Ou seja, quanto mais a empresa fatura ao longo do ano, maior pode ficar essa porcentagem aplicada nas vendas.</p>
                     <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
