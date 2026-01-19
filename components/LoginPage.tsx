@@ -1,20 +1,10 @@
 
 import React, { useState } from 'react';
+import { MainCalculatorIcon } from './CustomIcons';
 
 interface LoginPageProps {
   onLogin: (user: string, pass: string) => Promise<boolean>;
 }
-
-const CalculatorIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect width="16" height="20" x="4" y="2" rx="2" />
-      <line x1="8" x2="16" y1="6" y2="6" />
-      <line x1="16" x2="16" y1="14" y2="18" />
-      <line x1="16" x2="12" y1="14" y2="14" />
-      <line x1="12" x2="12" y1="14" y2="18" />
-      <line x1="8" x2="8" y1="14" y2="18" />
-    </svg>
-  );
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
   const [username, setUsername] = useState('');
@@ -38,7 +28,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-gray-200 p-8 space-y-8">
         <header className="text-center">
             <div className="flex items-center justify-center">
-                <CalculatorIcon className="w-10 h-10 text-blue-600" />
+                <MainCalculatorIcon className="w-10 h-10 text-blue-600" />
                 <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
             </div>
             <p className="text-lg text-gray-500 mt-2">Faça o login para continuar</p>

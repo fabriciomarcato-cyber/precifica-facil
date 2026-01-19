@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 // FIX: The Platform enum is used as a value in `marketplaceStyles`, so it must be imported as a value, not just a type.
 import { Platform, type AppSettings } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
+import { LockIcon, SettingsIcon } from './CustomIcons';
 
 interface SettingsPanelProps {
   initialSettings: AppSettings;
@@ -12,12 +13,6 @@ interface SettingsPanelProps {
   setIsOpen: (isOpen: boolean) => void;
   accessLevel: 'restricted' | 'full';
 }
-
-const LockIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
-        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-    </svg>
-);
 
 const marketplaceStyles = {
     mercadoLivre: {
@@ -119,8 +114,9 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
         <div className="text-center mb-6">
             <button
             onClick={() => setIsOpen(true)}
-            className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg animate-infrequent-pulse"
+            className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg animate-infrequent-pulse flex items-center gap-2 mx-auto"
             >
+            <SettingsIcon className="w-5 h-5"/>
             Clique Aqui Para Configuração
             </button>
         </div>

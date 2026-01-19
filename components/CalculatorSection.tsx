@@ -9,6 +9,7 @@ import {
     formatPercentage
 } from '../lib/calculator';
 import { getMarketplaceIcon } from './MarketplaceIcons';
+import { LockIcon, WarningIcon, ActivationIcon } from './CustomIcons';
 
 interface CalculatorSectionProps {
   settings: AppSettings;
@@ -17,12 +18,6 @@ interface CalculatorSectionProps {
   expiration: number | null;
   accessMessage: string;
 }
-
-const LockIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
-        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-    </svg>
-);
 
 const ActivationPanel: React.FC<{
   activate: (code: string) => Promise<{ success: boolean; message?: string }>;
@@ -49,7 +44,10 @@ const ActivationPanel: React.FC<{
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border-2 border-blue-500">
-            <h2 className="text-2xl font-bold text-gray-800 text-center">Ative o Acesso Completo</h2>
+            <div className="flex items-center justify-center gap-3">
+                <ActivationIcon className="w-8 h-8 text-blue-600"/>
+                <h2 className="text-2xl font-bold text-gray-800 text-center">Ative o Acesso Completo</h2>
+            </div>
             <p className="text-sm text-gray-500 mt-1 text-center">Use um código de acesso para liberar todas as calculadoras e recursos.</p>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <input
@@ -95,12 +93,6 @@ const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
     </div>
 );
 
-
-const WarningIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" {...props}>
-        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.031-1.742 3.031H4.42c-1.532 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-    </svg>
-);
 
 const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; isLocked?: boolean }>> = ({ title, subtitle, children, isLocked }) => (
     <div className="relative bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">

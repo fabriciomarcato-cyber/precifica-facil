@@ -2,42 +2,7 @@
 import React from 'react';
 import { Platform } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-
-const MarginIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-);
-
-const FeesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <line x1="19" y1="5" x2="5" y2="19" />
-        <circle cx="6.5" cy="6.5" r="2.5" />
-        <circle cx="17.5" cy="17.5" r="2.5" />
-    </svg>
-);
-
-const ShippingIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11" />
-        <path d="M14 9h4l4 4v4h-8v-4h-3" />
-        <circle cx="6.5" cy="18.5" r="2.5" />
-        <circle cx="16.5" cy="18.5" r="2.5" />
-    </svg>
-);
-
-const TaxIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="m21.21 15.89-1.21-1.21a2 2 0 0 0-2.83 0L14 17.83l-2.07-2.07a2 2 0 0 0-2.83 0L2.88 22.07" />
-        <path d="M6.83 11.5L14 5l3.17 3.17" />
-        <path d="M5 22v-2.07" />
-        <path d="M22 2v2.07" />
-        <path d="M12.79 3.21 11 5" />
-        <path d="M11 5h.01" />
-        <path d="M3.93 12.07 5 11" />
-        <path d="m19 9 1.17 1.17" />
-    </svg>
-);
+import { ExplanationFeesIcon, ExplanationMarginIcon, ExplanationShippingIcon, ExplanationTaxIcon } from './CustomIcons';
 
 const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title: string }>> = ({ icon, title, children }) => (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
@@ -69,7 +34,7 @@ export default function ExplanationSection() {
         <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Entenda os principais conceitos usados nos cálculos</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <InfoCard icon={<MarginIcon />} title="Margem de Contribuição">
+                <InfoCard icon={<ExplanationMarginIcon />} title="Margem de Contribuição">
                     <p>É o lucro que sobra para você depois de pagar todas as despesas da venda.</p>
                     <p>Na prática, é o dinheiro que fica para o seu negócio crescer, pagar contas e gerar resultado.</p>
                     <div className="bg-slate-100 p-3 rounded-md mt-2">
@@ -78,17 +43,17 @@ export default function ExplanationSection() {
                     </div>
                 </InfoCard>
 
-                <InfoCard icon={<FeesIcon />} title="Taxas dos Marketplaces">
+                <InfoCard icon={<ExplanationFeesIcon />} title="Taxas dos Marketplaces">
                     <p>Cada marketplace cobra uma comissão sobre a venda, além de algumas taxas fixas. Essas taxas variam de acordo com a plataforma e o tipo de anúncio.</p>
                     <p>Por isso, o mesmo produto pode ter preços e lucros diferentes no Mercado Livre, Shopee, TikTok Shop ou Instagram.</p>
                 </InfoCard>
 
-                <InfoCard icon={<ShippingIcon />} title="Frete Grátis">
+                <InfoCard icon={<ExplanationShippingIcon />} title="Frete Grátis">
                     <p>Em alguns marketplaces, o frete grátis é obrigatório acima de determinado valor. Nesse caso, o custo do frete sai do seu bolso e precisa ser considerado no cálculo.</p>
                     <p>Se o frete não for incluído no preço corretamente, a venda pode parecer boa, mas gerar prejuízo.</p>
                 </InfoCard>
 
-                <InfoCard icon={<TaxIcon />} title="Imposto do Simples Nacional">
+                <InfoCard icon={<ExplanationTaxIcon />} title="Imposto do Simples Nacional">
                     <p>O Simples Nacional é o imposto pago por empresas enquadradas nesse regime. Ele não é um valor fixo: normalmente começa em torno de 4% sobre o valor da venda e vai aumentando conforme o faturamento anual da empresa cresce.</p>
                     <p>Ou seja, quanto mais a empresa fatura ao longo do ano, maior pode ficar essa porcentagem aplicada nas vendas.</p>
                     <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
