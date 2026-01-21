@@ -1,30 +1,23 @@
 
 import React, { useState } from 'react';
 import { useSettings } from './hooks/useSettings';
-import { useAuth } from './hooks/useAuth';
 import { useAccess } from './hooks/useAccess';
-import LoginPage from './components/LoginPage';
 import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
 import ExplanationSection from './components/ExplanationSection';
-import { Calculator, LogOut } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 
 export default function App() {
-  const { isAuthenticated, isAuthLoading, login, logout } = useAuth();
   const { accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage } = useAccess();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
 
-  if (isAuthLoading || isAccessLoading) {
+  if (isAccessLoading) {
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center items-center">
             <p>Carregando...</p>
         </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={login} />;
   }
 
   return (
@@ -36,14 +29,6 @@ export default function App() {
             <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
           </div>
           <p className="text-lg text-gray-500 mt-2">Precificação inteligente para marketplaces</p>
-           <button 
-                onClick={logout} 
-                className="absolute top-0 right-0 flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                aria-label="Sair da aplicação"
-            >
-                <LogOut className="w-5 h-5" />
-                Sair
-            </button>
         </header>
 
         <main>

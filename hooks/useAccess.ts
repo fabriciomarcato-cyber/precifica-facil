@@ -45,7 +45,9 @@ export function useAccess() {
   }, []);
 
   const activate = useCallback(async (code: string): Promise<{ success: boolean; message?: string }> => {
-    const hours = CODES[code.toUpperCase()];
+    const upperCaseCode = code.toUpperCase();
+    const hours = CODES[upperCaseCode];
+    
     if (hours) {
       try {
         const expirationTimestamp = Date.now() + hours * 60 * 60 * 1000;
@@ -60,6 +62,8 @@ export function useAccess() {
         return { success: false, message: 'Ocorreu um erro ao salvar o acesso.' };
       }
     }
+
+    // If no valid code was found
     return { success: false, message: 'Código de acesso inválido.' };
   }, []);
 

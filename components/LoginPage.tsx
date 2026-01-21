@@ -11,6 +11,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,25 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     }
     setIsLoading(false);
   };
+  
+  const generateTestCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const expiration = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+
+    try {
+      window.localStorage.setItem('precificaTestCode', result);
+      window.localStorage.setItem('precificaTestCodeExpiration', expiration.toString());
+      setGeneratedCode(result);
+    } catch (e) {
+      setError("Não foi possível gerar o código de teste. Tente novamente.");
+      console.error("Failed to save test code to localStorage", e);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
@@ -90,6 +110,29 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           </div>
         </form>
       </div>
+      <div className="max-w-md w-full mt-6 text-center">
+          <p className="text-sm text-gray-600">Deseja experimentar o acesso completo?</p>
+          <button
+              onClick={generateTestCode}
+              className="mt-2 text-blue-600 font-semibold hover:text-blue-800 transition-colors underline"
+          >
+              Clique aqui para gerar um código de teste por 10 minutos
+          </button>
+          {generatedCode && (
+              <div className="mt-4 bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                  <p className="text-sm text-gray-800">
+                      Seu código de teste é:
+                  </p>
+                  <div className="my-2 p-2 bg-gray-200 rounded-md inline-block">
+                     <code className="text-xl font-bold tracking-widest text-gray-900">{generatedCode}</code>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                      Copie este código. Após fazer login, insira-o na tela principal para ativar o acesso completo.
+                  </p>
+              </div>
+          )}
+      </div>
+
        <footer className="text-center text-sm text-gray-500 mt-8">
           <p>&copy; {new Date().getFullYear()} Precifica Fácil. Todos os direitos reservados.</p>
       </footer>

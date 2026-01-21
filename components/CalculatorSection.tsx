@@ -19,7 +19,7 @@ interface CalculatorSectionProps {
   accessMessage: string;
 }
 
-const ActivationPanel: React.FC<{
+const ActivationBar: React.FC<{
   activate: (code: string) => Promise<{ success: boolean; message?: string }>;
   accessMessage: string;
 }> = ({ activate, accessMessage }) => {
@@ -43,32 +43,35 @@ const ActivationPanel: React.FC<{
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border-2 border-blue-500">
-            <div className="flex items-center justify-center gap-3">
-                <KeyRound className="w-8 h-8 text-blue-600"/>
-                <h2 className="text-2xl font-bold text-gray-800 text-center">Ative o Acesso Completo</h2>
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-8 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                <div className="flex items-center gap-2 text-blue-800 font-semibold">
+                    <KeyRound className="w-5 h-5" />
+                    <span>Acesso completo desativado.</span>
+                </div>
+                <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        placeholder="Insira seu código"
+                        className="rounded-md border-gray-300 shadow-sm sm:text-sm p-2 bg-white text-gray-900 w-48"
+                        aria-label="Código de Acesso"
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 text-sm"
+                    >
+                        {loading ? '...' : 'Ativar'}
+                    </button>
+                </form>
             </div>
-            <p className="text-sm text-gray-500 mt-1 text-center">Use um código de acesso para liberar todas as calculadoras e recursos.</p>
-            <form onSubmit={handleSubmit} className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="Digite seu código de acesso"
-                    className="block w-full sm:w-80 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
-                    aria-label="Código de Acesso"
-                />
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-                >
-                    {loading ? 'Ativando...' : 'Ativar'}
-                </button>
-            </form>
-            {error && <p className="text-red-600 text-center mt-2 text-sm">{error}</p>}
-            {success && <p className="text-green-600 text-center mt-2 text-sm">{success}</p>}
-            {accessMessage && <p className="text-yellow-700 bg-yellow-100 p-3 rounded-md text-center mt-4 text-sm font-semibold">{accessMessage}</p>}
+             <div className="mt-2 text-sm h-5">
+                 {error && <p className="text-red-600">{error}</p>}
+                 {success && <p className="text-green-600">{success}</p>}
+                 {accessMessage && !success && <p className="text-yellow-800">{accessMessage}</p>}
+            </div>
         </div>
     );
 };
@@ -161,7 +164,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
   return (
     <>
       {isRestricted ? (
-          <ActivationPanel activate={activate} accessMessage={accessMessage} />
+          <ActivationBar activate={activate} accessMessage={accessMessage} />
       ) : (
           expiration && (
               <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-r-lg" role="alert">
