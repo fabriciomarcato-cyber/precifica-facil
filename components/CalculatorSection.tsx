@@ -17,6 +17,7 @@ interface CalculatorSectionProps {
   activate: (code: string) => Promise<{ success: boolean; message?: string }>;
   expiration: number | null;
   accessMessage: string;
+  revalidateAccess: () => boolean;
 }
 
 const ActivationBar: React.FC<{
@@ -113,7 +114,7 @@ const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; 
 );
 
 
-export default function CalculatorSection({ settings, accessLevel, activate, expiration, accessMessage }: CalculatorSectionProps) {
+export default function CalculatorSection({ settings, accessLevel, activate, expiration, accessMessage, revalidateAccess }: CalculatorSectionProps) {
   const [productCost, setProductCost] = useState('');
   const [priceResults, setPriceResults] = useState<CalculationResult[]>([]);
 
@@ -126,16 +127,23 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
 
   const isRestricted = accessLevel === 'restricted';
   
-  useEffect(() => {
+  const handlePriceCalculation = () => {
+    // Revalidate to update access state if a session expired, but DO NOT block the calculation.
+    // The filtering of results after calculation will handle the restricted state.
+    revalidateAccess();
+    
     const cost = parseFloat(productCost);
     if (!isNaN(cost) && cost > 0) {
       setPriceResults(calculateIndividualPrices(cost, settings));
     } else {
+      alert('Por favor, insira um custo de produto válido.');
       setPriceResults([]);
     }
-  }, [productCost, settings]);
+  };
   
   const handleInverseCalculation = () => {
+    // This is a premium feature, so we must check for valid access before calculating.
+    if (!revalidateAccess()) return;
     const price = parseFloat(desiredPrice);
     if (!isNaN(price) && price > 0) {
       setInverseResults(calculateMaxCost(price, settings));
@@ -146,6 +154,8 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
   };
 
   const handleMarginSimulation = () => {
+    // This is a premium feature, so we must check for valid access before calculating.
+    if (!revalidateAccess()) return;
     const cost = parseFloat(simProductCost);
     const price = parseFloat(simSellingPrice);
     if (!isNaN(cost) && !isNaN(price) && cost > 0 && price > 0) {
@@ -179,7 +189,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
         subtitle="Informe o custo do produto e veja o preço de venda ideal em cada marketplace, já considerando comissões, impostos e taxas."
       >
         <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-full sm:w-1/3">
+            <div className="w-full sm:w-auto">
                 <label htmlFor="productCost" className="block text-sm font-medium text-gray-700">Custo do Produto (R$):</label>
                 <input
                     id="productCost"
@@ -190,6 +200,12 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
                 />
             </div>
+            <button
+                onClick={handlePriceCalculation}
+                className="w-full sm:w-auto mt-2 sm:mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Calcular Preço de Venda
+            </button>
         </div>
         
         {priceResults.length > 0 ? (
@@ -255,7 +271,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
             </div>
         ) : (
             <div className="text-center text-gray-500 py-12">
-                <p className="text-lg">Digite o custo do produto para ver o demonstrativo de preços.</p>
+                <p className="text-lg">Digite o custo do produto e clique em "Calcular Preço de Venda".</p>
             </div>
         )}
       </Card>

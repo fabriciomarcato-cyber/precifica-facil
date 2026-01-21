@@ -8,7 +8,7 @@ import ExplanationSection from './components/ExplanationSection';
 import { Calculator } from 'lucide-react';
 
 export default function App() {
-  const { accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage } = useAccess();
+  const { accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage, revalidateAccess } = useAccess();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
 
@@ -45,6 +45,7 @@ export default function App() {
             activate={activate}
             expiration={expiration}
             accessMessage={accessMessage}
+            revalidateAccess={revalidateAccess}
           />
           <ExplanationSection />
         </main>

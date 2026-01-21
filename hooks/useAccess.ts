@@ -12,6 +12,7 @@ const CODES: Record<string, number> = {
   'TESTE-24H': 24,
   'PRO-ANUAL': 365 * 24,
   'TESTE5MINUTOS': 5 / 60, // 5 minutes
+  'TESTE12345#': 3 / 60, // 3 minutes
 };
 
 export function useAccess() {
@@ -20,7 +21,7 @@ export function useAccess() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [message, setMessage] = useState<string>('');
 
-  useEffect(() => {
+  const revalidateAccess = useCallback(() => {
     try {
       const storedAccess = window.localStorage.getItem(ACCESS_KEY);
       const storedExpiration = window.localStorage.getItem(EXPIRATION_KEY);
@@ -28,8 +29,10 @@ export function useAccess() {
       if (storedAccess === 'full' && storedExpiration) {
         const expirationTimestamp = parseInt(storedExpiration, 10);
         if (Date.now() < expirationTimestamp) {
+          // Access is still valid
           setAccessLevel('full');
           setExpiration(expirationTimestamp);
+          return true;
         } else {
           // Access has expired
           window.localStorage.removeItem(ACCESS_KEY);
@@ -37,14 +40,25 @@ export function useAccess() {
           setAccessLevel('restricted');
           setExpiration(null);
           setMessage('Seu período de acesso expirou. Ative novamente para continuar usando todos os recursos.');
+          return false;
         }
       }
+      // No access info found, ensure state is restricted
+      setAccessLevel('restricted');
+      setExpiration(null);
+      return false;
     } catch (error) {
-      console.error("Error reading access state from localStorage", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error revalidating access state from localStorage", error);
+      setAccessLevel('restricted');
+      setExpiration(null);
+      return false;
     }
   }, []);
+
+  useEffect(() => {
+    revalidateAccess();
+    setIsLoading(false);
+  }, [revalidateAccess]);
 
   const activate = useCallback(async (code: string): Promise<{ success: boolean; message?: string }> => {
     const upperCaseCode = code.toUpperCase();
@@ -69,5 +83,5 @@ export function useAccess() {
     return { success: false, message: 'Código de acesso inválido.' };
   }, []);
 
-  return { accessLevel, expiration, isLoading, activate, message };
+  return { accessLevel, expiration, isLoading, activate, message, revalidateAccess };
 }
