@@ -41,7 +41,7 @@ const ActivationBar: React.FC<{
         }
         setLoading(false);
     };
-
+    
     return (
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-8 text-center">
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">

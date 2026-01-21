@@ -4,12 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 const ACCESS_KEY = 'precificaAccess';
 const EXPIRATION_KEY = 'precificaExpiration';
 
+
 type AccessLevel = 'restricted' | 'full';
 
 // Access codes and their duration in hours
 const CODES: Record<string, number> = {
   'TESTE-24H': 24,
   'PRO-ANUAL': 365 * 24,
+  'TESTE5MINUTOS': 5 / 60, // 5 minutes
 };
 
 export function useAccess() {
