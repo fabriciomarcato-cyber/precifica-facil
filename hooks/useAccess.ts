@@ -3,17 +3,24 @@ import { useState, useEffect, useCallback } from 'react';
 
 const ACCESS_KEY = 'precificaAccess';
 const EXPIRATION_KEY = 'precificaExpiration';
+const USED_CODES_KEY = 'precificaUsedCodes';
 
 
 type AccessLevel = 'restricted' | 'full';
 
-// Access codes and their duration in hours
+// Reusable access codes and their duration in hours
 const CODES: Record<string, number> = {
   'TESTE-24H': 24,
   'PRO-ANUAL': 365 * 24,
   'TESTE5MINUTOS': 5 / 60, // 5 minutes
   'TESTE12345#': 3 / 60, // 3 minutes
 };
+
+// One-time use codes and their duration in hours
+const ONE_TIME_CODES: Record<string, number> = {
+  'TESTE1234': 1, // 1 hour
+};
+
 
 export function useAccess() {
   const [accessLevel, setAccessLevel] = useState<AccessLevel>('restricted');
@@ -62,11 +69,41 @@ export function useAccess() {
 
   const activate = useCallback(async (code: string): Promise<{ success: boolean; message?: string }> => {
     const upperCaseCode = code.toUpperCase();
-    const hours = CODES[upperCaseCode];
     
-    if (hours) {
+    // Check one-time codes first
+    const oneTimeHours = ONE_TIME_CODES[upperCaseCode];
+    if (oneTimeHours) {
+        try {
+            const usedCodesStr = window.localStorage.getItem(USED_CODES_KEY);
+            const usedCodes: string[] = usedCodesStr ? JSON.parse(usedCodesStr) : [];
+
+            if (usedCodes.includes(upperCaseCode)) {
+                return { success: false, message: 'Este código de uso único já foi utilizado.' };
+            }
+
+            // Activate and then mark as used
+            const expirationTimestamp = Date.now() + oneTimeHours * 60 * 60 * 1000;
+            window.localStorage.setItem(ACCESS_KEY, 'full');
+            window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
+            
+            const newUsedCodes = [...usedCodes, upperCaseCode];
+            window.localStorage.setItem(USED_CODES_KEY, JSON.stringify(newUsedCodes));
+            
+            setAccessLevel('full');
+            setExpiration(expirationTimestamp);
+            setMessage('');
+            return { success: true };
+        } catch (error) {
+            console.error("Error handling one-time code", error);
+            return { success: false, message: 'Ocorreu um erro ao processar o código.' };
+        }
+    }
+
+    // Check regular codes
+    const regularHours = CODES[upperCaseCode];
+    if (regularHours) {
       try {
-        const expirationTimestamp = Date.now() + hours * 60 * 60 * 1000;
+        const expirationTimestamp = Date.now() + regularHours * 60 * 60 * 1000;
         window.localStorage.setItem(ACCESS_KEY, 'full');
         window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
         setAccessLevel('full');
