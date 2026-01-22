@@ -13,6 +13,7 @@ const CODES: Record<string, number> = {
   'PRO-ANUAL': 365 * 24,
   'TESTE5MINUTOS': 5 / 60, // 5 minutes
   'TESTE12345#': 3 / 60, // 3 minutes
+  'MASTER202252': 365 * 24, // 1 year
 };
 
 // One-time use codes are now managed by removing them from the list after use.
