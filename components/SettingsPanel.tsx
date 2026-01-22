@@ -80,17 +80,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
   }
 
   if (!isOpen) {
-    return (
-        <div className="text-center mb-6">
-            <button
-            onClick={() => setIsOpen(true)}
-            className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-lg animate-infrequent-pulse flex items-center gap-2 mx-auto"
-            >
-            <Settings className="w-5 h-5"/>
-            Clique Aqui Para Configuração
-            </button>
-        </div>
-    );
+    return null;
   }
 
   return (
