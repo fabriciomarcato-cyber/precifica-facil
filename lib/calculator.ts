@@ -134,6 +134,7 @@ function calculateShopeePrice(
     calculatedMargin: number, 
     commissionPercent: number 
 } {
+    // FIX: Corrected typo from `shpee` to `shopee`.
     const taxPercent = settings.simplesNacional / 100;
     const marginPercent = settings.shopee.contributionMargin / 100;
     const baseCommissionPercent = settings.shopee.commission / 100;
@@ -166,7 +167,6 @@ function calculateShopeePrice(
     if (sellingPrice < SHOPEE_LOW_PRICE_THRESHOLD) {
         finalFixedFee = sellingPrice * 0.50;
     } else {
-        // FIX: Corrected typo from `shpee` to `shopee`.
         finalFixedFee = settings.shopee.fixedFee;
     }
     
