@@ -46,13 +46,13 @@ function calculateMercadoLivrePrice(
   baseCommissionPercent: number,
   settings: AppSettings
 ): { 
-    finalPrice: number, 
-    fixedFee: number, 
-    commissionValue: number, 
-    taxValue: number, 
-    grossProfit: number, 
-    calculatedMargin: number, 
-    commissionPercent: number 
+    finalPrice: number,
+    fixedFee: number,
+    commissionValue: number,
+    taxValue: number,
+    grossProfit: number,
+    calculatedMargin: number,
+    commissionPercent: number,
 } {
 
     const taxPercent = settings.simplesNacional / 100;
@@ -126,13 +126,13 @@ function calculateShopeePrice(
   productCost: number,
   settings: AppSettings
 ): { 
-    finalPrice: number, 
-    fixedFee: number, 
-    commissionValue: number, 
-    taxValue: number, 
-    grossProfit: number, 
-    calculatedMargin: number, 
-    commissionPercent: number 
+    finalPrice: number,
+    fixedFee: number,
+    commissionValue: number,
+    taxValue: number,
+    grossProfit: number,
+    calculatedMargin: number,
+    commissionPercent: number,
 } {
     // FIX: Corrected typo from `shpee` to `shopee`.
     const taxPercent = settings.simplesNacional / 100;
@@ -188,6 +188,9 @@ function calculateShopeePrice(
 
 
 export function calculateIndividualPrices(productCost: number, settings: AppSettings): CalculationResult[] {
+  if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
+    return [];
+  }
   const results: CalculationResult[] = [];
   const taxPercent = settings.simplesNacional / 100;
 
@@ -292,6 +295,9 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
 }
 
 export function calculateMaxCost(desiredPrice: number, settings: AppSettings): CalculationResult[] {
+    if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
+      return [];
+    }
     const results: CalculationResult[] = [];
     const taxPercent = settings.simplesNacional / 100;
 
@@ -370,6 +376,9 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
 }
 
 export function simulateMargin(productCost: number, sellingPrice: number, settings: AppSettings): CalculationResult[] {
+    if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
+      return [];
+    }
     const results: CalculationResult[] = [];
     const taxRate = settings.simplesNacional / 100;
     
