@@ -42,10 +42,10 @@ export default function App() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center gap-2 font-semibold animate-premium-pulse"
-                aria-label="Ativar acesso completo"
+                aria-label="Clique Aqui! Assinatura Anual"
               >
                 <Zap className="w-5 h-5"/>
-                <span>Ativar Acesso</span>
+                <span>Clique Aqui! Assinatura Anual</span>
               </a>
             )}
             {!showSettings && (
