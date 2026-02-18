@@ -2,7 +2,7 @@
 // FIX: Correctly import `useState` from React to resolve syntax and reference errors.
 import React, { useState } from 'react';
 // FIX: The Platform enum is used as a value in `marketplaceStyles`, so it must be imported as a value, not just a type.
-import { Platform, type AppSettings } from '../types';
+import { Platform, type AppSettings, ShopeeSettings } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
 import { Lock, Settings } from 'lucide-react';
 
@@ -66,11 +66,22 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
     setIsOpen(false);
   };
   
-  const handleInputChange = (section: Exclude<keyof AppSettings, 'simplesNacional'>, field: string, value: string) => {
+  const handleInputChange = (section: Exclude<keyof AppSettings, 'simplesNacional' | 'shopee'>, field: string, value: string) => {
     const numericValue = parseFloat(value) || 0;
     setSettings(prev => {
         const updatedSection = { ...prev[section], [field]: numericValue };
         return { ...prev, [section]: updatedSection };
+    });
+  };
+  
+  const handleShopeeSettingChange = (field: keyof ShopeeSettings, value: string | boolean | number) => {
+    setSettings(prev => {
+        const newShopeeSettings = { ...prev.shopee, [field]: value };
+        // Logic to reset highVolumeCPF if sellerType is changed to cnpj
+        if (field === 'sellerType' && value === 'cnpj') {
+            newShopeeSettings.highVolumeCPF = false;
+        }
+        return { ...prev, shopee: newShopeeSettings };
     });
   };
 
@@ -126,9 +137,30 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
           </SettingsCard>
 
           <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
-            <InputField label="Margem Contribuição Shopee (%):" value={settings.shopee.contributionMargin} onChange={(e) => handleInputChange('shopee', 'contributionMargin', e.target.value)} />
-            <InputField label="Comissão Shopee (%):" value={settings.shopee.commission} onChange={(e) => handleInputChange('shopee', 'commission', e.target.value)} />
-            <InputField label="Taxa Fixa Shopee:" value={settings.shopee.fixedFee} onChange={(e) => handleInputChange('shopee', 'fixedFee', e.target.value)} isCurrency/>
+            <InputField label="Margem Contribuição Shopee (%):" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
+            <div className='md:col-span-2 space-y-3'>
+                <div>
+                  <label className="block text-sm font-medium text-gray-800">Tipo de Vendedor</label>
+                  <div className="mt-2 flex items-center gap-x-4 gap-y-2">
+                    <label className="flex items-center text-sm"><input type="radio" value="cnpj" name="sellerType" checked={settings.shopee.sellerType === 'cnpj'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CNPJ</span></label>
+                    <label className="flex items-center text-sm"><input type="radio" value="cpf" name="sellerType" checked={settings.shopee.sellerType === 'cpf'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CPF</span></label>
+                  </div>
+                </div>
+                {settings.shopee.sellerType === 'cpf' && (
+                  <div className="pl-1">
+                    <label className="flex items-center">
+                      <input type="checkbox" checked={settings.shopee.highVolumeCPF} onChange={(e) => handleShopeeSettingChange('highVolumeCPF', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <span className="ml-2 text-sm text-gray-800">Mais de 450 pedidos/90 dias (+R$3)</span>
+                    </label>
+                  </div>
+                )}
+                <div>
+                  <label className="flex items-center">
+                    <input type="checkbox" checked={settings.shopee.inCampaign} onChange={(e) => handleShopeeSettingChange('inCampaign', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <span className="ml-2 text-sm text-gray-800">Campanhas de Destaque (+2.5%)</span>
+                  </label>
+                </div>
+            </div>
           </SettingsCard>
           
           <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP} disabled={isRestricted}>

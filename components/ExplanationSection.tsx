@@ -65,15 +65,29 @@ export default function ExplanationSection() {
             <div className="mt-16">
                  <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Resumo das Fórmulas de Cálculo</h2>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <FormulaCard platform={Platform.ML_CLASSICO} formula="(Custo + Taxa) / (1 - % Total)">
-                        <p>O cálculo do Mercado Livre é o mais complexo, pois a <strong>taxa fixa e a comissão podem mudar</strong> dependendo do preço final do produto.</p>
-                        <p>A calculadora resolve isso automaticamente, testando diferentes cenários para encontrar o preço exato que garante sua margem.</p>
+                    <FormulaCard platform={Platform.ML_CLASSICO} formula="(Custo + Frete) / (1 - % Total)">
+                        <p>O cálculo do Mercado Livre (ref. Mar/2026) usa um <strong>custo de frete variável</strong>, que depende do <strong>preço</strong> e do <strong>peso</strong> do produto, conforme a nova tabela de custos operacionais.</p>
+                        <p>Essa nova taxa substitui a antiga "taxa fixa" e é aplicada a todas as faixas de preço.</p>
+                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                           <p className="font-semibold text-yellow-800 text-xs">Atenção: Como não pedimos o peso do produto, a calculadora assume um peso padrão de <strong>até 1kg</strong> para a simulação. O valor do frete pode variar para produtos mais pesados.</p>
+                        </div>
                     </FormulaCard>
                     <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">
-                        <p>A Shopee utiliza uma comissão sobre a venda mais uma taxa fixa por item vendido.</p>
-                        <p>O <strong>"% Total"</strong> na fórmula é a soma da sua margem, da comissão da Shopee e do imposto (Simples Nacional).</p>
-                        <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
-                           <p className="font-semibold text-orange-800 text-xs">Atenção: Para produtos com preço de venda abaixo de R$ 10,00, a taxa fixa é substituída por uma cobrança de 50% do valor da venda.</p>
+                        <p className='mb-2'>O cálculo da Shopee (ref. Mar/2026) possui taxas progressivas e regras especiais que a calculadora aplica para você:</p>
+                        <ul className="list-disc list-inside space-y-2 text-xs">
+                            <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,00</li>
+                            <li><strong>De R$ 80,00 a R$ 99,99:</strong> Comissão de 14% + Taxa de R$ 16,00</li>
+                            <li><strong>De R$ 100,00 a R$ 199,99:</strong> Comissão de 14% + Taxa de R$ 20,00</li>
+                            <li><strong>De R$ 200,00 a R$ 499,99:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
+                            <li><strong>Acima de R$ 500,00:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
+                        </ul>
+                        <div className="mt-3 text-xs space-y-1">
+                            <p><strong>+ Taxas Adicionais:</strong> Taxa de 2,5% (Campanha) e taxa de R$ 3,00 (CPF alto volume) são somadas quando aplicável.</p>
+                            <p><strong>Regra de Baixo Valor (CNPJ):</strong> Para itens abaixo de R$ 8,00, a taxa fixa é 50% do valor do produto.</p>
+                            <p><strong>Regra de Baixo Valor (CPF):</strong> Para itens abaixo de R$ 12,00, a taxa é regressiva (ex: R$10 paga R$6,50; R$8 paga R$6).</p>
+                        </div>
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                           <p className="font-semibold text-blue-800 text-xs">Não se preocupe em decorar as regras! A ferramenta aplica a lógica correta para encontrar o preço ideal para o seu cenário.</p>
                         </div>
                     </FormulaCard>
                     <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)">

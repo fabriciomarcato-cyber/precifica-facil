@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { AppSettings } from '../types';
+import { AppSettings, ShopeeSettings } from '../types';
 
 const SETTINGS_KEY = 'precificaFacilSettings';
 
@@ -14,8 +14,9 @@ const defaultSettings: AppSettings = {
   },
   shopee: {
     contributionMargin: 17,
-    commission: 20,
-    fixedFee: 4.00,
+    sellerType: 'cnpj',
+    highVolumeCPF: false,
+    inCampaign: false,
   },
   tiktok: {
     contributionMargin: 15,

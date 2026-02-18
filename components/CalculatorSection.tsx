@@ -86,7 +86,7 @@ const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
 );
 
 const FreebieBadge: React.FC = () => (
-    <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-full bg-green-600 text-white z-10">
+    <span className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs font-bold px-2 py-1 rounded-full bg-green-600 text-white z-10">
         Demonstração Gratuita
     </span>
 );
@@ -229,12 +229,17 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                 {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
                             </span>
                         )}
-                        <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-5' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
+                        <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                            {getMarketplaceIcon(res.platform)}
                            <h3 className="text-base font-bold text-gray-800">
                              {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
                            </h3>
                         </div>
+                        {res.platform === Platform.SHOPEE && (
+                            <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">
+                                Cálculo: {settings.shopee.sellerType}
+                            </p>
+                        )}
                         <p className="text-gray-600 text-sm text-center">Preço mínimo de Venda</p>
                         <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>{formatCurrency(res.sellingPrice)}</p>
                         <div className="text-sm space-y-2 flex-grow">
@@ -276,10 +281,15 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                           <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
                               {isDemo && <FreebieBadge />}
                               { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
-                              <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-5' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
+                              <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                                   {getMarketplaceIcon(res.platform)}
                                   <h3 className="text-base font-bold text-gray-800">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
                               </div>
+                               {res.platform === Platform.SHOPEE && (
+                                  <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">
+                                      Cálculo: {settings.shopee.sellerType}
+                                  </p>
+                              )}
                               <p className="text-gray-600 text-sm text-center">Custo Máximo do Produto</p>
                               <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-blue-600'}`}>{formatCurrency(res.maxProductCost)}</p>
                               <div className="text-sm space-y-2 flex-grow">
@@ -323,10 +333,15 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                       <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
                           {isDemo && <FreebieBadge />}
                           { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
-                          <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-5' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
+                          <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                               {getMarketplaceIcon(res.platform)}
                               <h3 className="text-base font-bold text-gray-800">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
                           </div>
+                          {res.platform === Platform.SHOPEE && (
+                              <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">
+                                  Cálculo: {settings.shopee.sellerType}
+                              </p>
+                          )}
                           <p className="text-gray-600 text-sm text-center">Lucro Bruto</p>
                           <p className={`text-3xl font-extrabold text-center mb-4 ${isNegative ? 'text-red-600' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</p>
                           <div className="text-sm space-y-2 flex-grow">

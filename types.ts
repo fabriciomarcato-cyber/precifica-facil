@@ -16,8 +16,9 @@ export interface MercadoLivreSettings {
 
 export interface ShopeeSettings {
   contributionMargin: number;
-  commission: number;
-  fixedFee: number;
+  sellerType: 'cnpj' | 'cpf';
+  highVolumeCPF: boolean; // Represents > 450 orders in 90 days
+  inCampaign: boolean; // Represents participation in 'Campanhas de Destaque'
 }
 
 export interface TikTokShopSettings {
