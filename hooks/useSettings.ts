@@ -10,7 +10,6 @@ const defaultSettings: AppSettings = {
     contributionMargin: 17,
     classicCommission: 14,
     premiumCommission: 19,
-    shippingFee: 24.00,
   },
   shopee: {
     contributionMargin: 17,
@@ -40,6 +39,12 @@ export function useSettings() {
       if (storedSettings) {
         // Basic migration: merge stored settings with defaults to add new fields
         const parsedSettings = JSON.parse(storedSettings);
+        
+        // Ensure old shippingFee is not carried over
+        if (parsedSettings.mercadoLivre && parsedSettings.mercadoLivre.shippingFee) {
+            delete parsedSettings.mercadoLivre.shippingFee;
+        }
+
         return {
             ...defaultSettings,
             ...parsedSettings,
