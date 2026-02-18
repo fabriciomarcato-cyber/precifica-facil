@@ -37,12 +37,12 @@ const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: 
 };
 
 
-const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; isCurrency?: boolean }> = ({ label, value, onChange, isCurrency = false }) => (
+const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit?: string }> = ({ label, value, onChange, unit }) => (
   <div>
     <label className="block text-sm font-medium text-gray-800">{label}</label>
     <div className="mt-1 relative rounded-md shadow-sm">
       <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-        <span className="text-gray-500 sm:text-sm">{isCurrency ? 'R$' : '%'}</span>
+        <span className="text-gray-500 sm:text-sm">{unit}</span>
       </div>
       <input
         type="number"
@@ -130,13 +130,14 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
           <SettingsCard title="Mercado Livre" platform={Platform.ML_CLASSICO} disabled={isRestricted}>
-            <InputField label="Margem Contribuição (%):" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
-            <InputField label="Comissão Anúncio Clássico (%):" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
-            <InputField label="Comissão Anúncio Premium (%):" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
+            <InputField label="Margem Contribuição (%):" unit="%" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
+            <InputField label="Peso do Produto (kg):" unit="kg" value={settings.mercadoLivre.productWeight} onChange={(e) => handleInputChange('mercadoLivre', 'productWeight', e.target.value)} />
+            <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
+            <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
           </SettingsCard>
 
           <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
-            <InputField label="Margem Contribuição Shopee (%):" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
+            <InputField label="Margem Contribuição Shopee (%):" unit="%" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
             <div className='md:col-span-2 space-y-3'>
                 <div>
                   <label className="block text-sm font-medium text-gray-800">Tipo de Vendedor</label>
@@ -163,24 +164,24 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
           </SettingsCard>
           
           <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP} disabled={isRestricted}>
-            <InputField label="Margem Contribuição TikTok (%):" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
-            <InputField label="Comissão Fixa (%):" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
-            <InputField label="Comissão Frete Grátis (%):" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
-            <InputField label="Taxas Adicionais:" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} isCurrency/>
+            <InputField label="Margem Contribuição TikTok (%):" unit="%" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
+            <InputField label="Comissão Fixa (%):" unit="%" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
+            <InputField label="Comissão Frete Grátis (%):" unit="%" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
+            <InputField label="Taxas Adicionais:" unit="R$" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} />
           </SettingsCard>
 
           <SettingsCard title="Instagram" platform={Platform.INSTAGRAM} disabled={isRestricted}>
             <div className="md:col-span-2">
-                <InputField label="Margem Contribuição Instagram (%):" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
+                <InputField label="Margem Contribuição Instagram (%):" unit="%" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
             </div>
             <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-gray-800">Custos de Recebimento de Pagamento</h4>
                 <p className="text-xs text-gray-500 mb-2">Use estes campos para simular taxas de maquininha, PIX ou intermediadores de pagamento usados em vendas via Instagram.</p>
             </div>
-            <InputField label="Taxa da Maquininha (%):" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
-            <InputField label="Taxa Fixa da Maquininha (R$):" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} isCurrency />
-            <InputField label="Taxa PIX (%):" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
-            <InputField label="Taxa Fixa PIX (R$):" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} isCurrency />
+            <InputField label="Taxa da Maquininha (%):" unit="%" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
+            <InputField label="Taxa Fixa da Maquininha (R$):" unit="R$" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} />
+            <InputField label="Taxa PIX (%):" unit="%" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
+            <InputField label="Taxa Fixa PIX (R$):" unit="R$" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} />
           </SettingsCard>
         </div>
 

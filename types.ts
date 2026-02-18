@@ -11,6 +11,7 @@ export interface MercadoLivreSettings {
   contributionMargin: number;
   classicCommission: number;
   premiumCommission: number;
+  productWeight: number;
 }
 
 export interface ShopeeSettings {

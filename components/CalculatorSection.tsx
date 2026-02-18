@@ -105,14 +105,9 @@ const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; 
 
 export default function CalculatorSection({ settings, accessLevel, activate, expiration, accessMessage, revalidateAccess }: CalculatorSectionProps) {
   const [productCost, setProductCost] = useState('');
-  const [productWeight, setProductWeight] = useState('');
-
   const [desiredPrice, setDesiredPrice] = useState('');
-  const [inverseWeight, setInverseWeight] = useState('');
-
   const [simProductCost, setSimProductCost] = useState('');
   const [simSellingPrice, setSimSellingPrice] = useState('');
-  const [simWeight, setSimWeight] = useState('');
 
   const [priceResults, setPriceResults] = useState<CalculationResult[]>([]);
   const [inverseResults, setInverseResults] = useState<CalculationResult[]>([]);
@@ -124,20 +119,20 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
 
   const isRestricted = accessLevel === 'restricted';
   
-  useEffect(() => { priceResults.length > 0 && setPriceResults([]); priceCalcError && setPriceCalcError(''); }, [productCost, productWeight]);
-  useEffect(() => { inverseResults.length > 0 && setInverseResults([]); inverseCalcError && setInverseCalcError(''); }, [desiredPrice, inverseWeight]);
-  useEffect(() => { marginResults.length > 0 && setMarginResults([]); marginSimError && setMarginSimError(''); }, [simProductCost, simSellingPrice, simWeight]);
+  useEffect(() => { priceResults.length > 0 && setPriceResults([]); priceCalcError && setPriceCalcError(''); }, [productCost, settings]);
+  useEffect(() => { inverseResults.length > 0 && setInverseResults([]); inverseCalcError && setInverseCalcError(''); }, [desiredPrice, settings]);
+  useEffect(() => { marginResults.length > 0 && setMarginResults([]); marginSimError && setMarginSimError(''); }, [simProductCost, simSellingPrice, settings]);
 
   
   const handlePriceCalculation = () => {
     revalidateAccess();
     const cost = parseFloat(productCost);
-    const weight = parseFloat(productWeight);
+    const weight = settings.mercadoLivre.productWeight;
     if (!isNaN(cost) && cost > 0 && !isNaN(weight) && weight > 0) {
       setPriceCalcError('');
       setPriceResults(calculateIndividualPrices(cost, weight, settings));
     } else {
-      setPriceCalcError('Por favor, insira um custo e peso de produto válidos.');
+      setPriceCalcError('Insira um custo válido e defina o peso do produto nas Configurações.');
       setPriceResults([]);
     }
   };
@@ -145,12 +140,12 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
   const handleInverseCalculation = () => {
     revalidateAccess();
     const price = parseFloat(desiredPrice);
-    const weight = parseFloat(inverseWeight);
+    const weight = settings.mercadoLivre.productWeight;
     if (!isNaN(price) && price > 0 && !isNaN(weight) && weight > 0) {
       setInverseCalcError('');
       setInverseResults(calculateMaxCost(price, weight, settings));
     } else {
-      setInverseCalcError('Por favor, insira um preço e peso de produto válidos.');
+      setInverseCalcError('Insira um preço de venda válido e defina o peso do produto nas Configurações.');
       setInverseResults([]);
     }
   };
@@ -159,12 +154,12 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
     revalidateAccess();
     const cost = parseFloat(simProductCost);
     const price = parseFloat(simSellingPrice);
-    const weight = parseFloat(simWeight);
+    const weight = settings.mercadoLivre.productWeight;
     if (!isNaN(cost) && !isNaN(price) && !isNaN(weight) && cost > 0 && price > 0 && weight > 0) {
       setMarginSimError('');
       setMarginResults(simulateMargin(cost, price, weight, settings));
     } else {
-      setMarginSimError('Por favor, insira valores válidos para custo, preço e peso.');
+      setMarginSimError('Insira custo e preço válidos, e defina o peso do produto nas Configurações.');
       setMarginResults([]);
     }
   };
@@ -201,7 +196,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
 
       <Card 
         title={isRestricted ? "Demonstrativo de Cálculo de Preço" : "Cálculo de Preço de Venda"}
-        subtitle="Informe o custo e o peso do produto e veja o preço de venda ideal em cada canal."
+        subtitle="Informe o custo do produto e veja o preço de venda ideal em cada canal."
       >
         <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="w-full sm:w-auto">
@@ -212,17 +207,6 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                     value={productCost}
                     onChange={(e) => setProductCost(e.target.value)}
                     placeholder="Ex: 25.00"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
-                />
-            </div>
-            <div className="w-full sm:w-auto">
-                <label htmlFor="productWeight" className="block text-sm font-medium text-gray-700">Peso do Produto (kg):</label>
-                <input
-                    id="productWeight"
-                    type="number"
-                    value={productWeight}
-                    onChange={(e) => setProductWeight(e.target.value)}
-                    placeholder="Ex: 0.850"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
                 />
             </div>
@@ -278,17 +262,16 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                  {lockedPricePlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
             </div>
         ) : (
-            <div className="text-center text-gray-500 py-12"><p className="text-lg">Digite o custo e o peso do produto e clique em "Calcular Preço de Venda".</p></div>
+            <div className="text-center text-gray-500 py-12"><p className="text-lg">Digite o custo do produto e clique em "Calcular Preço de Venda".</p></div>
         )}
       </Card>
       
       <Card 
           title={isRestricted ? "Demonstrativo de Cálculo Inverso" : "Cálculo Inverso - Qual Custo Comprar?"}
-          subtitle="Defina o preço de venda e o peso, e descubra o custo máximo de compra para manter a margem de lucro."
+          subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
       >
           <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="w-full sm:w-auto"><label htmlFor="desiredPrice" className="block text-sm font-medium text-gray-700">Preço de Venda Desejado (R$):</label><input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
-              <div className="w-full sm:w-auto"><label htmlFor="inverseWeight" className="block text-sm font-medium text-gray-700">Peso do Produto (kg):</label><input id="inverseWeight" type="number" value={inverseWeight} onChange={(e) => setInverseWeight(e.target.value)} placeholder="0.850" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
               <button onClick={handleInverseCalculation} className="w-full sm:w-auto mt-2 sm:mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Calcular Custo Máximo</button>
           </div>
           {inverseCalcError && <p className="text-red-600 text-sm mt-2">{inverseCalcError}</p>}
@@ -330,18 +313,17 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                   {lockedInversePlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
               </div>
           ) : (
-              <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e o peso, e clique em "Calcular Custo Máximo".</p></div>
+              <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
           )}
       </Card>
 
       <Card 
           title={isRestricted ? "Demonstrativo de Simulação de Margem" : "Simulação de Margem por Preço de Venda"}
-          subtitle="Simule diferentes preços e pesos para ver automaticamente o lucro e a margem em cada canal."
+          subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
       >
           <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="w-full sm:w-auto"><label htmlFor="simProductCost" className="block text-sm font-medium text-gray-700">Custo Produto (R$):</label><input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
               <div className="w-full sm:w-auto"><label htmlFor="simSellingPrice" className="block text-sm font-medium text-gray-700">Preço de Venda (R$):</label><input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
-              <div className="w-full sm:w-auto"><label htmlFor="simWeight" className="block text-sm font-medium text-gray-700">Peso do Produto (kg):</label><input id="simWeight" type="number" value={simWeight} onChange={(e) => setSimWeight(e.target.value)} placeholder="0.850" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
               <button onClick={handleMarginSimulation} className="w-full sm:w-auto mt-2 sm:mt-6 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Simular Margem</button>
           </div>
           {marginSimError && <p className="text-red-600 text-sm mt-2">{marginSimError}</p>}
