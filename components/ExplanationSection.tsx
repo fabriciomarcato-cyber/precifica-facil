@@ -69,7 +69,8 @@ export default function ExplanationSection() {
                         <p>O cálculo do Mercado Livre (ref. Mar/2026) usa um <strong>custo de frete variável</strong>, que depende do <strong>preço</strong> e do <strong>peso</strong> do produto, conforme a nova tabela de custos operacionais.</p>
                         <p>Essa nova taxa substitui a antiga "taxa fixa" e é aplicada a todas as faixas de preço.</p>
                         <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                           <p className="font-semibold text-yellow-800 text-xs">Atenção: Como não pedimos o peso do produto, a calculadora assume um peso padrão de <strong>até 1kg</strong> para a simulação. O valor do frete pode variar para produtos mais pesados.</p>
+                           <p className="font-semibold text-yellow-800 text-xs">Atenção: O custo de frete do ML depende do <strong>preço</strong> e do <strong>peso</strong>. Insira o peso correto para um cálculo preciso.</p>
+                           <p className="text-yellow-700 text-xs mt-1">Lembre-se de usar o maior valor entre o peso físico e o cúbico (C x L x A / 6000).</p>
                         </div>
                     </FormulaCard>
                     <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">

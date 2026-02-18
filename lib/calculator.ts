@@ -75,13 +75,8 @@ function getMercadoLivreShippingFee(price: number, weightInKg: number): number {
 /**
  * Determines the fixed fee for Mercado Livre based on the new 2026 shipping cost table.
  */
-function getMercadoLivreFees(price: number) {
-    // Assumption: Default weight is 1kg for calculation as there's no weight input in the UI.
-    const ASSUMED_WEIGHT_KG = 1; 
-    const shippingFee = getMercadoLivreShippingFee(price, ASSUMED_WEIGHT_KG);
-
-    // This new operational cost REPLACES the old fixed cost structure entirely.
-    // Commission rates (Classic/Premium) are handled separately and are not affected by this change.
+function getMercadoLivreFees(price: number, weightInKg: number) {
+    const shippingFee = getMercadoLivreShippingFee(price, weightInKg);
     return { fixedFee: shippingFee, commissionOverridePercent: null };
 }
 
@@ -91,6 +86,7 @@ function getMercadoLivreFees(price: number) {
 function calculateMercadoLivrePrice(
   productCost: number,
   baseCommissionPercent: number,
+  weightInKg: number,
   settings: AppSettings
 ): { 
     finalPrice: number,
@@ -110,7 +106,7 @@ function calculateMercadoLivrePrice(
     const MAX_ITERATIONS = 10;
 
     while (iterations < MAX_ITERATIONS) {
-        const fees = getMercadoLivreFees(sellingPrice);
+        const fees = getMercadoLivreFees(sellingPrice, weightInKg);
         const currentCommissionPercent = baseCommissionPercent;
         
         const totalPercentage = marginPercent + currentCommissionPercent + taxPercent;
@@ -131,7 +127,7 @@ function calculateMercadoLivrePrice(
         iterations++;
     }
 
-    const finalFees = getMercadoLivreFees(sellingPrice);
+    const finalFees = getMercadoLivreFees(sellingPrice, weightInKg);
     const finalCommissionPercent = baseCommissionPercent;
     
     const commissionValue = sellingPrice * finalCommissionPercent;
@@ -273,7 +269,7 @@ function calculateShopeePrice(
 }
 
 
-export function calculateIndividualPrices(productCost: number, settings: AppSettings): CalculationResult[] {
+export function calculateIndividualPrices(productCost: number, weightInKg: number, settings: AppSettings): CalculationResult[] {
   if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
     return [];
   }
@@ -282,7 +278,7 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
 
   // Mercado Livre Clássico
   const mlClassicCommissionPercent = settings.mercadoLivre.classicCommission / 100;
-  const classicResult = calculateMercadoLivrePrice(productCost, mlClassicCommissionPercent, settings);
+  const classicResult = calculateMercadoLivrePrice(productCost, mlClassicCommissionPercent, weightInKg, settings);
 
   results.push({
     platform: Platform.ML_CLASSICO,
@@ -300,7 +296,7 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
 
   // Mercado Livre Premium
   const mlPremiumCommissionPercent = settings.mercadoLivre.premiumCommission / 100;
-  const premiumResult = calculateMercadoLivrePrice(productCost, mlPremiumCommissionPercent, settings);
+  const premiumResult = calculateMercadoLivrePrice(productCost, mlPremiumCommissionPercent, weightInKg, settings);
   
   results.push({
     platform: Platform.ML_PREMIUM,
@@ -380,7 +376,7 @@ export function calculateIndividualPrices(productCost: number, settings: AppSett
   return results;
 }
 
-export function calculateMaxCost(desiredPrice: number, settings: AppSettings): CalculationResult[] {
+export function calculateMaxCost(desiredPrice: number, weightInKg: number, settings: AppSettings): CalculationResult[] {
     if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
       return [];
     }
@@ -400,13 +396,13 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
         switch (platform) {
             case Platform.ML_CLASSICO:
                 commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = getMercadoLivreFees(desiredPrice).fixedFee;
+                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg).fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.ML_PREMIUM:
                 commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = getMercadoLivreFees(desiredPrice).fixedFee;
+                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg).fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
@@ -454,7 +450,7 @@ export function calculateMaxCost(desiredPrice: number, settings: AppSettings): C
     return results;
 }
 
-export function simulateMargin(productCost: number, sellingPrice: number, settings: AppSettings): CalculationResult[] {
+export function simulateMargin(productCost: number, sellingPrice: number, weightInKg: number, settings: AppSettings): CalculationResult[] {
     if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
       return [];
     }
@@ -472,11 +468,11 @@ export function simulateMargin(productCost: number, sellingPrice: number, settin
         switch (platform) {
             case Platform.ML_CLASSICO:
                 commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = getMercadoLivreFees(sellingPrice).fixedFee;
+                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg).fixedFee;
                 break;
             case Platform.ML_PREMIUM:
                 commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = getMercadoLivreFees(sellingPrice).fixedFee;
+                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg).fixedFee;
                 break;
             case Platform.SHOPEE:
                 const shopeeFeesSim = getShopeeFeeComponents(sellingPrice, settings);
