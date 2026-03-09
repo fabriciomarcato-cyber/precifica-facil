@@ -18,11 +18,11 @@ export async function runShopeeBatchConference(
   productsData: string,
   settings: AppSettings
 ): Promise<ShopeeBatchResult[]> {
-  // Use the platform-provided API key
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Check multiple possible locations for the API key
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
   
   if (!apiKey || apiKey === "") {
-    throw new Error("A chave da API Gemini não foi encontrada. Verifique as configurações do ambiente.");
+    throw new Error("A chave da API Gemini não foi encontrada. Por favor, configure a chave no menu 'Settings' ou selecione uma chave válida.");
   }
 
   const ai = new GoogleGenAI({ apiKey });

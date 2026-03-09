@@ -18,9 +18,8 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        // Proteção extra para não quebrar se faltar a chave da API
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || '')
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+        'process.env.API_KEY': JSON.stringify(env.API_KEY || env.GEMINI_API_KEY || '')
       },
       resolve: {
         alias: {
