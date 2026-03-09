@@ -11,6 +11,8 @@ import {
 import { getMarketplaceIcon } from './MarketplaceIcons';
 import { Lock, AlertTriangle, KeyRound } from 'lucide-react';
 
+import ShopeeBatchConference from './ShopeeBatchConference';
+
 interface CalculatorSectionProps {
   settings: AppSettings;
   accessLevel: 'restricted' | 'full';
@@ -368,6 +370,8 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
               <div className="text-center text-gray-500 py-12"><p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p></div>
       )}
       </Card>
+
+      <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
     </>
   );
 }
