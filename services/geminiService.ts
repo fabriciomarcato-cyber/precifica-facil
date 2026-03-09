@@ -22,7 +22,7 @@ export async function runShopeeBatchConference(
   const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
   
   if (!apiKey || apiKey === "") {
-    throw new Error("A chave da API Gemini não foi encontrada. Por favor, configure a chave no menu 'Settings' ou selecione uma chave válida.");
+    throw new Error("Chave da API não encontrada. Para resolver: 1. Vá em 'Settings' (ícone de engrenagem) -> 2. Adicione 'GEMINI_API_KEY' nas variáveis de ambiente -> 3. Cole sua chave de aistudio.google.com");
   }
 
   const ai = new GoogleGenAI({ apiKey });

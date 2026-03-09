@@ -66,6 +66,9 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     console.error(err);
     const errorMessage = err.message || 'Erro desconhecido';
     setError(`Erro ao processar: ${errorMessage}. Verifique sua conexão e os dados inseridos.`);
+    if (errorMessage.toLowerCase().includes('chave') || errorMessage.toLowerCase().includes('api')) {
+      setShowKeySelector(true);
+    }
   } finally {
     setIsLoading(false);
   }
