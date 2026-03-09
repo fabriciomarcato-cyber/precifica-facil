@@ -18,9 +18,11 @@ export async function runShopeeBatchConference(
   productsData: string,
   settings: AppSettings
 ): Promise<ShopeeBatchResult[]> {
+  // Use the platform-provided API key
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not defined");
+  
+  if (!apiKey || apiKey === "") {
+    throw new Error("A chave da API Gemini não foi encontrada. Verifique as configurações do ambiente.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -56,8 +58,10 @@ Sua tarefa para CADA produto:
 - Calcular a Margem do Novo Preço de Venda (que deve bater com a configurada, ou ser a atual se não houver reajuste).
 
 IMPORTANTE SOBRE OS DADOS:
+- Os dados podem estar separados por vírgulas (CSV), tabulações ou múltiplos espaços.
 - Se os dados NÃO possuírem cabeçalho, assuma obrigatoriamente a ordem das colunas como: SKU, Descrição, Preço Atual, Estoque, Custo.
 - Se houver cabeçalho, use-o para identificar as informações corretamente.
+- Ignore linhas vazias ou dados incompletos.
 
 DIRETRIZES DE SAÍDA:
 Retorne EXCLUSIVAMENTE um array em formato JSON. Não adicione nenhum texto antes ou depois.
@@ -86,7 +90,7 @@ ${productsData}
 `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-3.1-pro-preview",
     contents: configPrompt,
     config: {
       systemInstruction,

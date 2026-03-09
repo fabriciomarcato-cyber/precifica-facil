@@ -33,15 +33,20 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
 
     setIsLoading(true);
     setError('');
-    try {
-      const batchResults = await runShopeeBatchConference(inputData, settings);
+  try {
+    const batchResults = await runShopeeBatchConference(inputData, settings);
+    if (batchResults.length === 0) {
+      setError('O modelo não retornou resultados. Verifique se os dados estão no formato correto (SKU, Descrição, Preço, Estoque, Custo).');
+    } else {
       setResults(batchResults);
-    } catch (err: any) {
-      console.error(err);
-      setError('Ocorreu um erro ao processar os dados. Verifique o formato e tente novamente.');
-    } finally {
-      setIsLoading(false);
     }
+  } catch (err: any) {
+    console.error(err);
+    const errorMessage = err.message || 'Erro desconhecido';
+    setError(`Erro ao processar: ${errorMessage}. Verifique sua conexão e os dados inseridos.`);
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   const exportToExcel = () => {
