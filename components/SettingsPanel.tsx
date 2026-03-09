@@ -95,20 +95,23 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Parâmetros Específicos por Plataforma e Gerais</h2>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-gray-800"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200">
+        {/* Header - Sticky */}
+        <div className="flex justify-between items-center p-6 border-b bg-gray-50">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Parâmetros Específicos por Plataforma e Gerais</h2>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-gray-500 hover:text-gray-800 p-2 hover:bg-gray-200 rounded-full transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
 
-      <div className="space-y-6">
-        <div className="bg-blue-50 p-6 rounded-lg shadow-md border-2 border-blue-200">
-           <h3 className="text-xl font-bold text-blue-900 mb-4">Imposto Geral (Simples Nacional - Anexo I Comércio)</h3>
+        {/* Scrollable Content */}
+        <div className="flex-grow overflow-y-auto p-6 space-y-6">
+          <div className="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-200">
+            <h3 className="text-xl font-bold text-blue-900 mb-4">Imposto Geral (Simples Nacional - Anexo I Comércio)</h3>
             <div>
               <label htmlFor="simplesNacional" className="block text-sm font-medium text-gray-800">Faixa de Faturamento (últimos 12 meses):</label>
               <select
@@ -126,19 +129,19 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
                 <option value="19">6ª Faixa - Faturamento de R$ 3,6 mi a R$ 4,8 mi (19,00%)</option>
               </select>
             </div>
-        </div>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-          <SettingsCard title="Mercado Livre" platform={Platform.ML_CLASSICO} disabled={isRestricted}>
-            <InputField label="Margem Contribuição (%):" unit="%" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
-            <InputField label="Peso do Produto (kg):" unit="kg" value={settings.mercadoLivre.productWeight} onChange={(e) => handleInputChange('mercadoLivre', 'productWeight', e.target.value)} />
-            <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
-            <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
-          </SettingsCard>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+            <SettingsCard title="Mercado Livre" platform={Platform.ML_CLASSICO} disabled={isRestricted}>
+              <InputField label="Margem Contribuição (%):" unit="%" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
+              <InputField label="Peso do Produto (kg):" unit="kg" value={settings.mercadoLivre.productWeight} onChange={(e) => handleInputChange('mercadoLivre', 'productWeight', e.target.value)} />
+              <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
+              <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
+            </SettingsCard>
 
-          <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
-            <InputField label="Margem Contribuição Shopee (%):" unit="%" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
-            <div className='md:col-span-2 space-y-3'>
+            <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
+              <InputField label="Margem Contribuição Shopee (%):" unit="%" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
+              <div className='md:col-span-2 space-y-3'>
                 <div>
                   <label className="block text-sm font-medium text-gray-800">Tipo de Vendedor</label>
                   <div className="mt-2 flex items-center gap-x-4 gap-y-2">
@@ -160,33 +163,44 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
                     <span className="ml-2 text-sm text-gray-800">Campanhas de Destaque (+2.5%)</span>
                   </label>
                 </div>
-            </div>
-          </SettingsCard>
-          
-          <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP} disabled={isRestricted}>
-            <InputField label="Margem Contribuição TikTok (%):" unit="%" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
-            <InputField label="Comissão Fixa (%):" unit="%" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
-            <InputField label="Comissão Frete Grátis (%):" unit="%" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
-            <InputField label="Taxas Adicionais:" unit="R$" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} />
-          </SettingsCard>
+              </div>
+            </SettingsCard>
 
-          <SettingsCard title="Instagram" platform={Platform.INSTAGRAM} disabled={isRestricted}>
-            <div className="md:col-span-2">
+            <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP} disabled={isRestricted}>
+              <InputField label="Margem Contribuição TikTok (%):" unit="%" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
+              <InputField label="Comissão Fixa (%):" unit="%" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
+              <InputField label="Comissão Frete Grátis (%):" unit="%" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
+              <InputField label="Taxas Adicionais:" unit="R$" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} />
+            </SettingsCard>
+
+            <SettingsCard title="Instagram" platform={Platform.INSTAGRAM} disabled={isRestricted}>
+              <div className="md:col-span-2">
                 <InputField label="Margem Contribuição Instagram (%):" unit="%" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
-            </div>
-            <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
+              </div>
+              <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-gray-800">Custos de Recebimento de Pagamento</h4>
                 <p className="text-xs text-gray-500 mb-2">Use estes campos para simular taxas de maquininha, PIX ou intermediadores de pagamento usados em vendas via Instagram.</p>
-            </div>
-            <InputField label="Taxa da Maquininha (%):" unit="%" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
-            <InputField label="Taxa Fixa da Maquininha (R$):" unit="R$" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} />
-            <InputField label="Taxa PIX (%):" unit="%" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
-            <InputField label="Taxa Fixa PIX (R$):" unit="R$" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} />
-          </SettingsCard>
+              </div>
+              <InputField label="Taxa da Maquininha (%):" unit="%" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
+              <InputField label="Taxa Fixa da Maquininha (R$):" unit="R$" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} />
+              <InputField label="Taxa PIX (%):" unit="%" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
+              <InputField label="Taxa Fixa PIX (R$):" unit="R$" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} />
+            </SettingsCard>
+          </div>
         </div>
 
-        <div className="flex justify-start pt-4">
-          <button onClick={handleSave} className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+        {/* Footer - Sticky */}
+        <div className="p-6 border-t bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="px-6 py-3 text-gray-700 font-semibold hover:bg-gray-200 rounded-lg transition-colors order-2 sm:order-1"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors shadow-md order-1 sm:order-2"
+          >
             Salvar Configurações
           </button>
         </div>
