@@ -1,0 +1,91 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: coupons
+// Document ID: couponCode (uppercase)
+// Fields:
+//   - code: string (required) - The unique code
+//   - status: string (required) - 'available' or 'used'
+//   - days_duration: number (required) - Days of access
+//   - activation_date: timestamp (optional) - When activated
+//   - expiration_date: timestamp (optional) - When expires
+//   - used_by_uid: string (optional) - UID of user
+//
+// Collection: users
+// Document ID: userId
+// Fields:
+//   - uid: string (required)
+//   - email: string (required)
+//   - role: string (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "fabricio.marcato@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidCoupon(data) {
+      return data.code is string && data.code.size() > 0 &&
+             data.status in ['available', 'used'] &&
+             data.days_duration is number && data.days_duration > 0;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId && 
+                      request.resource.data.role == 'user';
+      allow update: if isAdmin();
+    }
+
+    match /coupons/{couponId} {
+      // Anyone authenticated can check if a coupon exists and its status
+      allow read: if isAuthenticated();
+      
+      // Only admins can create or delete coupons
+      allow create, delete: if isAdmin();
+
+      // Users can "activate" a coupon
+      allow update: if isAuthenticated() &&
+        // 1. Coupon must be available
+        resource.data.status == 'available' &&
+        // 2. User is setting it to used
+        request.resource.data.status == 'used' &&
+        // 3. User is setting themselves as the owner
+        request.resource.data.used_by_uid == request.auth.uid &&
+        // 4. Activation date is the current server time
+        request.resource.data.activation_date == request.time &&
+        // 5. Expiration date is calculated correctly (days_duration * 24 * 60 * 60)
+        request.resource.data.expiration_date == request.time + duration.value(resource.data.days_duration, 'd') &&
+        // 6. Other fields remain unchanged
+        request.resource.data.code == resource.data.code &&
+        request.resource.data.days_duration == resource.data.days_duration;
+    }
+  }
+}

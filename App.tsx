@@ -6,10 +6,10 @@ import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
 import ExplanationSection from './components/ExplanationSection';
 import HelpSidebar from './components/HelpSidebar';
-import { Calculator, HelpCircle, Settings, Zap } from 'lucide-react';
+import { Calculator, HelpCircle, Settings, Zap, LogIn, User as UserIcon } from 'lucide-react';
 
 export default function App() {
-  const { accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage, revalidateAccess } = useAccess();
+  const { user, accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage, revalidateAccess, login } = useAccess();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -35,7 +35,21 @@ export default function App() {
           </div>
           
           {/* Action Buttons */}
-          <div className="mt-4 md:mt-0 flex items-center justify-center md:justify-end gap-4">
+          <div className="mt-4 md:mt-0 flex flex-wrap items-center justify-center md:justify-end gap-4">
+            {user ? (
+              <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
+                <UserIcon className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-600 truncate max-w-[150px]">{user.email}</span>
+              </div>
+            ) : (
+              <button
+                onClick={login}
+                className="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 font-semibold"
+              >
+                <LogIn className="w-5 h-5" />
+                <span>Login</span>
+              </button>
+            )}
             {accessLevel === 'restricted' && (
                <a
                 href="https://pay.kiwify.com.br/HX8c6Q4"

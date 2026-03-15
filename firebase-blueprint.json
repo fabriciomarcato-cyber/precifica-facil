@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "Coupon": {
+      "title": "Coupon",
+      "description": "A coupon that grants temporary full access to the application.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The unique code for the coupon."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["available", "used"],
+          "description": "The current status of the coupon."
+        },
+        "days_duration": {
+          "type": "integer",
+          "description": "The number of days of access granted upon activation."
+        },
+        "activation_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the coupon was activated."
+        },
+        "expiration_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the access granted by the coupon expires."
+        },
+        "used_by_uid": {
+          "type": "string",
+          "description": "The UID of the user who activated the coupon."
+        }
+      },
+      "required": ["code", "status", "days_duration"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile and access information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "active_coupon": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/coupons/{couponId}": {
+      "schema": "Coupon",
+      "description": "Collection of coupons."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    }
+  }
+}

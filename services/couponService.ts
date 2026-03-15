@@ -1,0 +1,147 @@
+import { db, auth } from '../firebase';
+import { 
+  doc, 
+  getDoc, 
+  updateDoc, 
+  serverTimestamp, 
+  Timestamp,
+  getDocFromServer,
+  collection,
+  query,
+  where,
+  getDocs,
+  limit
+} from 'firebase/firestore';
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
+export async function activateCoupon(code: string) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Você precisa estar logado para ativar um cupom.');
+  }
+
+  const couponId = code.toUpperCase().trim();
+  const couponRef = doc(db, 'coupons', couponId);
+
+  try {
+    const couponSnap = await getDoc(couponRef);
+    if (!couponSnap.exists()) {
+      throw new Error('Cupom inválido ou não encontrado.');
+    }
+
+    const data = couponSnap.data();
+    if (data.status === 'used') {
+      throw new Error('Este cupom já foi utilizado.');
+    }
+
+    const daysDuration = data.days_duration || 7;
+    const now = new Date();
+    const expirationDate = new Date(now.getTime() + daysDuration * 24 * 60 * 60 * 1000);
+
+    await updateDoc(couponRef, {
+      status: 'used',
+      used_by_uid: user.uid,
+      activation_date: serverTimestamp(),
+      expiration_date: Timestamp.fromDate(expirationDate)
+    });
+
+    return {
+      success: true,
+      expirationDate
+    };
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `coupons/${couponId}`);
+    return { success: false }; // Should not reach here due to throw in handleFirestoreError
+  }
+}
+
+export async function checkActiveCoupon() {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  try {
+    const couponsRef = collection(db, 'coupons');
+    const q = query(
+      couponsRef, 
+      where('used_by_uid', '==', user.uid),
+      where('status', '==', 'used'),
+      limit(1)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const couponData = querySnapshot.docs[0].data();
+      const expirationDate = couponData.expiration_date?.toDate();
+      
+      if (expirationDate && expirationDate > new Date()) {
+        return expirationDate;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao verificar cupom ativo:", error);
+    return null;
+  }
+}
+
+// Connection test
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if(error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration.");
+    }
+  }
+}
+testConnection();

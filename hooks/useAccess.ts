@@ -1,5 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { auth } from '../firebase';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
+import { activateCoupon, checkActiveCoupon } from '../services/couponService';
 
 const ACCESS_KEY = 'precificaAccess';
 const EXPIRATION_KEY = 'precificaExpiration';
@@ -14,6 +17,8 @@ const CODES: Record<string, number> = {
   'TESTE5MINUTOS': 5 / 60, // 5 minutes
   'TESTE12345#': 3 / 60, // 3 minutes
   'MASTER202252': 365 * 24, // 1 year
+  'PREMIUM-60D': 60 * 24, // 2 months (60 days)
+  'FLASH-5MIN': 5 / 60, // 5 minutes
 };
 
 // One-time use codes are now managed by removing them from the list after use.
@@ -23,6 +28,7 @@ const ONE_TIME_CODES: Record<string, number> = {
 
 
 export function useAccess() {
+  const [user, setUser] = useState<User | null>(null);
   const [accessLevel, setAccessLevel] = useState<AccessLevel>('restricted');
   const [expiration, setExpiration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -63,9 +69,43 @@ export function useAccess() {
   }, []);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      
+      if (currentUser) {
+        setIsLoading(true);
+        const dbExpiration = await checkActiveCoupon();
+        if (dbExpiration) {
+          const expirationTimestamp = dbExpiration.getTime();
+          window.localStorage.setItem(ACCESS_KEY, 'full');
+          window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
+          setAccessLevel('full');
+          setExpiration(expirationTimestamp);
+        } else {
+          revalidateAccess();
+        }
+        setIsLoading(false);
+      } else {
+        revalidateAccess();
+        setIsLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [revalidateAccess]);
+
+  useEffect(() => {
     revalidateAccess();
     setIsLoading(false);
   }, [revalidateAccess]);
+
+  const login = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in", error);
+    }
+  };
 
   const activate = useCallback(async (code: string): Promise<{ success: boolean; message?: string }> => {
     const upperCaseCode = code.toUpperCase();
@@ -87,9 +127,35 @@ export function useAccess() {
       }
     }
 
-    // If no valid code was found
-    return { success: false, message: 'Código de acesso inválido.' };
-  }, []);
+    // If no valid code was found in local list, try Firebase
+    if (user) {
+      try {
+        const result = await activateCoupon(upperCaseCode);
+        if (result.success && result.expirationDate) {
+          const expirationTimestamp = result.expirationDate.getTime();
+          window.localStorage.setItem(ACCESS_KEY, 'full');
+          window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
+          setAccessLevel('full');
+          setExpiration(expirationTimestamp);
+          setMessage('');
+          return { success: true };
+        }
+      } catch (error: any) {
+        let errorMsg = 'Código de acesso inválido.';
+        try {
+          const parsed = JSON.parse(error.message);
+          errorMsg = parsed.error || errorMsg;
+        } catch {
+          errorMsg = error.message || errorMsg;
+        }
+        return { success: false, message: errorMsg };
+      }
+    } else {
+      return { success: false, message: 'Código de acesso inválido ou você precisa estar logado para ativar este cupom.' };
+    }
 
-  return { accessLevel, expiration, isLoading, activate, message, revalidateAccess };
+    return { success: false, message: 'Código de acesso inválido.' };
+  }, [user]);
+
+  return { user, accessLevel, expiration, isLoading, activate, message, revalidateAccess, login };
 }
