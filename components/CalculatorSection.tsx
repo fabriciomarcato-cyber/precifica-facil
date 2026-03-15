@@ -236,9 +236,16 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                         )}
                         <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                            {getMarketplaceIcon(res.platform)}
-                           <h3 className="text-base font-bold text-gray-800">
-                             {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
-                           </h3>
+                           <div className="flex flex-col">
+                               <h3 className="text-base font-bold text-gray-800 leading-tight">
+                                 {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
+                               </h3>
+                               {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                   <span className="text-[10px] text-gray-500 font-medium">
+                                       Peso: {settings.mercadoLivre.productWeight}kg
+                                   </span>
+                               )}
+                           </div>
                         </div>
                         {res.platform === Platform.SHOPEE && (
                             <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">
@@ -288,7 +295,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                               { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
                               <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                                   {getMarketplaceIcon(res.platform)}
-                                  <h3 className="text-base font-bold text-gray-800">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
+                                  <div className="flex flex-col">
+                                      <h3 className="text-base font-bold text-gray-800 leading-tight">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
+                                      {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                          <span className="text-[10px] text-gray-500 font-medium">
+                                              Peso: {settings.mercadoLivre.productWeight}kg
+                                          </span>
+                                      )}
+                                  </div>
                               </div>
                                {res.platform === Platform.SHOPEE && (
                                   <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">
@@ -340,7 +354,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                           { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
                           <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
                               {getMarketplaceIcon(res.platform)}
-                              <h3 className="text-base font-bold text-gray-800">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
+                              <div className="flex flex-col">
+                                  <h3 className="text-base font-bold text-gray-800 leading-tight">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
+                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                      <span className="text-[10px] text-gray-500 font-medium">
+                                          Peso: {settings.mercadoLivre.productWeight}kg
+                                      </span>
+                                  )}
+                              </div>
                           </div>
                           {res.platform === Platform.SHOPEE && (
                               <p className="text-center text-[10px] text-gray-500 -mt-1 mb-2 uppercase">

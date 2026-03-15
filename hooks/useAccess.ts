@@ -19,6 +19,7 @@ const CODES: Record<string, number> = {
   'MASTER202252': 365 * 24, // 1 year
   'PREMIUM-60D': 60 * 24, // 2 months (60 days)
   'FLASH-5MIN': 5 / 60, // 5 minutes
+  'ACESSO-24H': 24, // 1 day
 };
 
 // One-time use codes are now managed by removing them from the list after use.
