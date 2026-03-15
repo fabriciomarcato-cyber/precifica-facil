@@ -100,10 +100,26 @@ export function useAccess() {
 
   const login = async () => {
     const provider = new GoogleAuthProvider();
+    // Forçar a escolha de conta para evitar que o Google tente logar automaticamente e falhe no iframe
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing in", error);
+      let errorMsg = 'Erro ao fazer login com Google.';
+      
+      if (error.code === 'auth/unauthorized-domain') {
+        errorMsg = 'Este domínio não está autorizado no Firebase. Por favor, adicione as URLs do app nos "Domínios Autorizados" do Console do Firebase.';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMsg = 'O pop-up de login foi bloqueado pelo seu navegador. Por favor, permita pop-ups para este site.';
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        return; // Usuário fechou a janela, não precisa de erro
+      }
+      
+      alert(errorMsg);
     }
   };
 
