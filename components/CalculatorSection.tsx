@@ -12,6 +12,7 @@ import { getMarketplaceIcon } from './MarketplaceIcons';
 import { Lock, AlertTriangle, KeyRound } from 'lucide-react';
 
 import ShopeeBatchConference from './ShopeeBatchConference';
+import VolumetricWeightCalculator from './VolumetricWeightCalculator';
 
 interface CalculatorSectionProps {
   settings: AppSettings;
@@ -393,6 +394,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
       </Card>
 
       <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
+      <VolumetricWeightCalculator />
     </>
   );
 }
