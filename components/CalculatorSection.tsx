@@ -242,7 +242,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                </h3>
                                {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                    <span className="text-[10px] text-gray-500 font-medium">
-                                       Peso: {settings.mercadoLivre.productWeight}kg
+                                       Peso Volumétrico: {settings.mercadoLivre.productWeight}kg
                                    </span>
                                )}
                            </div>
@@ -299,7 +299,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                       <h3 className="text-base font-bold text-gray-800 leading-tight">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
                                       {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                           <span className="text-[10px] text-gray-500 font-medium">
-                                              Peso: {settings.mercadoLivre.productWeight}kg
+                                              Peso Volumétrico: {settings.mercadoLivre.productWeight}kg
                                           </span>
                                       )}
                                   </div>
@@ -358,7 +358,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                   <h3 className="text-base font-bold text-gray-800 leading-tight">{(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}</h3>
                                   {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                       <span className="text-[10px] text-gray-500 font-medium">
-                                          Peso: {settings.mercadoLivre.productWeight}kg
+                                          Peso Volumétrico: {settings.mercadoLivre.productWeight}kg
                                       </span>
                                   )}
                               </div>

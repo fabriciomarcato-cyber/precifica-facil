@@ -18,6 +18,7 @@ const CODES: Record<string, number> = {
   'TESTE12345#': 3 / 60, // 3 minutes
   'MASTER202252': 365 * 24, // 1 year
   'PREMIUM-60D': 60 * 24, // 2 months (60 days)
+  'PRO-2MESES': 60 * 24, // 2 months (60 days)
   'FLASH-5MIN': 5 / 60, // 5 minutes
   'ACESSO-24H': 24, // 1 day
 };
