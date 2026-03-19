@@ -11,6 +11,8 @@ const defaultSettings: AppSettings = {
     classicCommission: 14,
     premiumCommission: 19,
     productWeight: 1,
+    useManualFixedFee: false,
+    manualFixedFeeValue: 0,
   },
   shopee: {
     contributionMargin: 17,

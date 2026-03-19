@@ -90,6 +90,13 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
      setSettings(prev => ({...prev, [field]: numericValue }));
   }
 
+  const handleToggleChange = (section: 'mercadoLivre', field: string, value: boolean) => {
+    setSettings(prev => {
+        const updatedSection = { ...prev[section], [field]: value };
+        return { ...prev, [section]: updatedSection };
+    });
+  };
+
   if (!isOpen) {
     return null;
   }
@@ -137,6 +144,27 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
               <InputField label="Peso Volumétrico do Produto (kg):" unit="kg" value={settings.mercadoLivre.productWeight} onChange={(e) => handleInputChange('mercadoLivre', 'productWeight', e.target.value)} />
               <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
               <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
+              
+              <div className="md:col-span-2 space-y-3 pt-2 border-t border-gray-100 mt-2">
+                <label className="flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={settings.mercadoLivre.useManualFixedFee} 
+                    onChange={(e) => handleToggleChange('mercadoLivre', 'useManualFixedFee', e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-800">Usar Taxa Fixa/Frete Manual</span>
+                </label>
+                
+                {settings.mercadoLivre.useManualFixedFee && (
+                  <InputField 
+                    label="Valor Taxa Fixa/Frete (R$):" 
+                    unit="R$" 
+                    value={settings.mercadoLivre.manualFixedFeeValue} 
+                    onChange={(e) => handleInputChange('mercadoLivre', 'manualFixedFeeValue', e.target.value)} 
+                  />
+                )}
+              </div>
             </SettingsCard>
 
             <SettingsCard title="Shopee" platform={Platform.SHOPEE}>

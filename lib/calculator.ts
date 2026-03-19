@@ -75,7 +75,10 @@ function getMercadoLivreShippingFee(price: number, weightInKg: number): number {
 /**
  * Determines the fixed fee for Mercado Livre based on the new 2026 shipping cost table.
  */
-function getMercadoLivreFees(price: number, weightInKg: number) {
+function getMercadoLivreFees(price: number, weightInKg: number, settings: AppSettings) {
+    if (settings.mercadoLivre.useManualFixedFee) {
+        return { fixedFee: settings.mercadoLivre.manualFixedFeeValue, commissionOverridePercent: null };
+    }
     const shippingFee = getMercadoLivreShippingFee(price, weightInKg);
     return { fixedFee: shippingFee, commissionOverridePercent: null };
 }
@@ -106,7 +109,7 @@ function calculateMercadoLivrePrice(
     const MAX_ITERATIONS = 10;
 
     while (iterations < MAX_ITERATIONS) {
-        const fees = getMercadoLivreFees(sellingPrice, weightInKg);
+        const fees = getMercadoLivreFees(sellingPrice, weightInKg, settings);
         const currentCommissionPercent = baseCommissionPercent;
         
         const totalPercentage = marginPercent + currentCommissionPercent + taxPercent;
@@ -127,7 +130,7 @@ function calculateMercadoLivrePrice(
         iterations++;
     }
 
-    const finalFees = getMercadoLivreFees(sellingPrice, weightInKg);
+    const finalFees = getMercadoLivreFees(sellingPrice, weightInKg, settings);
     const finalCommissionPercent = baseCommissionPercent;
     
     const commissionValue = sellingPrice * finalCommissionPercent;
@@ -396,13 +399,13 @@ export function calculateMaxCost(desiredPrice: number, weightInKg: number, setti
         switch (platform) {
             case Platform.ML_CLASSICO:
                 commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg).fixedFee;
+                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg, settings).fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
             case Platform.ML_PREMIUM:
                 commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg).fixedFee;
+                fixedFee = getMercadoLivreFees(desiredPrice, weightInKg, settings).fixedFee;
                 marginPercent = settings.mercadoLivre.contributionMargin / 100;
                 contributionMargin = settings.mercadoLivre.contributionMargin;
                 break;
@@ -468,11 +471,11 @@ export function simulateMargin(productCost: number, sellingPrice: number, weight
         switch (platform) {
             case Platform.ML_CLASSICO:
                 commissionRate = settings.mercadoLivre.classicCommission / 100;
-                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg).fixedFee;
+                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg, settings).fixedFee;
                 break;
             case Platform.ML_PREMIUM:
                 commissionRate = settings.mercadoLivre.premiumCommission / 100;
-                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg).fixedFee;
+                fixedFee = getMercadoLivreFees(sellingPrice, weightInKg, settings).fixedFee;
                 break;
             case Platform.SHOPEE:
                 const shopeeFeesSim = getShopeeFeeComponents(sellingPrice, settings);
