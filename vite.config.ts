@@ -18,8 +18,8 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.Calc_Prec_Fac': JSON.stringify(env.Calc_Prec_Fac || ''),
-        'process.env.API_KEY': JSON.stringify(env.API_KEY || env.Calc_Prec_Fac || '')
+        'process.env.Calc_Prec_Fac': JSON.stringify(process.env.Calc_Prec_Fac || process.env.CALC_PREC_FAC || env.Calc_Prec_Fac || env.CALC_PREC_FAC || ''),
+        'process.env.API_KEY': JSON.stringify(process.env.API_KEY || process.env.Calc_Prec_Fac || process.env.CALC_PREC_FAC || env.Calc_Prec_Fac || env.CALC_PREC_FAC || '')
       },
       resolve: {
         alias: {
