@@ -18,8 +18,8 @@ export async function runShopeeBatchConference(
   productsData: string,
   settings: AppSettings
 ): Promise<ShopeeBatchResult[]> {
-  // Use only the specific VITE_Calc_Prec_Fac key
-  const apiKey = process.env.VITE_Calc_Prec_Fac || process.env.API_KEY;
+  // Use the specific VITE_Calc_Prec_Fac key via import.meta.env
+  const apiKey = (import.meta as any).env.VITE_Calc_Prec_Fac || (import.meta as any).env.VITE_API_KEY;
   
   if (!apiKey || apiKey === "") {
     throw new Error("Configuração do servidor incompleta (API Key). Por favor, contate o administrador.");

@@ -17,10 +17,6 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
-      define: {
-        'process.env.VITE_Calc_Prec_Fac': JSON.stringify(process.env.VITE_Calc_Prec_Fac || ''),
-        'process.env.API_KEY': JSON.stringify(process.env.VITE_Calc_Prec_Fac || '')
-      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
