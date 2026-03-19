@@ -19,7 +19,7 @@ export async function runShopeeBatchConference(
   settings: AppSettings
 ): Promise<ShopeeBatchResult[]> {
   // Check multiple possible locations for the API key
-  const apiKey = process.env.Calc_Prec_Fac || process.env.CALC_PREC_FAC || process.env.API_KEY;
+  const apiKey = process.env.VITE_Calc_Prec_Fac || process.env.Calc_Prec_Fac || process.env.API_KEY;
   
   if (!apiKey || apiKey === "") {
     throw new Error("Configuração do servidor incompleta (API Key). Por favor, contate o administrador.");
