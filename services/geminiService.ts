@@ -19,10 +19,10 @@ export async function runShopeeBatchConference(
   settings: AppSettings
 ): Promise<ShopeeBatchResult[]> {
   // Check multiple possible locations for the API key
-  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  const apiKey = process.env.Calc_Prec_Fac || process.env.API_KEY;
   
   if (!apiKey || apiKey === "") {
-    throw new Error("Chave da API não encontrada. Para resolver: 1. Vá em 'Settings' (ícone de engrenagem) -> 2. Adicione 'GEMINI_API_KEY' nas variáveis de ambiente -> 3. Cole sua chave de aistudio.google.com");
+    throw new Error("Configuração do servidor incompleta (API Key). Por favor, contate o administrador.");
   }
 
   const ai = new GoogleGenAI({ apiKey });

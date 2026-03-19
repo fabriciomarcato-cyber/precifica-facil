@@ -19,25 +19,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'adjustment'>('all');
-  const [showKeySelector, setShowKeySelector] = useState(false);
-
-  const checkApiKey = async () => {
-    if (typeof window !== 'undefined' && (window as any).aistudio) {
-      const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-      if (!hasKey) {
-        setShowKeySelector(true);
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const handleOpenKeySelector = async () => {
-    if (typeof window !== 'undefined' && (window as any).aistudio) {
-      await (window as any).aistudio.openSelectKey();
-      setShowKeySelector(false);
-    }
-  };
 
   const filteredResults = useMemo(() => {
     if (filterType === 'all') return results;
@@ -49,9 +30,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
       setError('Por favor, insira os dados dos produtos (CSV ou JSON).');
       return;
     }
-
-    const hasKey = await checkApiKey();
-    if (!hasKey) return;
 
     setIsLoading(true);
     setError('');
@@ -66,9 +44,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     console.error(err);
     const errorMessage = err.message || 'Erro desconhecido';
     setError(`Erro ao processar: ${errorMessage}. Verifique sua conexão e os dados inseridos.`);
-    if (errorMessage.toLowerCase().includes('chave') || errorMessage.toLowerCase().includes('api')) {
-      setShowKeySelector(true);
-    }
   } finally {
     setIsLoading(false);
   }
@@ -233,24 +208,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
             </div>
           )}
         </div>
-
-        {showKeySelector && (
-          <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
-              <span className="font-medium">Chave de API Necessária</span>
-            </div>
-            <p className="text-sm">
-              Para usar o processamento em lote com o modelo Pro, você precisa selecionar uma chave de API válida.
-            </p>
-            <button
-              onClick={handleOpenKeySelector}
-              className="bg-amber-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors self-start text-sm"
-            >
-              Selecionar Chave de API
-            </button>
-          </div>
-        )}
 
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
