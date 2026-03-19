@@ -37,7 +37,7 @@ export default function VolumetricWeightCalculator() {
             value={length}
             onChange={(e) => setLength(e.target.value)}
             placeholder="Ex: 30"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
           />
         </div>
         <div>
@@ -47,7 +47,7 @@ export default function VolumetricWeightCalculator() {
             value={width}
             onChange={(e) => setWidth(e.target.value)}
             placeholder="Ex: 20"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
           />
         </div>
         <div>
@@ -57,7 +57,7 @@ export default function VolumetricWeightCalculator() {
             value={height}
             onChange={(e) => setHeight(e.target.value)}
             placeholder="Ex: 15"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
           />
         </div>
         <div>
@@ -67,7 +67,7 @@ export default function VolumetricWeightCalculator() {
             value={physicalWeight}
             onChange={(e) => setPhysicalWeight(e.target.value)}
             placeholder="Ex: 0.5"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
           />
         </div>
       </div>

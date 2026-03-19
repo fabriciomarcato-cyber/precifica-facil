@@ -49,7 +49,7 @@ const InputField: React.FC<{ label: string; value: number; onChange: (e: React.C
         step="0.01"
         value={value}
         onChange={onChange}
-        className="block w-full rounded-md border-gray-300 pl-10 pr-4 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
+        className="block w-full rounded-md border-gray-400 pl-10 pr-4 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
       />
     </div>
   </div>
@@ -125,7 +125,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
                 id="simplesNacional"
                 value={settings.simplesNacional}
                 onChange={(e) => handleGeneralChange('simplesNacional', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
+                className="mt-1 block w-full rounded-md border-gray-400 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
               >
                 <option value="0">MEI - Isento (0%)</option>
                 <option value="4">1ª Faixa - Faturamento até R$ 180 mil (4,00%)</option>
@@ -151,7 +151,7 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
                     type="checkbox" 
                     checked={settings.mercadoLivre.useManualFixedFee} 
                     onChange={(e) => handleToggleChange('mercadoLivre', 'useManualFixedFee', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                    className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" 
                   />
                   <span className="ml-2 text-sm font-medium text-gray-800">Usar Taxa Fixa/Frete Manual</span>
                 </label>
@@ -173,21 +173,21 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
                 <div>
                   <label className="block text-sm font-medium text-gray-800">Tipo de Vendedor</label>
                   <div className="mt-2 flex items-center gap-x-4 gap-y-2">
-                    <label className="flex items-center text-sm"><input type="radio" value="cnpj" name="sellerType" checked={settings.shopee.sellerType === 'cnpj'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CNPJ</span></label>
-                    <label className="flex items-center text-sm"><input type="radio" value="cpf" name="sellerType" checked={settings.shopee.sellerType === 'cpf'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CPF</span></label>
+                    <label className="flex items-center text-sm"><input type="radio" value="cnpj" name="sellerType" checked={settings.shopee.sellerType === 'cnpj'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-400 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CNPJ</span></label>
+                    <label className="flex items-center text-sm"><input type="radio" value="cpf" name="sellerType" checked={settings.shopee.sellerType === 'cpf'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-400 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CPF</span></label>
                   </div>
                 </div>
                 {settings.shopee.sellerType === 'cpf' && (
                   <div className="pl-1">
                     <label className="flex items-center">
-                      <input type="checkbox" checked={settings.shopee.highVolumeCPF} onChange={(e) => handleShopeeSettingChange('highVolumeCPF', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <input type="checkbox" checked={settings.shopee.highVolumeCPF} onChange={(e) => handleShopeeSettingChange('highVolumeCPF', e.target.checked)} className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" />
                       <span className="ml-2 text-sm text-gray-800">Mais de 450 pedidos/90 dias (+R$3)</span>
                     </label>
                   </div>
                 )}
                 <div>
                   <label className="flex items-center">
-                    <input type="checkbox" checked={settings.shopee.inCampaign} onChange={(e) => handleShopeeSettingChange('inCampaign', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" checked={settings.shopee.inCampaign} onChange={(e) => handleShopeeSettingChange('inCampaign', e.target.checked)} className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" />
                     <span className="ml-2 text-sm text-gray-800">Campanhas de Destaque (+2.5%)</span>
                   </label>
                 </div>

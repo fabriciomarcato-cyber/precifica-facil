@@ -134,7 +134,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
             value={inputData}
             onChange={(e) => setInputData(e.target.value)}
             placeholder={`Exemplo SEM cabeçalho:\n2237,Produto X,89.90,10,50.00\n\nExemplo COM cabeçalho:\nSKU,Descrição,Preço Atual,Estoque,Custo\n2237,Produto X,89.90,10,50.00`}
-            className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            className="w-full h-40 p-3 border border-gray-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
           />
         </div>
 

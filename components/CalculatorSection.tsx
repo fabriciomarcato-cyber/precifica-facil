@@ -55,7 +55,7 @@ const ActivationBar: React.FC<{
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
                         placeholder="Insira seu código"
-                        className="rounded-md border-gray-300 shadow-sm sm:text-sm p-2 bg-white text-gray-900 w-48"
+                        className="rounded-md border-gray-400 shadow-sm sm:text-sm p-2 bg-white text-gray-900 w-48"
                         aria-label="Código de Acesso"
                     />
                     <button
@@ -210,7 +210,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                     value={productCost}
                     onChange={(e) => setProductCost(e.target.value)}
                     placeholder="Ex: 25.00"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
+                    className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"
                 />
             </div>
             <button
@@ -281,7 +281,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
           subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
       >
           <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-full sm:w-auto"><label htmlFor="desiredPrice" className="block text-sm font-medium text-gray-700">Preço de Venda Desejado (R$):</label><input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
+              <div className="w-full sm:w-auto"><label htmlFor="desiredPrice" className="block text-sm font-medium text-gray-700">Preço de Venda Desejado (R$):</label><input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
               <button onClick={handleInverseCalculation} className="w-full sm:w-auto mt-2 sm:mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Calcular Custo Máximo</button>
           </div>
           {inverseCalcError && <p className="text-red-600 text-sm mt-2">{inverseCalcError}</p>}
@@ -339,8 +339,8 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
           subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
       >
           <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-full sm:w-auto"><label htmlFor="simProductCost" className="block text-sm font-medium text-gray-700">Custo Produto (R$):</label><input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
-              <div className="w-full sm:w-auto"><label htmlFor="simSellingPrice" className="block text-sm font-medium text-gray-700">Preço de Venda (R$):</label><input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
+              <div className="w-full sm:w-auto"><label htmlFor="simProductCost" className="block text-sm font-medium text-gray-700">Custo Produto (R$):</label><input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
+              <div className="w-full sm:w-auto"><label htmlFor="simSellingPrice" className="block text-sm font-medium text-gray-700">Preço de Venda (R$):</label><input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white text-gray-900"/></div>
               <button onClick={handleMarginSimulation} className="w-full sm:w-auto mt-2 sm:mt-6 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Simular Margem</button>
           </div>
           {marginSimError && <p className="text-red-600 text-sm mt-2">{marginSimError}</p>}
