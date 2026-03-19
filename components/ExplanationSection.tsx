@@ -14,20 +14,39 @@ const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title:
     </div>
 );
 
-const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string }>> = ({ platform, formula, children }) => (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
-        <div className="flex items-center mb-4">
-            {getMarketplaceIcon(platform)}
-            <h4 className="text-lg font-bold text-gray-800 ml-3">{platform}</h4>
+const getPlatformColor = (platform: Platform) => {
+    switch (platform) {
+        case Platform.ML_CLASSICO:
+        case Platform.ML_PREMIUM:
+            return 'bg-yellow-50 border-yellow-200';
+        case Platform.SHOPEE:
+            return 'bg-red-50 border-red-200';
+        case Platform.TIKTOK_SHOP:
+            return 'bg-gray-50 border-gray-200';
+        case Platform.INSTAGRAM:
+            return 'bg-blue-50 border-blue-200';
+        default:
+            return 'bg-white border-gray-200';
+    }
+};
+
+const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string }>> = ({ platform, formula, children }) => {
+    const colorClasses = getPlatformColor(platform);
+    return (
+        <div className={`${colorClasses} p-6 rounded-xl shadow-md border flex flex-col h-full`}>
+            <div className="flex items-center mb-4">
+                {getMarketplaceIcon(platform)}
+                <h4 className="text-lg font-bold text-gray-800 ml-3">{platform}</h4>
+            </div>
+            <div className="bg-white/50 p-3 rounded-md text-center mb-4 border border-black/5">
+                <code className="text-sm text-gray-700 font-mono">{formula}</code>
+            </div>
+            <div className="text-gray-600 text-sm space-y-2">
+                {children}
+            </div>
         </div>
-        <div className="bg-gray-100 p-3 rounded-md text-center mb-4">
-            <code className="text-sm text-gray-700 font-mono">{formula}</code>
-        </div>
-        <div className="text-gray-600 text-sm space-y-2">
-            {children}
-        </div>
-    </div>
-);
+    );
+};
 
 export default function ExplanationSection() {
     return (

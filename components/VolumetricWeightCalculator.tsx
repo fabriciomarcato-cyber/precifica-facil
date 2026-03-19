@@ -20,7 +20,7 @@ export default function VolumetricWeightCalculator() {
   const finalWeight = volumetricWeight <= 2 ? pw : Math.max(pw, volumetricWeight);
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+    <div className="bg-yellow-50 p-6 rounded-xl shadow-lg mb-8 border border-yellow-200">
       <div className="border-b pb-4 mb-6 flex items-center gap-3">
         <Package className="w-8 h-8 text-blue-600" />
         <div>

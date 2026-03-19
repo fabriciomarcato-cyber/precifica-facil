@@ -106,6 +106,24 @@ const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; 
 );
 
 
+const getPlatformColor = (platform: Platform, isNegative: boolean) => {
+    if (isNegative) return 'bg-red-50 border-red-400';
+    
+    switch (platform) {
+        case Platform.ML_CLASSICO:
+        case Platform.ML_PREMIUM:
+            return 'bg-yellow-50 border-yellow-200';
+        case Platform.SHOPEE:
+            return 'bg-red-50 border-red-200';
+        case Platform.TIKTOK_SHOP:
+            return 'bg-gray-50 border-gray-200';
+        case Platform.INSTAGRAM:
+            return 'bg-blue-50 border-blue-200';
+        default:
+            return 'bg-slate-100 border-slate-200';
+    }
+};
+
 export default function CalculatorSection({ settings, accessLevel, activate, expiration, accessMessage, revalidateAccess }: CalculatorSectionProps) {
   const [productCost, setProductCost] = useState('');
   const [desiredPrice, setDesiredPrice] = useState('');
@@ -227,8 +245,9 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                 {displayedPriceResults.map((res) => {
                     const isNegative = res.grossProfit < 0;
                     const isDemo = isRestricted && res.platform === PRICE_CALC_DEMO_PLATFORM;
+                    const colorClasses = getPlatformColor(res.platform, isNegative);
                     return (
-                    <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                    <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${colorClasses}`}>
                         {isDemo && <FreebieBadge />}
                         { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                             <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>
@@ -290,8 +309,9 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                   {displayedInverseResults.map((res) => {
                       const isNegative = res.maxProductCost && res.maxProductCost < 0;
                       const isDemo = isRestricted && res.platform === INVERSE_CALC_DEMO_PLATFORM;
+                      const colorClasses = getPlatformColor(res.platform, !!isNegative);
                       return (
-                          <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                          <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${colorClasses}`}>
                               {isDemo && <FreebieBadge />}
                               { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
                               <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
@@ -349,8 +369,9 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
               {displayedMarginResults.map((res) => {
                   const isNegative = res.grossProfit < 0;
                   const isDemo = isRestricted && res.platform === MARGIN_SIM_DEMO_PLATFORM;
+                  const colorClasses = getPlatformColor(res.platform, isNegative);
                   return (
-                      <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${isNegative ? 'bg-red-50 border-red-400' : 'bg-slate-100 border-slate-200'}`}>
+                      <div key={res.platform} className={`relative p-4 rounded-lg border flex flex-col ${colorClasses}`}>
                           {isDemo && <FreebieBadge />}
                           { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (<span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full text-white ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-500'}`}>{res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}</span>)}
                           <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>

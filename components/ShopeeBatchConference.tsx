@@ -117,7 +117,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+    <div className="bg-red-50 p-6 rounded-xl shadow-lg mb-8 border border-red-200">
       <div className="border-b pb-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Conferência em Lote - Shopee</h2>
         <p className="text-sm text-gray-500 mt-1">

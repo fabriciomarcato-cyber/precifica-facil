@@ -14,9 +14,26 @@ interface SettingsPanelProps {
   accessLevel: 'restricted' | 'full';
 }
 
+const getPlatformColor = (platform: Platform) => {
+  switch (platform) {
+    case Platform.ML_CLASSICO:
+    case Platform.ML_PREMIUM:
+      return 'bg-yellow-50 border-yellow-200';
+    case Platform.SHOPEE:
+      return 'bg-red-50 border-red-200';
+    case Platform.TIKTOK_SHOP:
+      return 'bg-gray-50 border-gray-200';
+    case Platform.INSTAGRAM:
+      return 'bg-blue-50 border-blue-200';
+    default:
+      return 'bg-white border-gray-200';
+  }
+};
+
 const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform; disabled?: boolean }>> = ({ title, platform, children, disabled }) => {
+    const colorClasses = getPlatformColor(platform);
     return (
-        <div className={`relative bg-white border-gray-200 p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
+        <div className={`relative ${colorClasses} p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
             {disabled && (
                  <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-lg z-10 flex-col p-4 text-center">
                     <Lock className="w-8 h-8 text-gray-500 mb-2" />
