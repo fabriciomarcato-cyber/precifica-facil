@@ -1,8 +1,8 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { AppSettings } from '../types';
 import { runShopeeBatchConference, ShopeeBatchResult } from '../services/geminiService';
-import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText, FileUp } from 'lucide-react';
 import { formatCurrency } from '../lib/calculator';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -19,15 +19,47 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'adjustment'>('all');
+  const [sortType, setSortType] = useState<'none' | 'alphabetical' | 'margin-asc' | 'margin-desc'>('none');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredResults = useMemo(() => {
-    if (filterType === 'all') return results;
-    return results.filter(r => r.precisa_de_reajuste);
-  }, [results, filterType]);
+    let baseResults = filterType === 'all' ? [...results] : results.filter(r => r.precisa_de_reajuste);
+    
+    if (sortType === 'alphabetical') {
+      baseResults.sort((a, b) => a.descricao_produto.localeCompare(b.descricao_produto));
+    } else if (sortType === 'margin-asc') {
+      baseResults.sort((a, b) => a.margem_atual_porcentagem - b.margem_atual_porcentagem);
+    } else if (sortType === 'margin-desc') {
+      baseResults.sort((a, b) => b.margem_atual_porcentagem - a.margem_atual_porcentagem);
+    }
+    
+    return baseResults;
+  }, [results, filterType, sortType]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target?.result;
+      const workbook = XLSX.read(bstr, { type: 'binary' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      
+      // Convert to CSV format for Gemini
+      const csvData = XLSX.utils.sheet_to_csv(worksheet);
+      setInputData(csvData);
+      
+      // Reset input to allow uploading same file again
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsBinaryString(file);
+  };
 
   const handleRunBatch = async () => {
     if (!inputData.trim()) {
-      setError('Por favor, insira os dados dos produtos (CSV ou JSON).');
+      setError('Por favor, insira os dados dos produtos (CSV, Excel ou JSON).');
       return;
     }
 
@@ -36,7 +68,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   try {
     const batchResults = await runShopeeBatchConference(inputData, settings);
     if (batchResults.length === 0) {
-      setError('O modelo não retornou resultados. Verifique se os dados estão no formato correto (SKU, Descrição, Preço, Estoque, Custo).');
+      setError('O modelo não retornou resultados. Verifique se os dados estão no formato correto (SKU, Descrição, Custo, Estoque, Preço de Venda Atual).');
     } else {
       setResults(batchResults);
     }
@@ -53,8 +85,8 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     const dataToExport = filteredResults.map(item => ({
       'SKU': item.sku,
       'Descrição': item.descricao_produto,
-      'Estoque': item.estoque,
       'Custo': item.custo_produto,
+      'Estoque': item.estoque,
       'Preço Atual': item.preco_venda_atual,
       'Margem Atual (%)': item.margem_atual_porcentagem,
       'Novo Preço': item.novo_preco_venda,
@@ -82,12 +114,12 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     doc.text(`Data: ${dateStr} às ${timeStr}`, 14, 30);
     doc.text(`Filtro: ${filterType === 'all' ? 'Todos os Produtos' : 'Apenas Reajustes'}`, 14, 35);
 
-    const tableColumn = ["SKU", "Descrição", "Estoque", "Custo", "Preço Atual", "Margem", "Novo Preço", "Nova Margem"];
+    const tableColumn = ["SKU", "Descrição", "Custo", "Estoque", "Preço Atual", "Margem", "Novo Preço", "Nova Margem"];
     const tableRows = filteredResults.map(item => [
       item.sku,
       item.descricao_produto,
-      item.estoque,
       formatCurrency(item.custo_produto),
+      item.estoque,
       formatCurrency(item.preco_venda_atual),
       `${item.margem_atual_porcentagem.toFixed(2)}%`,
       formatCurrency(item.novo_preco_venda),
@@ -119,21 +151,49 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   return (
     <div className="bg-red-50 p-6 rounded-xl shadow-lg mb-8 border border-red-200">
       <div className="border-b pb-4 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Conferência em Lote - Shopee</h2>
+        <div className="flex items-center gap-3">
+          <img 
+            src="https://i.postimg.cc/mgpM837m/Logo_Shopee_(1).png" 
+            alt="Shopee Logo" 
+            className="h-10 w-auto object-contain"
+            referrerPolicy="no-referrer"
+          />
+          <h2 className="text-2xl font-bold text-gray-800">Conferência em Lote - Shopee</h2>
+        </div>
         <p className="text-sm text-gray-500 mt-1">
-          Cole sua lista de produtos (CSV ou JSON) para conferir margens e preços ideais rapidamente.
+          Importe um arquivo ou cole sua lista de produtos para conferir margens e preços ideais rapidamente.
         </p>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Dados dos Produtos (SKU, Descrição, Preço Atual, Estoque, Custo):
-          </label>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-gray-700">
+              Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço de Venda Atual):
+            </label>
+            
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 bg-white text-gray-700 text-xs font-bold py-1.5 px-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <FileUp className="w-4 h-4 text-blue-600" />
+                Importar Arquivo (Excel/CSV)
+              </button>
+            </div>
+          </div>
+          
           <textarea
             value={inputData}
             onChange={(e) => setInputData(e.target.value)}
-            placeholder={`Exemplo SEM cabeçalho:\n2237,Produto X,89.90,10,50.00\n\nExemplo COM cabeçalho:\nSKU,Descrição,Preço Atual,Estoque,Custo\n2237,Produto X,89.90,10,50.00`}
+            placeholder={`Exemplo SEM cabeçalho:\n2237,Produto X,50.00,10,89.90\n\nExemplo COM cabeçalho:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
             className="w-full h-40 p-3 border border-gray-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
           />
         </div>
@@ -161,7 +221,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <div className="flex items-center gap-1">
                 <FileSpreadsheet className="w-4 h-4" />
-                <span>Suporta CSV</span>
+                <span>Suporta Excel/CSV</span>
               </div>
               <div className="flex items-center gap-1">
                 <FileJson className="w-4 h-4" />
@@ -171,23 +231,40 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
           </div>
 
           {results.length > 0 && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg border border-gray-200">
-                <button
-                  onClick={() => setFilterType('all')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setFilterType('adjustment')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Apenas Reajustes
-                </button>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-500 uppercase">Filtrar:</span>
+                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg border border-gray-200">
+                  <button
+                    onClick={() => setFilterType('all')}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    onClick={() => setFilterType('adjustment')}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Apenas Reajustes
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-500 uppercase">Ordenar:</span>
+                <select
+                  value={sortType}
+                  onChange={(e) => setSortType(e.target.value as any)}
+                  className="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-1.5 shadow-sm"
+                >
+                  <option value="none">Padrão</option>
+                  <option value="alphabetical">Alfabética (A-Z)</option>
+                  <option value="margin-asc">Margem (Menor p/ Maior)</option>
+                  <option value="margin-desc">Margem (Maior p/ Menor)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2 ml-auto">
                 <button
                   onClick={exportToExcel}
                   className="flex items-center gap-1.5 bg-green-600 text-white text-xs font-bold py-2 px-3 rounded-lg hover:bg-green-700 transition-colors"
@@ -229,8 +306,8 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço Atual</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margem Atual</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Novo Preço</th>
@@ -245,11 +322,11 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
                       {item.descricao_produto}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono">
-                      {item.estoque}
-                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {formatCurrency(item.custo_produto)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono">
+                      {item.estoque}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {formatCurrency(item.preco_venda_atual)}

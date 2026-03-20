@@ -42,7 +42,7 @@ const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: 
             )}
             <div className={disabled ? 'pointer-events-none' : ''}>
                 <div className="flex items-center gap-3 mb-4">
-                    {getMarketplaceIcon(platform)}
+                    {getMarketplaceIcon(platform, platform === Platform.SHOPEE ? "w-8 h-8" : "w-6 h-6")}
                     <h3 className={`text-xl font-bold text-gray-800`}>{title}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

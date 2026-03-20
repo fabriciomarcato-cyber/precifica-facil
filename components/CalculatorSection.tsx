@@ -255,7 +255,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                             </span>
                         )}
                         <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
-                           {getMarketplaceIcon(res.platform)}
+                           {getMarketplaceIcon(res.platform, res.platform === Platform.SHOPEE ? "w-8 h-8" : "w-6 h-6")}
                            <div className="flex flex-col">
                                <h3 className="text-base font-bold text-gray-800 leading-tight">
                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}

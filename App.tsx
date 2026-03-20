@@ -25,17 +25,23 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8 py-4 md:flex md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center justify-center md:justify-start">
+        <header className="mb-8 py-4 flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+          <div className="flex flex-col items-center md:items-start">
+            <div className="flex items-center">
               <Calculator className="w-10 h-10 text-blue-600" />
-              <h1 className="text-4xl font-bold text-gray-700 ml-4">Precifica Fácil</h1>
+              <h1 className="text-4xl font-bold text-gray-700 ml-4 whitespace-nowrap">Precifica Fácil</h1>
             </div>
-            <p className="text-lg text-gray-500 mt-2 text-center md:text-left">Precificação inteligente para marketplaces</p>
+            <p className="text-lg text-gray-500 mt-1 text-center md:text-left">Precificação inteligente para marketplaces</p>
+            <div className="flex items-center gap-4 mt-4">
+              <img src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" alt="Mercado Livre" className="h-[32px] w-auto object-contain" referrerPolicy="no-referrer" />
+              <img src="https://i.postimg.cc/mgpM837m/Logo_Shopee_(1).png" alt="Shopee" className="h-[32px] w-auto object-contain" referrerPolicy="no-referrer" />
+              <img src="https://i.postimg.cc/4x2tBvp8/tiktokshop.png" alt="TikTok Shop" className="h-[32px] w-auto object-contain" referrerPolicy="no-referrer" />
+              <img src="https://i.postimg.cc/6pbRYVCz/Instagram.png" alt="Instagram" className="h-[32px] w-auto object-contain" referrerPolicy="no-referrer" />
+            </div>
           </div>
           
           {/* Action Buttons */}
-          <div className="mt-4 md:mt-0 flex flex-wrap items-center justify-center md:justify-end gap-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
             {user ? (
               <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
                 <UserIcon className="w-4 h-4 text-gray-400" />
@@ -44,10 +50,14 @@ export default function App() {
             ) : (
               <button
                 onClick={login}
-                className="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 font-semibold"
+                className="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm flex flex-col items-center gap-1 font-semibold text-center"
+                title="Login com Google"
               >
-                <LogIn className="w-5 h-5" />
-                <span>Login</span>
+                <div className="flex items-center gap-2">
+                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                  <span>Login com Google</span>
+                </div>
+                <span className="text-[10px] font-normal text-gray-500 leading-tight">Para usar em outros navegadores</span>
               </button>
             )}
             {accessLevel === 'restricted' && (
@@ -59,26 +69,26 @@ export default function App() {
                 aria-label="Clique Aqui! Assinatura Anual"
               >
                 <Zap className="w-5 h-5"/>
-                <span>Clique Aqui! Assinatura Anual</span>
+                <span>Assinatura Anual</span>
               </a>
             )}
             {!showSettings && (
               <button
                 onClick={() => setShowSettings(true)}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-2 font-semibold animate-infrequent-pulse"
+                className="bg-red-600 text-white p-3 rounded-lg hover:bg-red-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center justify-center animate-infrequent-pulse"
+                title="Configurações"
                 aria-label="Abrir configurações"
               >
-                <Settings className="w-5 h-5"/>
-                <span>Configuração</span>
+                <Settings className="w-6 h-6"/>
               </button>
             )}
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center gap-2 font-semibold"
+              className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center"
+              title="Ajuda"
               aria-label="Abrir ajuda"
             >
-              <HelpCircle className="w-5 h-5" />
-              <span>Precisa de Ajuda?</span>
+              <HelpCircle className="w-6 h-6" />
             </button>
           </div>
         </header>

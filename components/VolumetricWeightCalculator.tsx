@@ -22,7 +22,12 @@ export default function VolumetricWeightCalculator() {
   return (
     <div className="bg-yellow-50 p-6 rounded-xl shadow-lg mb-8 border border-yellow-200">
       <div className="border-b pb-4 mb-6 flex items-center gap-3">
-        <Package className="w-8 h-8 text-blue-600" />
+        <img 
+          src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" 
+          alt="Mercado Livre Logo" 
+          className="h-10 w-auto object-contain"
+          referrerPolicy="no-referrer"
+        />
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Calculadora de Peso Volumétrico (Mercado Livre)</h2>
           <p className="text-sm text-gray-500">Descubra qual peso será usado para calcular o seu frete.</p>
