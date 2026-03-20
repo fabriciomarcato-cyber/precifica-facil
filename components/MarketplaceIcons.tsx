@@ -3,7 +3,7 @@ import React from 'react';
 import { Store } from 'lucide-react';
 import { Platform } from '../types';
 
-export const getMarketplaceIcon = (platform: Platform, className: string = "w-6 h-6") => {
+export const getMarketplaceIcon = (platform: Platform, className: string = "w-[58px] h-[58px]") => {
     let src = '';
     switch (platform) {
         case Platform.ML_CLASSICO:

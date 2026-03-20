@@ -9,7 +9,7 @@ import {
     formatPercentage
 } from '../lib/calculator';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { Lock, AlertTriangle, KeyRound } from 'lucide-react';
+import { Lock, AlertTriangle } from 'lucide-react';
 
 import ShopeeBatchConference from './ShopeeBatchConference';
 import VolumetricWeightCalculator from './VolumetricWeightCalculator';
@@ -22,58 +22,6 @@ interface CalculatorSectionProps {
   accessMessage: string;
   revalidateAccess: () => boolean;
 }
-
-const ActivationBar: React.FC<{
-  activate: (code: string) => Promise<{ success: boolean; message?: string }>;
-  accessMessage: string;
-}> = ({ activate, accessMessage }) => {
-    const [code, setCode] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
-        const result = await activate(code);
-        if (!result.success) {
-            setError(result.message || 'Ocorreu um erro.');
-        }
-        setLoading(false);
-    };
-    
-    return (
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-8 text-center">
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                <div className="flex items-center gap-2 text-blue-800 font-semibold">
-                    <KeyRound className="w-5 h-5" />
-                    <span>Acesso limitado. Use um código para liberar tudo.</span>
-                </div>
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                    <input
-                        type="text"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="Insira seu código"
-                        className="rounded-md border-gray-400 shadow-sm sm:text-sm p-2 bg-white text-gray-900 w-48"
-                        aria-label="Código de Acesso"
-                    />
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 text-white font-bold py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 text-sm"
-                    >
-                        {loading ? '...' : 'Ativar'}
-                    </button>
-                </form>
-            </div>
-             <div className="mt-2 text-sm h-5">
-                 {error && <p className="text-red-600">{error}</p>}
-                 {accessMessage && <p className="text-yellow-800">{accessMessage}</p>}
-            </div>
-        </div>
-    );
-};
 
 const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
     <div className="p-4 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 h-full min-h-[300px]">
@@ -204,17 +152,6 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
 
   return (
     <>
-      {isRestricted ? (
-          <ActivationBar activate={activate} accessMessage={accessMessage} />
-      ) : (
-          expiration && (
-              <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-r-lg" role="alert">
-                  <p className="font-bold">Acesso completo ativado!</p>
-                  <p>Todos os recursos estão disponíveis até {new Date(expiration).toLocaleString('pt-BR')}.</p>
-              </div>
-          )
-      )}
-
       <Card 
         title={isRestricted ? "Demonstrativo de Cálculo de Preço" : "Cálculo de Preço de Venda"}
         subtitle="Informe o custo do produto e veja o preço de venda ideal em cada canal."
@@ -255,7 +192,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                             </span>
                         )}
                         <div className={`flex items-center gap-2 mb-2 ${isDemo ? 'mt-8' : ''} ${ (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'justify-start' : 'justify-center' }`}>
-                           {getMarketplaceIcon(res.platform, res.platform === Platform.SHOPEE ? "w-8 h-8" : "w-6 h-6")}
+                           {getMarketplaceIcon(res.platform, res.platform === Platform.SHOPEE ? "w-[77px] h-[77px]" : "w-[58px] h-[58px]")}
                            <div className="flex flex-col">
                                <h3 className="text-base font-bold text-gray-800 leading-tight">
                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}

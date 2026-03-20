@@ -168,9 +168,15 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
       <div className="space-y-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700">
-              Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço de Venda Atual):
-            </label>
+            <div className="flex flex-col">
+              <label className="block text-sm font-medium text-gray-700">
+                Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço de Venda Atual):
+              </label>
+              <div className="flex items-center gap-1.5 mt-1 text-red-600">
+                <Info className="w-4 h-4" />
+                <span className="text-xs font-bold">Aviso: Recomendamos subir no máximo 100 produtos por vez para melhor performance.</span>
+              </div>
+            </div>
             
             <div className="flex items-center gap-2">
               <input
