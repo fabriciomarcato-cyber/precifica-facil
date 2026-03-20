@@ -29,19 +29,19 @@ const ActivationInput: React.FC<{
     };
     
     return (
-        <div className="flex flex-col items-start ml-4">
-            <form onSubmit={handleSubmit} className="flex items-center gap-1">
+        <div className="flex flex-col items-end">
+            <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Código"
-                    className="rounded-md border-gray-300 shadow-sm text-xs p-1.5 bg-white text-gray-900 w-24 focus:ring-blue-500 focus:border-blue-500"
+                    className="rounded-lg border-gray-300 shadow-sm text-sm px-3 py-3 bg-white text-gray-900 w-28 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
                 />
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-blue-600 text-white font-bold py-1.5 px-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300 text-xs"
+                    className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 text-sm h-[48px] flex items-center justify-center"
                 >
                     {loading ? '...' : 'Ativar'}
                 </button>
@@ -73,15 +73,8 @@ export default function App() {
             <div className="flex items-center">
               <Calculator className="w-10 h-10 text-blue-600" />
               <h1 className="text-4xl font-bold text-gray-700 ml-4 whitespace-nowrap">Precifica Fácil</h1>
-              {accessLevel === 'restricted' && <ActivationInput activate={activate} />}
             </div>
             <p className="text-lg text-gray-500 mt-1 text-center md:text-left">Precificação inteligente para marketplaces</p>
-            <div className="flex items-center gap-2 mt-4">
-              <img src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" alt="Mercado Livre" className="h-[77px] w-auto object-contain" referrerPolicy="no-referrer" />
-              <img src="https://i.postimg.cc/mgpM837m/Logo_Shopee_(1).png" alt="Shopee" className="h-[77px] w-auto object-contain" referrerPolicy="no-referrer" />
-              <img src="https://i.postimg.cc/4x2tBvp8/tiktokshop.png" alt="TikTok Shop" className="h-[77px] w-auto object-contain" referrerPolicy="no-referrer" />
-              <img src="https://i.postimg.cc/6pbRYVCz/Instagram.png" alt="Instagram" className="h-[77px] w-auto object-contain" referrerPolicy="no-referrer" />
-            </div>
           </div>
           
           {/* Action Buttons Column */}
@@ -94,6 +87,7 @@ export default function App() {
             )}
             
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+              {accessLevel === 'restricted' && <ActivationInput activate={activate} />}
               {user ? (
                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
                   <UserIcon className="w-4 h-4 text-gray-400" />
@@ -117,7 +111,7 @@ export default function App() {
                   href="https://pay.kiwify.com.br/HX8c6Q4"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center gap-2 font-semibold animate-premium-pulse"
+                  className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 flex items-center gap-2 font-semibold animate-premium-pulse h-[48px]"
                   aria-label="Clique Aqui! Assinatura Anual"
                 >
                   <Zap className="w-5 h-5"/>
