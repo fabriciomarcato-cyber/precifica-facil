@@ -14,16 +14,30 @@ const ActivationInput: React.FC<{
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccess(false);
+        
+        // Padronização: 3 blocos de 4 caracteres alfanuméricos (Ex: K9B2-X7M4-P1Q8)
+        const couponPattern = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+        const formattedCode = code.trim().toUpperCase();
+
+        if (!couponPattern.test(formattedCode)) {
+            setError('Padrão inválido (Ex: K9B2-X7M4-P1Q8)');
+            return;
+        }
+
         setLoading(true);
-        const result = await activate(code);
+        const result = await activate(formattedCode);
         if (!result.success) {
-            setError(result.message || 'Erro.');
+            setError(result.message || 'Código inválido.');
         } else {
             setCode('');
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 5000);
         }
         setLoading(false);
     };
@@ -34,9 +48,12 @@ const ActivationInput: React.FC<{
                 <input
                     type="text"
                     value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="Código"
-                    className="rounded-lg border-gray-300 shadow-md text-sm px-3 py-3 bg-white text-gray-900 w-28 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
+                    onChange={(e) => {
+                        setCode(e.target.value);
+                        if (success) setSuccess(false);
+                    }}
+                    placeholder="K9B2-X7M4-P1Q8"
+                    className="rounded-lg border-gray-300 shadow-md text-sm px-3 py-3 bg-white text-gray-900 w-44 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
                 />
                 <button
                     type="submit"
@@ -47,6 +64,7 @@ const ActivationInput: React.FC<{
                 </button>
             </form>
             {error && <p className="text-[10px] text-red-600 mt-0.5 absolute -bottom-4 right-0">{error}</p>}
+            {success && <p className="text-[10px] text-green-600 mt-0.5 absolute -bottom-4 right-0">Acesso liberado com sucesso!</p>}
         </div>
     );
 };

@@ -80,17 +80,28 @@ export async function activateCoupon(code: string) {
     }
 
     const data = couponSnap.data();
-    if (data.status === 'used') {
+    
+    // Suporta tanto o formato antigo quanto o novo solicitado pelo usuário
+    const currentStatus = data.status;
+    
+    if (currentStatus === 'usado' || currentStatus === 'used') {
       throw new Error('Este cupom já foi utilizado.');
     }
 
-    const daysDuration = data.days_duration || 7;
+    if (currentStatus !== 'disponivel' && currentStatus !== 'available' && currentStatus !== undefined) {
+       // Se houver um status diferente de disponivel/available, podemos considerar inválido ou apenas prosseguir se for nulo
+    }
+
+    // Lógica de 1 ano (365 dias)
     const now = new Date();
-    const expirationDate = new Date(now.getTime() + daysDuration * 24 * 60 * 60 * 1000);
+    const expirationDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
     await updateDoc(couponRef, {
-      status: 'used',
+      status: 'usado',
       used_by_uid: user.uid,
+      data_ativacao: serverTimestamp(),
+      data_vencimento: Timestamp.fromDate(expirationDate),
+      // Mantendo compatibilidade com campos antigos se necessário
       activation_date: serverTimestamp(),
       expiration_date: Timestamp.fromDate(expirationDate)
     });
@@ -101,7 +112,7 @@ export async function activateCoupon(code: string) {
     };
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `coupons/${couponId}`);
-    return { success: false }; // Should not reach here due to throw in handleFirestoreError
+    return { success: false };
   }
 }
 
@@ -114,19 +125,37 @@ export async function checkActiveCoupon() {
     const q = query(
       couponsRef, 
       where('used_by_uid', '==', user.uid),
-      where('status', '==', 'used'),
+      where('status', '==', 'usado'),
       limit(1)
     );
     
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
       const couponData = querySnapshot.docs[0].data();
-      const expirationDate = couponData.expiration_date?.toDate();
+      // Tenta pegar do novo campo data_vencimento ou do antigo expiration_date
+      const expirationDate = (couponData.data_vencimento || couponData.expiration_date)?.toDate();
       
       if (expirationDate && expirationDate > new Date()) {
         return expirationDate;
       }
     }
+    
+    // Fallback para o status antigo 'used'
+    const qOld = query(
+      couponsRef, 
+      where('used_by_uid', '==', user.uid),
+      where('status', '==', 'used'),
+      limit(1)
+    );
+    const querySnapshotOld = await getDocs(qOld);
+    if (!querySnapshotOld.empty) {
+      const couponData = querySnapshotOld.docs[0].data();
+      const expirationDate = (couponData.data_vencimento || couponData.expiration_date)?.toDate();
+      if (expirationDate && expirationDate > new Date()) {
+        return expirationDate;
+      }
+    }
+
     return null;
   } catch (error) {
     console.error("Erro ao verificar cupom ativo:", error);
