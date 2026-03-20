@@ -29,24 +29,24 @@ const ActivationInput: React.FC<{
     };
     
     return (
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end relative">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Código"
-                    className="rounded-lg border-gray-300 shadow-sm text-sm px-3 py-3 bg-white text-gray-900 w-28 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
+                    className="rounded-lg border-gray-300 shadow-md text-sm px-3 py-3 bg-white text-gray-900 w-28 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
                 />
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 text-sm h-[48px] flex items-center justify-center"
+                    className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:bg-blue-300 text-sm h-[48px] flex items-center justify-center"
                 >
                     {loading ? '...' : 'Ativar'}
                 </button>
             </form>
-            {error && <p className="text-[10px] text-red-600 mt-0.5">{error}</p>}
+            {error && <p className="text-[10px] text-red-600 mt-0.5 absolute -bottom-4 right-0">{error}</p>}
         </div>
     );
 };
