@@ -37,25 +37,47 @@ Você receberá:
 1. CONFIGURAÇÕES: Taxas da plataforma, impostos e a Margem de Contribuição mínima desejada.
 2. DADOS: Uma lista de produtos com SKU, Descrição, Custo, Estoque e Preço de Venda Atual.
 
-REGRAS DE CÁLCULO (OBRIGATÓRIO SEGUIR):
-1. DESCONTOS DA PLATAFORMA (SHOPEE):
-   - Se o Preço de Venda for até R$ 79,99: Comissão = 20% + Taxa Fixa = R$ 4,00.
-   - Se o Preço de Venda for entre R$ 80,00 e R$ 99,99: Comissão = 14% + Taxa Fixa = R$ 16,00.
-   - Se o Preço de Venda for entre R$ 100,00 e R$ 199,99: Comissão = 14% + Taxa Fixa = R$ 20,00.
-   - Se o Preço de Venda for entre R$ 200,00 e R$ 499,99: Comissão = 14% + Taxa Fixa = R$ 26,00.
-   - Se o Preço de Venda for R$ 500,00 ou mais: Comissão = 14% + Taxa Fixa = R$ 26,00.
+REGRAS DE CÁLCULO (OBRIGATÓRIO SEGUIR EXATAMENTE):
 
-2. ADICIONAIS:
-   - Se "Em Campanha" for "Sim": Adicione +2,5% na porcentagem de comissão.
-   - Se "CPF Alto Volume" for "Sim": Adicione R$ 3,00 na Taxa Fixa.
-   - Se Vendedor for "CNPJ" e Preço < R$ 8,00: Taxa Fixa = Preço * 0,50.
+1. DEFINIÇÃO DE COMISSÃO E TAXA FIXA (SHOPEE):
+   A base de cálculo depende do Preço de Venda (PV) e do Tipo de Vendedor.
+
+   A) REGRA ESPECIAL CPF BAIXO VALOR:
+      - Se Vendedor for "CPF" E Preço de Venda < R$ 12,00:
+        Comissão Base = 25%
+        Taxa Fixa = R$ 4,00
+        (Nesta regra específica, NÃO se adiciona a taxa de R$ 3,00 de Alto Volume, mesmo que esteja ativa).
+
+   B) REGRA GERAL (Demais casos):
+      - Se PV <= R$ 79,99: Comissão Base = 20% | Taxa Fixa = R$ 4,00
+      - Se PV entre R$ 80,00 e R$ 99,99: Comissão Base = 14% | Taxa Fixa = R$ 16,00
+      - Se PV entre R$ 100,00 e R$ 199,99: Comissão Base = 14% | Taxa Fixa = R$ 20,00
+      - Se PV entre R$ 200,00 e R$ 499,99: Comissão Base = 14% | Taxa Fixa = R$ 26,00
+      - Se PV >= R$ 500,00: Comissão Base = 14% | Taxa Fixa = R$ 26,00
+
+   C) AJUSTES SOBRE A REGRA GERAL (Não se aplica à Regra A):
+      - Se Vendedor for "CNPJ" E PV < R$ 8,00: A Taxa Fixa de R$ 4,00 é SUBSTITUÍDA por (PV * 0,50).
+      - Se "CPF Alto Volume" for "Sim" E Vendedor for "CPF": Adicione +R$ 3,00 na Taxa Fixa (Totalizando R$ 7,00 na faixa inicial).
+
+   D) ADICIONAL DE CAMPANHA (Aplica-se a TODOS os casos A e B):
+      - Se "Em Campanha" for "Sim": Adicione +2,5% na porcentagem de comissão final.
+
+2. FÓRMULAS DE CÁLCULO:
+   - Margem Bruta (R$) = Preço de Venda - Custo do Produto - Taxa Fixa - (Preço de Venda * % Comissão Final) - (Preço de Venda * % Imposto)
+   - Margem (%) = (Margem Bruta / Preço de Venda) * 100
+
+3. CÁLCULO DO NOVO PREÇO:
+   Se a Margem (%) Atual for menor que a Margem Desejada:
+   - Você deve encontrar o Novo Preço de Venda que resulte na Margem Desejada.
+   - Como as taxas mudam conforme o preço, use a fórmula: Novo Preço = (Custo + Taxa Fixa) / (1 - %MargemDesejada - %ComissãoFinal - %Imposto).
+   - Verifique se o novo preço calculado altera a faixa de Taxa Fixa/Comissão. Se alterar, recalcule usando os valores da nova faixa até estabilizar.
 
 Sua tarefa para CADA produto:
-- Calcular os custos totais (Comissão + Taxa Fixa + Impostos + Custo do Produto) sobre o Preço Atual.
-- Encontrar a Margem Atual (%).
-- Comparar a Margem Atual com a Margem Mínima Desejada.
-- Se a Margem Atual for menor que a desejada, calcular o "Novo Preço de Venda" necessário para atingir exatamente a Margem Mínima Desejada. Caso contrário, o Novo Preço de Venda será igual ao atual.
-- Calcular a Margem do Novo Preço de Venda (que deve bater com a configurada, ou ser a atual se não houver reajuste).
+- Identificar os valores corretos de Comissão e Taxa Fixa para o Preço Atual.
+- Calcular a Margem Atual (%).
+- Se Margem Atual < Margem Desejada, calcular o Novo Preço de Venda necessário.
+- Se Margem Atual >= Margem Desejada, o Novo Preço é igual ao Atual.
+- Calcular a Margem do Novo Preço (deve ser >= Margem Desejada).
 
 IMPORTANTE SOBRE OS DADOS:
 - Os dados podem estar separados por vírgulas (CSV), tabulações ou múltiplos espaços.
@@ -64,17 +86,8 @@ IMPORTANTE SOBRE OS DADOS:
 - Ignore linhas vazias ou dados incompletos.
 
 DIRETRIZES DE SAÍDA:
-Retorne EXCLUSIVAMENTE um array em formato JSON. Não adicione nenhum texto antes ou depois.
-Cada objeto do JSON deve conter exatamente estas chaves:
-- "sku"
-- "descricao_produto"
-- "preco_venda_atual"
-- "margem_atual_porcentagem"
-- "novo_preco_venda"
-- "margem_novo_preco_porcentagem"
-- "precisa_de_reajuste" (Retorne o valor booleano true se a margem atual estiver abaixo da desejada, caso contrário false)
-- "estoque" (O valor do estoque fornecido nos dados)
-- "custo_produto" (O valor do custo fornecido nos dados)
+Retorne EXCLUSIVAMENTE um array JSON.
+Campos: sku, descricao_produto, preco_venda_atual, margem_atual_porcentagem, novo_preco_venda, margem_novo_preco_porcentagem, precisa_de_reajuste (bool), estoque, custo_produto.
 `;
 
   const configPrompt = `

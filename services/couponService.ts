@@ -101,6 +101,7 @@ export async function activateCoupon(code: string) {
       used_by_uid: user.uid,
       data_ativacao: serverTimestamp(),
       data_vencimento: Timestamp.fromDate(expirationDate),
+      codigo: couponId,
       // Mantendo compatibilidade com campos antigos se necessário
       activation_date: serverTimestamp(),
       expiration_date: Timestamp.fromDate(expirationDate)
@@ -113,6 +114,111 @@ export async function activateCoupon(code: string) {
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `coupons/${couponId}`);
     return { success: false };
+  }
+}
+
+/**
+ * Verifica se o e-mail do usuário logado possui acesso liberado na coleção /coupons.
+ * Se o status for 'disponivel', ativa automaticamente por 1 ano.
+ * Se já for 'usado', verifica se ainda está dentro do prazo de validade.
+ */
+export async function checkAndActivateEmailAccess() {
+  const user = auth.currentUser;
+  if (!user || !user.email) return null;
+
+  const email = user.email.toLowerCase().trim();
+  const couponRef = doc(db, 'coupons', email);
+
+  try {
+    const couponSnap = await getDoc(couponRef);
+    if (!couponSnap.exists()) {
+      return null;
+    }
+
+    const data = couponSnap.data();
+    const now = new Date();
+
+    // Se o cupom está disponível, ativa ele agora
+    if (data.status === 'disponivel' || data.status === 'available') {
+      const expirationDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      
+      await updateDoc(couponRef, {
+        status: 'usado',
+        used_by_uid: user.uid,
+        data_ativacao: serverTimestamp(),
+        data_vencimento: Timestamp.fromDate(expirationDate),
+        codigo: email // Garante que o campo codigo contenha o email conforme solicitado
+      });
+      
+      return expirationDate;
+    }
+
+    // Se já está usado, verifica a validade
+    if (data.status === 'usado' || data.status === 'used') {
+      const expirationDate = (data.data_vencimento || data.expiration_date)?.toDate();
+      if (expirationDate && expirationDate > now) {
+        // Se o used_by_uid estiver vazio ou for diferente (caso de re-login ou ativação manual), vincula ao UID atual
+        if (!data.used_by_uid || data.used_by_uid !== user.uid) {
+          await updateDoc(couponRef, { used_by_uid: user.uid });
+        }
+        return expirationDate;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Erro ao verificar acesso por e-mail:", error);
+    return null;
+  }
+}
+
+/**
+ * Funções Administrativas (Apenas para Admin)
+ */
+
+export async function listAllCoupons() {
+  try {
+    const couponsRef = collection(db, 'coupons');
+    const querySnapshot = await getDocs(couponsRef);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error("Erro ao listar cupons:", error);
+    throw error;
+  }
+}
+
+export async function addAdminCoupon(email: string) {
+  const cleanEmail = email.toLowerCase().trim();
+  const couponRef = doc(db, 'coupons', cleanEmail);
+  
+  try {
+    await updateDoc(couponRef, {
+      codigo: cleanEmail,
+      status: 'disponivel',
+      criado_em: serverTimestamp()
+    });
+  } catch (error: any) {
+    // Se o documento não existir, o updateDoc falha. Usamos setDoc como fallback ou principal.
+    const { setDoc } = await import('firebase/firestore');
+    await setDoc(couponRef, {
+      codigo: cleanEmail,
+      status: 'disponivel',
+      criado_em: serverTimestamp()
+    });
+  }
+}
+
+export async function deleteCoupon(id: string) {
+  const { deleteDoc } = await import('firebase/firestore');
+  const couponRef = doc(db, 'coupons', id);
+  try {
+    await deleteDoc(couponRef);
+  } catch (error) {
+    console.error("Erro ao deletar cupom:", error);
+    throw error;
   }
 }
 

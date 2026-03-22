@@ -2,38 +2,34 @@
   "entities": {
     "Coupon": {
       "title": "Coupon",
-      "description": "A coupon that grants temporary full access to the application.",
+      "description": "A coupon or email-based access that grants temporary full access to the application.",
       "type": "object",
       "properties": {
-        "code": {
+        "codigo": {
           "type": "string",
-          "description": "The unique code for the coupon."
+          "description": "The unique code or email for the access."
         },
         "status": {
           "type": "string",
-          "enum": ["available", "used"],
-          "description": "The current status of the coupon."
+          "enum": ["disponivel", "usado"],
+          "description": "The current status of the access."
         },
-        "days_duration": {
-          "type": "integer",
-          "description": "The number of days of access granted upon activation."
-        },
-        "activation_date": {
+        "data_ativacao": {
           "type": "string",
           "format": "date-time",
-          "description": "The timestamp when the coupon was activated."
+          "description": "The timestamp when the access was activated."
         },
-        "expiration_date": {
+        "data_vencimento": {
           "type": "string",
           "format": "date-time",
-          "description": "The timestamp when the access granted by the coupon expires."
+          "description": "The timestamp when the access expires."
         },
         "used_by_uid": {
           "type": "string",
-          "description": "The UID of the user who activated the coupon."
+          "description": "The UID of the user who activated the access."
         }
       },
-      "required": ["code", "status", "days_duration"]
+      "required": ["codigo", "status"]
     },
     "User": {
       "title": "User",

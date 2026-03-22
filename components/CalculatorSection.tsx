@@ -31,13 +31,13 @@ const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
          </h3>
          <div className="mt-6 text-center">
             <Lock className="w-6 h-6 text-gray-300 mx-auto" />
-            <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-wider">Disponível no Plano Pro</p>
+            <p className="text-xs text-gray-400 mt-2 uppercase font-bold tracking-wider">Disponível no Plano Pro</p>
          </div>
     </div>
 );
 
 const FreebieBadge: React.FC = () => (
-    <span className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs font-bold px-2 py-1 rounded-full bg-green-600 text-white z-10">
+    <span className="absolute top-2 left-1/2 transform -translate-x-1/2 text-sm font-bold px-3 py-1 rounded-full bg-green-600 text-white z-10 shadow-sm">
         Demonstração Gratuita
     </span>
 );
@@ -210,11 +210,11 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                         </div>
 
                         <div className="text-center mb-6 py-2">
-                            <p className="text-gray-500 text-[11px] font-medium mb-1">Preço mínimo de Venda</p>
-                            <p className={`text-3xl font-black ${isNegative ? 'text-red-600' : 'text-blue-700'}`}>{formatCurrency(res.sellingPrice)}</p>
+                            <p className="text-gray-500 text-sm font-medium mb-1">Preço mínimo de Venda</p>
+                            <p className={`text-4xl font-black ${isNegative ? 'text-red-600' : 'text-blue-700'}`}>{formatCurrency(res.sellingPrice)}</p>
                         </div>
 
-                        <div className="w-full space-y-2 flex-grow text-[11px]">
+                        <div className="w-full space-y-2.5 flex-grow text-sm">
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-500">Custo do Produto</span>
                                 <span className="font-bold text-gray-900">{formatCurrency(res.productCost)}</span>
@@ -237,14 +237,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                             </div>
                         </div>
 
-                        <div className={`w-full border-t mt-4 pt-3 space-y-1.5 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
+                        <div className={`w-full border-t mt-4 pt-3 space-y-2 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
                             <div className="flex justify-between items-center">
-                                <span className={`text-xs font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Lucro Bruto</span>
-                                <span className={`text-sm font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
+                                <span className={`text-sm font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Lucro Bruto</span>
+                                <span className={`text-base font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-blue-800">Margem Final</span>
-                                <span className="text-sm font-black text-blue-800">{formatPercentage(res.calculatedMargin)}</span>
+                                <span className="text-sm font-bold text-blue-800">Margem Final</span>
+                                <span className={`text-base font-black ${isNegative ? 'text-red-700' : 'text-blue-800'}`}>{formatPercentage(res.calculatedMargin)}</span>
                             </div>
                             {isNegative && (
                                 <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-[10px] gap-1">
@@ -307,11 +307,11 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                               </div>
 
                               <div className="text-center mb-6 py-2">
-                                  <p className="text-gray-600 text-[11px] font-medium mb-1">Custo Máximo do Produto</p>
-                                  <p className={`text-3xl font-black ${isNegative ? 'text-red-600' : 'text-blue-700'}`}>{formatCurrency(res.maxProductCost)}</p>
+                                  <p className="text-gray-600 text-sm font-medium mb-1">Custo Máximo do Produto</p>
+                                  <p className={`text-4xl font-black ${isNegative ? 'text-red-600' : 'text-blue-700'}`}>{formatCurrency(res.maxProductCost)}</p>
                               </div>
 
-                              <div className="w-full space-y-2 flex-grow text-[11px]">
+                              <div className="w-full space-y-2.5 flex-grow text-sm">
                                   <div className="flex justify-between items-center">
                                       <span className="text-gray-500">Preço de Venda</span>
                                       <span className="font-bold text-gray-900">{formatCurrency(res.sellingPrice)}</span>
@@ -334,13 +334,13 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                   </div>
                               </div>
 
-                              <div className={`w-full border-t mt-4 pt-3 space-y-1.5 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
+                              <div className={`w-full border-t mt-4 pt-3 space-y-2 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
                                   <div className="flex justify-between items-center">
-                                      <span className={`text-xs font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Margem Desejada</span>
-                                      <span className={`text-sm font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
+                                      <span className={`text-sm font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Margem Desejada</span>
+                                      <span className={`text-base font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                      <span className="text-xs font-bold text-blue-800">Margem Final</span>
+                                      <span className="text-sm font-bold text-blue-800">Margem Final</span>
                                       <span className="text-sm font-black text-blue-800">{formatPercentage(res.calculatedMargin)}</span>
                                   </div>
                                   {isNegative && (
@@ -409,11 +409,11 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                           </div>
 
                           <div className="text-center mb-6 py-2">
-                              <p className="text-gray-600 text-[11px] font-medium mb-1">Lucro Bruto</p>
-                              <p className={`text-3xl font-black ${isNegative ? 'text-red-600' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</p>
+                              <p className="text-gray-600 text-sm font-medium mb-1">Lucro Bruto</p>
+                              <p className={`text-4xl font-black ${isNegative ? 'text-red-600' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</p>
                           </div>
 
-                          <div className="w-full space-y-2 flex-grow text-[11px]">
+                          <div className="w-full space-y-2.5 flex-grow text-sm">
                               <div className="flex justify-between items-center">
                                   <span className="text-gray-500">Preço de Venda</span>
                                   <span className="font-bold text-gray-900">{formatCurrency(res.sellingPrice)}</span>
@@ -436,14 +436,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                               </div>
                           </div>
 
-                          <div className={`w-full border-t mt-4 pt-3 space-y-1.5 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
+                          <div className={`w-full border-t mt-4 pt-3 space-y-2 ${isNegative ? 'border-red-200' : 'border-gray-200'}`}>
                               <div className="flex justify-between items-center">
-                                  <span className={`text-xs font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Lucro Bruto</span>
-                                  <span className={`text-sm font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
+                                  <span className={`text-sm font-bold ${isNegative ? 'text-red-700' : 'text-green-700'}`}>Lucro Bruto</span>
+                                  <span className={`text-base font-black ${isNegative ? 'text-red-700' : 'text-green-700'}`}>{formatCurrency(res.grossProfit)}</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                  <span className="text-xs font-bold text-blue-800">Margem Final</span>
-                                  <span className="text-sm font-black text-blue-800">{formatPercentage(res.calculatedMargin)}</span>
+                                  <span className="text-sm font-bold text-blue-800">Margem Final</span>
+                                  <span className={`text-base font-black ${isNegative ? 'text-red-700' : 'text-blue-800'}`}>{formatPercentage(res.calculatedMargin)}</span>
                               </div>
                               {isNegative && (
                                   <div className="flex items-center justify-center mt-2 text-red-700 font-bold text-[10px] gap-1">

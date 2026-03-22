@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
-import { activateCoupon, checkActiveCoupon } from '../services/couponService';
+import { activateCoupon, checkActiveCoupon, checkAndActivateEmailAccess } from '../services/couponService';
 
 const ACCESS_KEY = 'precificaAccess';
 const EXPIRATION_KEY = 'precificaExpiration';
@@ -77,15 +77,29 @@ export function useAccess() {
       
       if (currentUser) {
         setIsLoading(true);
-        const dbExpiration = await checkActiveCoupon();
-        if (dbExpiration) {
-          const expirationTimestamp = dbExpiration.getTime();
+        // Primeiro tenta validar pelo e-mail (novo sistema automático)
+        const emailExpiration = await checkAndActivateEmailAccess();
+        
+        if (emailExpiration) {
+          const expirationTimestamp = emailExpiration.getTime();
           window.localStorage.setItem(ACCESS_KEY, 'full');
           window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
           setAccessLevel('full');
           setExpiration(expirationTimestamp);
+          setMessage('');
         } else {
-          revalidateAccess();
+          // Se não encontrar pelo e-mail, tenta pelo sistema antigo (UID vinculado)
+          const dbExpiration = await checkActiveCoupon();
+          if (dbExpiration) {
+            const expirationTimestamp = dbExpiration.getTime();
+            window.localStorage.setItem(ACCESS_KEY, 'full');
+            window.localStorage.setItem(EXPIRATION_KEY, expirationTimestamp.toString());
+            setAccessLevel('full');
+            setExpiration(expirationTimestamp);
+            setMessage('');
+          } else {
+            revalidateAccess();
+          }
         }
         setIsLoading(false);
       } else {

@@ -3,13 +3,12 @@
 // ===============================================================
 //
 // Collection: coupons
-// Document ID: couponCode (uppercase)
+// Document ID: User Email (lowercase) or Coupon Code
 // Fields:
-//   - code: string (required) - The unique code
-//   - status: string (required) - 'available' or 'used'
-//   - days_duration: number (required) - Days of access
-//   - activation_date: timestamp (optional) - When activated
-//   - expiration_date: timestamp (optional) - When expires
+//   - codigo: string (required) - The unique code or email
+//   - status: string (required) - 'disponivel' or 'usado'
+//   - data_ativacao: timestamp (optional) - When activated
+//   - data_vencimento: timestamp (optional) - When expires
 //   - used_by_uid: string (optional) - UID of user
 //
 // Collection: users
@@ -65,27 +64,30 @@ service cloud.firestore {
     }
 
     match /coupons/{couponId} {
-      // Anyone authenticated can check if a coupon exists and its status
-      allow read: if isAuthenticated();
+      // Allow read if user is authenticated and their email matches the document ID (for email-based access)
+      // Or if they are an admin
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.token.email.lower() == couponId.lower());
+      
+      // Allow listing ONLY for admins
+      allow list: if isAdmin();
       
       // Only admins can create or delete coupons
       allow create, delete: if isAdmin();
 
-      // Users can "activate" a coupon
+      // Users can "activate" a coupon or their email-based access
       allow update: if isAuthenticated() &&
-        // 1. Coupon must be available
-        resource.data.status == 'available' &&
+        // 1. Access must be available
+        (resource.data.status == 'disponivel' || resource.data.status == 'available') &&
         // 2. User is setting it to used
-        request.resource.data.status == 'used' &&
+        request.resource.data.status == 'usado' &&
         // 3. User is setting themselves as the owner
         request.resource.data.used_by_uid == request.auth.uid &&
         // 4. Activation date is the current server time
-        request.resource.data.activation_date == request.time &&
-        // 5. Expiration date is calculated correctly (days_duration * 24 * 60 * 60)
-        request.resource.data.expiration_date == request.time + duration.value(resource.data.days_duration, 'd') &&
-        // 6. Other fields remain unchanged
-        request.resource.data.code == resource.data.code &&
-        request.resource.data.days_duration == resource.data.days_duration;
+        request.resource.data.data_ativacao == request.time &&
+        // 5. Expiration date is 1 year (365 days)
+        request.resource.data.data_vencimento == request.time + duration.value(365, 'd') &&
+        // 6. If it's email-based access (ID is an email), ensure it matches the user's email
+        (couponId.lower().contains('@') ? couponId.lower() == request.auth.token.email.lower() : true);
     }
   }
 }

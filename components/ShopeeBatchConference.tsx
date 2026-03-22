@@ -310,44 +310,44 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
             <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço Atual</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margem Atual</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Novo Preço</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nova Margem</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reajuste?</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">SKU</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Descrição</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Custo</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Estoque</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Preço Atual</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Margem Atual</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Novo Preço</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Nova Margem</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Reajuste?</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredResults.map((item, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{item.sku}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
+                    <td className="px-4 py-3 whitespace-nowrap text-base font-medium text-gray-900">{item.sku}</td>
+                    <td className="px-4 py-3 text-base text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
                       {item.descricao_produto}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
                       {formatCurrency(item.custo_produto)}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-mono">
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600 font-mono">
                       {item.estoque}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
                       {formatCurrency(item.preco_venda_atual)}
                     </td>
-                    <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
+                    <td className={`px-4 py-3 whitespace-nowrap text-base font-bold ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
                       {item.margem_atual_porcentagem.toFixed(2)}%
                     </td>
-                    <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-600'}`}>
+                    <td className={`px-4 py-3 whitespace-nowrap text-base font-black ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-600'}`}>
                       {formatCurrency(item.novo_preco_venda)}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
                       {item.margem_novo_preco_porcentagem.toFixed(2)}%
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusClass(item.precisa_de_reajuste)}`}>
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold border ${getStatusClass(item.precisa_de_reajuste)}`}>
                         {getStatusIcon(item.precisa_de_reajuste)}
                         {item.precisa_de_reajuste ? 'Sim' : 'Não'}
                       </span>

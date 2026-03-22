@@ -6,7 +6,8 @@ import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
 import ExplanationSection from './components/ExplanationSection';
 import HelpSidebar from './components/HelpSidebar';
-import { Calculator, HelpCircle, Settings, Zap, LogIn, User as UserIcon, KeyRound } from 'lucide-react';
+import AdminDashboard from './components/AdminDashboard';
+import { Calculator, HelpCircle, Settings, Zap, LogIn, User as UserIcon, KeyRound, ShieldCheck } from 'lucide-react';
 
 const ActivationInput: React.FC<{
   activate: (code: string) => Promise<{ success: boolean; message?: string }>;
@@ -73,7 +74,10 @@ export default function App() {
   const { user, accessLevel, expiration, isLoading: isAccessLoading, activate, message: accessMessage, revalidateAccess, login } = useAccess();
   const { settings, setSettings } = useSettings();
   const [showSettings, setShowSettings] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const isAdmin = user?.email === 'fabricio.marcato@gmail.com';
 
   if (isAccessLoading) {
     return (
@@ -105,6 +109,11 @@ export default function App() {
             )}
             
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+              {accessLevel === 'restricted' && user && (
+                <div className="text-[10px] text-gray-500 max-w-[200px] text-right leading-tight mr-2">
+                  Acesso automático para compradores. Se você já comprou, verifique se está usando o e-mail correto.
+                </div>
+              )}
               {accessLevel === 'restricted' && <ActivationInput activate={activate} />}
               {user ? (
                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
@@ -146,6 +155,16 @@ export default function App() {
                   <Settings className="w-6 h-6"/>
                 </button>
               )}
+              {isAdmin && (
+                <button
+                  onClick={() => setShowAdmin(true)}
+                  className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
+                  title="Painel Administrativo"
+                  aria-label="Abrir painel administrativo"
+                >
+                  <ShieldCheck className="w-6 h-6"/>
+                </button>
+              )}
               <button
                 onClick={() => setIsHelpOpen(true)}
                 className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center"
@@ -177,6 +196,11 @@ export default function App() {
           <ExplanationSection />
         </main>
         
+        <AdminDashboard 
+          isOpen={showAdmin}
+          onClose={() => setShowAdmin(false)}
+        />
+
         <footer className="text-center text-sm text-gray-500 mt-12 py-4 border-t border-gray-200">
           <p>&copy; {new Date().getFullYear()} Precifica Fácil. Todos os direitos reservados.</p>
         </footer>
