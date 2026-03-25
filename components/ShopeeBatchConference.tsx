@@ -86,6 +86,8 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
       'SKU': item.sku,
       'Descrição': item.descricao_produto,
       'Custo': item.custo_produto,
+      'Comissão (%)': item.comissao_porcentagem,
+      'Taxa Fixa (R$)': item.taxa_fixa,
       'Estoque': item.estoque,
       'Preço Atual': item.preco_venda_atual,
       'Margem Atual (%)': item.margem_atual_porcentagem,
@@ -114,11 +116,13 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     doc.text(`Data: ${dateStr} às ${timeStr}`, 14, 30);
     doc.text(`Filtro: ${filterType === 'all' ? 'Todos os Produtos' : 'Apenas Reajustes'}`, 14, 35);
 
-    const tableColumn = ["SKU", "Descrição", "Custo", "Estoque", "Preço Atual", "Margem", "Novo Preço", "Nova Margem"];
+    const tableColumn = ["SKU", "Descrição", "Custo", "Comissão", "Taxa", "Estoque", "Preço Atual", "Margem", "Novo Preço", "Nova Margem"];
     const tableRows = filteredResults.map(item => [
       item.sku,
       item.descricao_produto,
       formatCurrency(item.custo_produto),
+      `${item.comissao_porcentagem}%`,
+      formatCurrency(item.taxa_fixa),
       item.estoque,
       formatCurrency(item.preco_venda_atual),
       `${item.margem_atual_porcentagem.toFixed(2)}%`,
@@ -313,6 +317,8 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">SKU</th>
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Descrição</th>
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Custo</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Comissão</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Taxa</th>
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Estoque</th>
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Preço Atual</th>
                   <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Margem Atual</th>
@@ -330,6 +336,12 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
                       {formatCurrency(item.custo_produto)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
+                      {item.comissao_porcentagem}%
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
+                      {formatCurrency(item.taxa_fixa)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600 font-mono">
                       {item.estoque}

@@ -12,6 +12,8 @@ export interface ShopeeBatchResult {
   precisa_de_reajuste: boolean;
   estoque: number;
   custo_produto: number;
+  comissao_porcentagem: number;
+  taxa_fixa: number;
 }
 
 export async function runShopeeBatchConference(
@@ -72,9 +74,20 @@ REGRAS DE CÁLCULO (OBRIGATÓRIO SEGUIR EXATAMENTE):
    - Como as taxas mudam conforme o preço, use a fórmula: Novo Preço = (Custo + Taxa Fixa) / (1 - %MargemDesejada - %ComissãoFinal - %Imposto).
    - Verifique se o novo preço calculado altera a faixa de Taxa Fixa/Comissão. Se alterar, recalcule usando os valores da nova faixa até estabilizar.
 
+4. EXEMPLO DE CÁLCULO (PARA SUA REFERÊNCIA):
+   Custo: 32.65 | Preço Atual: 55.99 | Imposto: 4% | Margem Desejada: 15%
+   - Faixa: <= 79.99 -> Comissão: 20%, Taxa Fixa: 4.00
+   - Comissão Final: 20% (ou 22.5% se em campanha)
+   - Margem Bruta Atual = 55.99 - 32.65 - 4.00 - (55.99 * 0.20) - (55.99 * 0.04)
+   - Margem Bruta Atual = 55.99 - 32.65 - 4.00 - 11.20 - 2.24 = 5.90
+   - Margem (%) Atual = (5.90 / 55.99) * 100 = 10.54%
+   - Como 10.54% < 15%, precisa de reajuste.
+   - Novo Preço = (32.65 + 4.00) / (1 - 0.15 - 0.20 - 0.04) = 36.65 / 0.61 = 60.08
+   - Margem Novo Preço = (60.08 - 32.65 - 4.00 - 12.02 - 2.40) / 60.08 = 9.01 / 60.08 = 15.00%
+
 Sua tarefa para CADA produto:
 - Identificar os valores corretos de Comissão e Taxa Fixa para o Preço Atual.
-- Calcular a Margem Atual (%).
+- Calcular a Margem Atual (%) com precisão matemática.
 - Se Margem Atual < Margem Desejada, calcular o Novo Preço de Venda necessário.
 - Se Margem Atual >= Margem Desejada, o Novo Preço é igual ao Atual.
 - Calcular a Margem do Novo Preço (deve ser >= Margem Desejada).
@@ -87,7 +100,7 @@ IMPORTANTE SOBRE OS DADOS:
 
 DIRETRIZES DE SAÍDA:
 Retorne EXCLUSIVAMENTE um array JSON.
-Campos: sku, descricao_produto, preco_venda_atual, margem_atual_porcentagem, novo_preco_venda, margem_novo_preco_porcentagem, precisa_de_reajuste (bool), estoque, custo_produto.
+Campos: sku, descricao_produto, preco_venda_atual, margem_atual_porcentagem, novo_preco_venda, margem_novo_preco_porcentagem, precisa_de_reajuste (bool), estoque, custo_produto, comissao_porcentagem, taxa_fixa.
 `;
 
   const configPrompt = `
@@ -122,6 +135,8 @@ ${productsData}
             precisa_de_reajuste: { type: Type.BOOLEAN },
             estoque: { type: Type.NUMBER },
             custo_produto: { type: Type.NUMBER },
+            comissao_porcentagem: { type: Type.NUMBER },
+            taxa_fixa: { type: Type.NUMBER },
           },
           required: [
             "sku",
@@ -133,6 +148,8 @@ ${productsData}
             "precisa_de_reajuste",
             "estoque",
             "custo_produto",
+            "comissao_porcentagem",
+            "taxa_fixa",
           ],
         },
       },
