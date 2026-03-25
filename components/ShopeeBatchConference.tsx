@@ -156,7 +156,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
     <div className="bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 rounded-2xl shadow-2xl mb-8 border border-orange-600 text-white">
       <div className="border-b border-white/20 pb-6 mb-8">
         <div className="text-center">
-          <h2 className="text-3xl font-black uppercase tracking-tighter">Conferência em Lote</h2>
+          <h2 className="text-3xl font-black uppercase tracking-tighter">CONFERÊNCIA EM LOTE - SHOPEE</h2>
           <p className="text-sm text-white/80 font-medium mt-1">
             Analise margens e preços ideais para centenas de produtos simultaneamente.
           </p>
