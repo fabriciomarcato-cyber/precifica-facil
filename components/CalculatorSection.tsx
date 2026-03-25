@@ -25,8 +25,7 @@ interface CalculatorSectionProps {
 
 const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
     <div className="p-4 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center bg-gray-50/50 h-full min-h-[450px]">
-         {getMarketplaceIcon(platform, "w-10 h-10 opacity-30 grayscale")}
-         <h3 className="text-sm font-bold text-gray-400 mt-3">
+         <h3 className="text-sm font-bold text-gray-400 mt-3 uppercase tracking-widest">
             {(platform === Platform.ML_CLASSICO || platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : platform}
          </h3>
          <div className="mt-6 text-center">
@@ -187,13 +186,10 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                     <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                         {isDemo && <FreebieBadge />}
                         
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                                {getMarketplaceIcon(res.platform, "w-8 h-8")}
-                            </div>
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="text-lg font-bold">
+                        <div className="mb-6 text-center">
+                            <div className="flex flex-col items-center">
+                                <div className="flex items-center justify-center gap-2 mb-1">
+                                    <h3 className="text-xl font-black uppercase tracking-tight">
                                         {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
                                     </h3>
                                     { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
@@ -286,13 +282,10 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                           <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                               {isDemo && <FreebieBadge />}
                               
-                              <div className="flex items-center gap-3 mb-6">
-                                  <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                                      {getMarketplaceIcon(res.platform, "w-8 h-8")}
-                                  </div>
-                                  <div className="flex flex-col">
-                                      <div className="flex items-center gap-2">
-                                          <h3 className="text-lg font-bold">
+                              <div className="mb-6 text-center">
+                                  <div className="flex flex-col items-center">
+                                      <div className="flex items-center justify-center gap-2 mb-1">
+                                          <h3 className="text-xl font-black uppercase tracking-tight">
                                               {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
                                           </h3>
                                           { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
@@ -390,13 +383,10 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                       <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                           {isDemo && <FreebieBadge />}
                           
-                          <div className="flex items-center gap-3 mb-6">
-                              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                                  {getMarketplaceIcon(res.platform, "w-8 h-8")}
-                              </div>
-                              <div className="flex flex-col">
-                                  <div className="flex items-center gap-2">
-                                      <h3 className="text-lg font-bold">
+                          <div className="mb-6 text-center">
+                              <div className="flex flex-col items-center">
+                                  <div className="flex items-center justify-center gap-2 mb-1">
+                                      <h3 className="text-xl font-black uppercase tracking-tight">
                                           {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
                                       </h3>
                                       { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (

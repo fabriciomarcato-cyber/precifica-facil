@@ -153,32 +153,26 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   };
 
   return (
-    <div className="bg-red-50 p-6 rounded-xl shadow-lg mb-8 border border-red-200">
-      <div className="border-b pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <img 
-            src="https://i.postimg.cc/mgpM837m/Logo_Shopee_(1).png" 
-            alt="Shopee Logo" 
-            className="h-10 w-auto object-contain"
-            referrerPolicy="no-referrer"
-          />
-          <h2 className="text-2xl font-bold text-gray-800">Conferência em Lote - Shopee</h2>
+    <div className="bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 rounded-2xl shadow-2xl mb-8 border border-orange-600 text-white">
+      <div className="border-b border-white/20 pb-6 mb-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-black uppercase tracking-tighter">Conferência em Lote</h2>
+          <p className="text-sm text-white/80 font-medium mt-1">
+            Analise margens e preços ideais para centenas de produtos simultaneamente.
+          </p>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
-          Importe um arquivo ou cole sua lista de produtos para conferir margens e preços ideais rapidamente.
-        </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <label className="block text-sm font-medium text-gray-700">
-                Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço de Venda Atual):
+              <label className="block text-xs font-black uppercase tracking-widest text-white/90 mb-2">
+                Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço Atual):
               </label>
-              <div className="flex items-center gap-1.5 mt-1 text-red-600">
+              <div className="flex items-center gap-2 text-white/70">
                 <Info className="w-4 h-4" />
-                <span className="text-xs font-bold">Aviso: Recomendamos subir no máximo 100 produtos por vez para melhor performance.</span>
+                <span className="text-xs font-bold">Dica: Você pode colar diretamente do Excel ou subir o arquivo abaixo.</span>
               </div>
             </div>
             
@@ -192,10 +186,10 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 bg-white text-gray-700 text-xs font-bold py-1.5 px-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-black py-2.5 px-4 rounded-xl border border-white/30 transition-all shadow-lg backdrop-blur-sm uppercase tracking-wider"
               >
-                <FileUp className="w-4 h-4 text-blue-600" />
-                Importar Arquivo (Excel/CSV)
+                <FileUp className="w-4 h-4" />
+                Importar Planilha
               </button>
             </div>
           </div>
@@ -203,81 +197,81 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
           <textarea
             value={inputData}
             onChange={(e) => setInputData(e.target.value)}
-            placeholder={`Exemplo SEM cabeçalho:\n2237,Produto X,50.00,10,89.90\n\nExemplo COM cabeçalho:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
-            className="w-full h-40 p-3 border border-gray-400 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+            placeholder={`Exemplo:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
+            className="w-full h-48 p-4 bg-white/10 border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-transparent font-mono text-sm text-white placeholder-white/40 shadow-inner backdrop-blur-sm"
           />
         </div>
 
-        <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex flex-wrap gap-6 items-center justify-between">
           <div className="flex flex-wrap gap-4 items-center">
             <button
               onClick={handleRunBatch}
               disabled={isLoading}
-              className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+              className="flex items-center gap-3 bg-white text-[#EE4D2D] font-black py-3 px-8 rounded-xl hover:bg-gray-100 transition-all disabled:bg-white/50 shadow-xl uppercase tracking-wider text-sm"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Processando...
+                  Processando IA...
                 </>
               ) : (
                 <>
                   <Upload className="w-5 h-5" />
-                  Iniciar Conferência
+                  Iniciar Análise
                 </>
               )}
             </button>
             
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-4 text-[10px] text-white/60 font-black uppercase tracking-widest">
+              <div className="flex items-center gap-1.5">
                 <FileSpreadsheet className="w-4 h-4" />
-                <span>Suporta Excel/CSV</span>
+                <span>Excel/CSV</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <FileJson className="w-4 h-4" />
-                <span>Suporta JSON</span>
+                <span>JSON</span>
               </div>
             </div>
           </div>
 
           {results.length > 0 && (
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase">Filtrar:</span>
-                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg border border-gray-200">
+            <div className="flex flex-wrap items-center gap-6 bg-black/10 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Filtrar:</span>
+                <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/20">
                   <button
                     onClick={() => setFilterType('all')}
-                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'all' ? 'bg-white text-[#EE4D2D] shadow-lg' : 'text-white/70 hover:text-white'}`}
                   >
                     Todos
                   </button>
                   <button
                     onClick={() => setFilterType('adjustment')}
-                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-lg' : 'text-white/70 hover:text-white'}`}
                   >
-                    Apenas Reajustes
+                    Reajustes
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase">Ordenar:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Ordenar:</span>
                 <select
                   value={sortType}
                   onChange={(e) => setSortType(e.target.value as any)}
-                  className="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-1.5 shadow-sm"
+                  className="bg-white/10 border border-white/20 text-white text-[10px] font-black rounded-xl focus:ring-2 focus:ring-white/50 block p-2 shadow-lg uppercase tracking-wider outline-none"
                 >
-                  <option value="none">Padrão</option>
-                  <option value="alphabetical">Alfabética (A-Z)</option>
-                  <option value="margin-asc">Margem (Menor p/ Maior)</option>
-                  <option value="margin-desc">Margem (Maior p/ Menor)</option>
+                  <option value="none" className="text-gray-900">Padrão</option>
+                  <option value="alphabetical" className="text-gray-900">Alfabética</option>
+                  <option value="margin-asc" className="text-gray-900">Margem (Menor)</option>
+                  <option value="margin-desc" className="text-gray-900">Margem (Maior)</option>
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-3 ml-auto border-l border-white/20 pl-6">
                 <button
                   onClick={exportToExcel}
-                  className="flex items-center gap-1.5 bg-green-600 text-white text-xs font-bold py-2 px-3 rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex items-center gap-2 bg-green-500 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg uppercase tracking-wider"
                   title="Exportar para Excel"
                 >
                   <Download className="w-4 h-4" />
@@ -285,7 +279,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                 </button>
                 <button
                   onClick={exportToPDF}
-                  className="flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold py-2 px-3 rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center gap-2 bg-red-600 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all shadow-lg uppercase tracking-wider"
                   title="Exportar para PDF"
                 >
                   <FileText className="w-4 h-4" />
@@ -297,77 +291,79 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            <span>{error}</span>
+          <div className="p-4 bg-white/10 border border-white/20 text-white rounded-xl flex items-center gap-3 backdrop-blur-md animate-pulse">
+            <AlertCircle className="w-6 h-6 text-yellow-300" />
+            <span className="font-bold">{error}</span>
           </div>
         )}
 
         {results.length > 0 && (
-          <div className="mt-8 overflow-x-auto">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="mt-10 overflow-hidden rounded-2xl border border-white/20 shadow-2xl bg-white">
+            <div className="bg-gray-50 p-4 border-b flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest">
                 <Filter className="w-4 h-4" />
                 <span>Exibindo <strong>{filteredResults.length}</strong> de <strong>{results.length}</strong> produtos</span>
               </div>
             </div>
-            <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">SKU</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Descrição</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Custo</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Comissão</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Taxa</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Estoque</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Preço Atual</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Margem Atual</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Novo Preço</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Nova Margem</th>
-                  <th className="px-4 py-3 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Reajuste?</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredResults.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-base font-medium text-gray-900">{item.sku}</td>
-                    <td className="px-4 py-3 text-base text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
-                      {item.descricao_produto}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
-                      {formatCurrency(item.custo_produto)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
-                      {item.comissao_porcentagem}%
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
-                      {formatCurrency(item.taxa_fixa)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600 font-mono">
-                      {item.estoque}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
-                      {formatCurrency(item.preco_venda_atual)}
-                    </td>
-                    <td className={`px-4 py-3 whitespace-nowrap text-base font-bold ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
-                      {item.margem_atual_porcentagem.toFixed(2)}%
-                    </td>
-                    <td className={`px-4 py-3 whitespace-nowrap text-base font-black ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-600'}`}>
-                      {formatCurrency(item.novo_preco_venda)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-base text-gray-600">
-                      {item.margem_novo_preco_porcentagem.toFixed(2)}%
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold border ${getStatusClass(item.precisa_de_reajuste)}`}>
-                        {getStatusIcon(item.precisa_de_reajuste)}
-                        {item.precisa_de_reajuste ? 'Sim' : 'Não'}
-                      </span>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">SKU</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Descrição</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Custo</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Comissão</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Taxa</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Estoque</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Preço Atual</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Margem Atual</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Novo Preço</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Nova Margem</th>
+                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {filteredResults.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-900">{item.sku}</td>
+                      <td className="px-4 py-4 text-sm font-medium text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
+                        {item.descricao_produto}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                        {formatCurrency(item.custo_produto)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                        {item.comissao_porcentagem}%
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                        {formatCurrency(item.taxa_fixa)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-400 font-mono">
+                        {item.estoque}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                        {formatCurrency(item.preco_venda_atual)}
+                      </td>
+                      <td className={`px-4 py-4 whitespace-nowrap text-sm font-black ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
+                        {item.margem_atual_porcentagem.toFixed(2)}%
+                      </td>
+                      <td className={`px-4 py-4 whitespace-nowrap text-base font-black ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-900'}`}>
+                        {formatCurrency(item.novo_preco_venda)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                        {item.margem_novo_preco_porcentagem.toFixed(2)}%
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${getStatusClass(item.precisa_de_reajuste)}`}>
+                          {getStatusIcon(item.precisa_de_reajuste)}
+                          {item.precisa_de_reajuste ? 'Reajustar' : 'Ok'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

@@ -18,32 +18,33 @@ const getPlatformColor = (platform: Platform) => {
   switch (platform) {
     case Platform.ML_CLASSICO:
     case Platform.ML_PREMIUM:
-      return 'bg-yellow-50 border-yellow-200';
+      return 'bg-[#FFE600] border-yellow-400 text-gray-900';
     case Platform.SHOPEE:
-      return 'bg-red-50 border-red-200';
+      return 'bg-gradient-to-b from-[#EE4D2D] to-[#FF6321] border-orange-600 text-white';
     case Platform.TIKTOK_SHOP:
-      return 'bg-gray-50 border-gray-200';
+      return 'bg-[#E9EBF0] border-gray-300 text-gray-900';
     case Platform.INSTAGRAM:
-      return 'bg-blue-50 border-blue-200';
+      return 'bg-blue-50 border-blue-200 text-gray-900';
     default:
-      return 'bg-white border-gray-200';
+      return 'bg-white border-gray-200 text-gray-900';
   }
 };
 
 const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform; disabled?: boolean }>> = ({ title, platform, children, disabled }) => {
     const colorClasses = getPlatformColor(platform);
+    const isShopee = platform === Platform.SHOPEE;
+    
     return (
-        <div className={`relative ${colorClasses} p-6 rounded-lg shadow-md border-2 ${disabled ? 'opacity-60' : ''}`}>
+        <div className={`relative ${colorClasses} p-6 rounded-xl shadow-lg border-2 transition-all ${disabled ? 'opacity-60' : 'hover:shadow-xl'}`}>
             {disabled && (
-                 <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-lg z-10 flex-col p-4 text-center">
+                 <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-xl z-10 flex-col p-4 text-center">
                     <Lock className="w-8 h-8 text-gray-500 mb-2" />
-                    <span className="text-sm font-bold text-gray-600">Ative o acesso completo para usar este recurso</span>
+                    <span className="text-sm font-bold text-gray-600 uppercase tracking-tight">Recurso Pro</span>
                  </div>
             )}
             <div className={disabled ? 'pointer-events-none' : ''}>
-                <div className="flex items-center gap-3 mb-4">
-                    {getMarketplaceIcon(platform, platform === Platform.SHOPEE ? "w-[77px] h-[77px]" : "w-[58px] h-[58px]")}
-                    <h3 className={`text-xl font-bold text-gray-800`}>{title}</h3>
+                <div className="mb-6 text-center">
+                    <h3 className={`text-xl font-black uppercase tracking-tight ${isShopee ? 'text-white' : 'text-gray-800'}`}>{title}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {children}
@@ -54,19 +55,19 @@ const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: 
 };
 
 
-const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit?: string }> = ({ label, value, onChange, unit }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-800">{label}</label>
-    <div className="mt-1 relative rounded-md shadow-sm">
-      <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-        <span className="text-gray-500 sm:text-sm">{unit}</span>
+const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit?: string; isShopee?: boolean }> = ({ label, value, onChange, unit, isShopee }) => (
+  <div className="w-full">
+    <label className={`block text-[10px] font-black uppercase tracking-wider leading-tight mb-1 ${isShopee ? 'text-white/90' : 'text-gray-600'}`}>{label}</label>
+    <div className="relative rounded-lg shadow-sm">
+      <div className="pointer-events-none absolute inset-y-0 left-0 pl-2.5 flex items-center">
+        <span className={`${isShopee ? 'text-white/70' : 'text-gray-500'} text-[10px] font-bold`}>{unit}</span>
       </div>
       <input
         type="number"
         step="0.01"
         value={value}
         onChange={onChange}
-        className="block w-full rounded-md border-gray-400 pl-10 pr-4 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-white text-gray-900"
+        className={`block w-full rounded-lg border-0 pl-8 pr-3 py-1.5 focus:ring-2 focus:ring-white/50 text-sm font-bold shadow-inner transition-all ${isShopee ? 'bg-white/10 text-white placeholder-white/40 ring-1 ring-white/20' : 'bg-white text-gray-900 ring-1 ring-gray-300'}`}
       />
     </div>
   </div>
@@ -162,15 +163,15 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
               <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
               <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
               
-              <div className="md:col-span-2 space-y-3 pt-2 border-t border-gray-100 mt-2">
-                <label className="flex items-center cursor-pointer">
+              <div className="md:col-span-2 space-y-3 pt-4 border-t border-black/10 mt-2">
+                <label className="flex items-center cursor-pointer group">
                   <input 
                     type="checkbox" 
                     checked={settings.mercadoLivre.useManualFixedFee} 
                     onChange={(e) => handleToggleChange('mercadoLivre', 'useManualFixedFee', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" 
+                    className="h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 transition-all" 
                   />
-                  <span className="ml-2 text-sm font-medium text-gray-800">Usar Taxa Fixa/Frete Manual</span>
+                  <span className="ml-3 text-sm font-black uppercase tracking-tight text-gray-700 group-hover:text-black transition-colors">Usar Taxa Fixa/Frete Manual</span>
                 </label>
                 
                 {settings.mercadoLivre.useManualFixedFee && (
@@ -185,27 +186,29 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
             </SettingsCard>
 
             <SettingsCard title="Shopee" platform={Platform.SHOPEE}>
-              <InputField label="Margem Contribuição Shopee (%):" unit="%" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
-              <div className='md:col-span-2 space-y-3'>
+              <div className="md:col-span-2">
+                <InputField isShopee label="Margem Contribuição Shopee (%):" unit="%" value={settings.shopee.contributionMargin} onChange={(e) => handleShopeeSettingChange('contributionMargin', parseFloat(e.target.value) || 0)} />
+              </div>
+              <div className='md:col-span-2 space-y-4'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-800">Tipo de Vendedor</label>
-                  <div className="mt-2 flex items-center gap-x-4 gap-y-2">
-                    <label className="flex items-center text-sm"><input type="radio" value="cnpj" name="sellerType" checked={settings.shopee.sellerType === 'cnpj'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-400 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CNPJ</span></label>
-                    <label className="flex items-center text-sm"><input type="radio" value="cpf" name="sellerType" checked={settings.shopee.sellerType === 'cpf'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-4 w-4 border-gray-400 text-blue-600 focus:ring-blue-500" /> <span className="ml-2 text-gray-800">CPF</span></label>
+                  <label className="block text-xs font-black uppercase tracking-widest text-white/80 mb-2">Tipo de Vendedor</label>
+                  <div className="mt-2 flex items-center gap-x-6 gap-y-2">
+                    <label className="flex items-center text-sm font-bold cursor-pointer group"><input type="radio" value="cnpj" name="sellerType" checked={settings.shopee.sellerType === 'cnpj'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-5 w-5 border-white/30 bg-white/10 text-white focus:ring-white/50" /> <span className="ml-2 text-white group-hover:text-white/80 transition-colors">CNPJ</span></label>
+                    <label className="flex items-center text-sm font-bold cursor-pointer group"><input type="radio" value="cpf" name="sellerType" checked={settings.shopee.sellerType === 'cpf'} onChange={(e) => handleShopeeSettingChange('sellerType', e.target.value)} className="h-5 w-5 border-white/30 bg-white/10 text-white focus:ring-white/50" /> <span className="ml-2 text-white group-hover:text-white/80 transition-colors">CPF</span></label>
                   </div>
                 </div>
                 {settings.shopee.sellerType === 'cpf' && (
                   <div className="pl-1">
-                    <label className="flex items-center">
-                      <input type="checkbox" checked={settings.shopee.highVolumeCPF} onChange={(e) => handleShopeeSettingChange('highVolumeCPF', e.target.checked)} className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" />
-                      <span className="ml-2 text-sm text-gray-800">Mais de 450 pedidos/90 dias (+R$3)</span>
+                    <label className="flex items-center cursor-pointer group">
+                      <input type="checkbox" checked={settings.shopee.highVolumeCPF} onChange={(e) => handleShopeeSettingChange('highVolumeCPF', e.target.checked)} className="h-5 w-5 rounded border-white/30 bg-white/10 text-white focus:ring-white/50" />
+                      <span className="ml-3 text-sm font-bold text-white group-hover:text-white/80 transition-colors">Mais de 450 pedidos/90 dias (+R$3)</span>
                     </label>
                   </div>
                 )}
                 <div>
-                  <label className="flex items-center">
-                    <input type="checkbox" checked={settings.shopee.inCampaign} onChange={(e) => handleShopeeSettingChange('inCampaign', e.target.checked)} className="h-4 w-4 rounded border-gray-400 text-blue-600 focus:ring-blue-500" />
-                    <span className="ml-2 text-sm text-gray-800">Campanhas de Destaque (+2.5%)</span>
+                  <label className="flex items-center cursor-pointer group">
+                    <input type="checkbox" checked={settings.shopee.inCampaign} onChange={(e) => handleShopeeSettingChange('inCampaign', e.target.checked)} className="h-5 w-5 rounded border-white/30 bg-white/10 text-white focus:ring-white/50" />
+                    <span className="ml-3 text-sm font-bold text-white group-hover:text-white/80 transition-colors">Campanhas de Destaque (+2.5%)</span>
                   </label>
                 </div>
               </div>
@@ -222,9 +225,8 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
               <div className="md:col-span-2">
                 <InputField label="Margem Contribuição Instagram (%):" unit="%" value={settings.instagram.contributionMargin} onChange={(e) => handleInputChange('instagram', 'contributionMargin', e.target.value)} />
               </div>
-              <div className="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
-                <h4 className="font-semibold text-gray-800">Custos de Recebimento de Pagamento</h4>
-                <p className="text-xs text-gray-500 mb-2">Use estes campos para simular taxas de maquininha, PIX ou intermediadores de pagamento usados em vendas via Instagram.</p>
+              <div className="md:col-span-2 mt-4 pt-4 border-t border-black/10">
+                <h4 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-3">Custos de Recebimento</h4>
               </div>
               <InputField label="Taxa da Maquininha (%):" unit="%" value={settings.instagram.machineFeePercent} onChange={(e) => handleInputChange('instagram', 'machineFeePercent', e.target.value)} />
               <InputField label="Taxa Fixa da Maquininha (R$):" unit="R$" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} />
