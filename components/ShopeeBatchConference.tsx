@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { AppSettings } from '../types';
 import { runShopeeBatchConference, ShopeeBatchResult } from '../services/geminiService';
-import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText, FileUp } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText, FileUp, Lock } from 'lucide-react';
 import { formatCurrency } from '../lib/calculator';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -153,8 +153,32 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 rounded-2xl shadow-2xl mb-8 border border-orange-600 text-white">
-      <div className="border-b border-white/20 pb-6 mb-8">
+    <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-8 border border-orange-600">
+      {accessLevel === 'restricted' && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[6px] transition-all">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 flex flex-col items-center text-center max-w-sm mx-4 transform scale-110">
+            <div className="bg-orange-100 p-4 rounded-full mb-4">
+              <Lock className="w-10 h-10 text-[#EE4D2D]" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Recurso Exclusivo Pro</h3>
+            <p className="text-sm text-gray-600 font-medium mb-6">
+              A Conferência em Lote permite analisar centenas de produtos da Shopee de uma só vez usando Inteligência Artificial.
+            </p>
+            <div className="w-full p-4 bg-orange-50 rounded-2xl border border-orange-100 mb-6">
+              <p className="text-[10px] font-black text-orange-800 uppercase tracking-widest mb-1">Benefícios Pro:</p>
+              <ul className="text-left text-[10px] text-orange-700 font-bold space-y-1">
+                <li>• Importação de Planilhas (Excel/CSV)</li>
+                <li>• Análise Instantânea com IA</li>
+                <li>• Exportação para PDF e Excel</li>
+                <li>• Filtros Avançados de Reajuste</li>
+              </ul>
+            </div>
+            <p className="text-xs font-black text-[#EE4D2D] uppercase tracking-widest animate-bounce">Ative seu acesso para liberar</p>
+          </div>
+        </div>
+      )}
+      <div className={`bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 text-white ${accessLevel === 'restricted' ? 'filter blur-[2px] pointer-events-none' : ''}`}>
+        <div className="border-b border-white/20 pb-6 mb-8">
         <div className="text-center">
           <h2 className="text-3xl font-black uppercase tracking-tighter">CONFERÊNCIA EM LOTE - SHOPEE</h2>
           <p className="text-sm text-white/80 font-medium mt-1">
@@ -368,5 +392,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }

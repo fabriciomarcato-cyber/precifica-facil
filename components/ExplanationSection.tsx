@@ -2,7 +2,7 @@
 import React from 'react';
 import { Platform } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { Percent, DollarSign, Truck, Banknote } from 'lucide-react';
+import { Percent, DollarSign, Truck, Banknote, Lock } from 'lucide-react';
 
 const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title: string }>> = ({ icon, title, children }) => (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
@@ -30,19 +30,29 @@ const getPlatformColor = (platform: Platform) => {
     }
 };
 
-const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string }>> = ({ platform, formula, children }) => {
+const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string; isLocked?: boolean }>> = ({ platform, formula, isLocked, children }) => {
     const colorClasses = getPlatformColor(platform);
     return (
-        <div className={`${colorClasses} p-6 rounded-xl shadow-md border flex flex-col h-full`}>
-            <div className="flex items-center mb-4">
-                {getMarketplaceIcon(platform)}
-                <h4 className="text-xl font-bold text-gray-800 ml-3">{platform}</h4>
-            </div>
-            <div className="bg-white/50 p-4 rounded-md text-center mb-4 border border-black/5">
-                <code className="text-base text-gray-700 font-mono font-bold">{formula}</code>
-            </div>
-            <div className="text-gray-600 text-base space-y-3">
-                {children}
+        <div className={`${colorClasses} p-6 rounded-xl shadow-md border flex flex-col h-full relative overflow-hidden`}>
+            {isLocked && (
+                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-4">
+                    <div className="bg-white/90 p-3 rounded-full shadow-sm mb-2">
+                        <Lock className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Disponível no Pro</p>
+                </div>
+            )}
+            <div className={`flex flex-col h-full ${isLocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+                <div className="flex items-center mb-4">
+                    {getMarketplaceIcon(platform)}
+                    <h4 className="text-xl font-bold text-gray-800 ml-3">{platform}</h4>
+                </div>
+                <div className="bg-white/50 p-4 rounded-md text-center mb-4 border border-black/5">
+                    <code className="text-base text-gray-700 font-mono font-bold">{formula}</code>
+                </div>
+                <div className="text-gray-600 text-base space-y-3">
+                    {children}
+                </div>
             </div>
         </div>
     );
@@ -93,36 +103,35 @@ export default function ExplanationSection({ accessLevel }: { accessLevel: strin
                            <p className="text-yellow-700 text-sm mt-1">Lembre-se de usar o maior valor entre o peso físico e o cúbico (C x L x A / 6000).</p>
                         </div>
                     </FormulaCard>
-                    {!isRestricted && (
-                        <>
-                            <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">
-                                <p className='mb-2'>O cálculo da Shopee (ref. Mar/2026) possui taxas progressivas e regras especiais que a calculadora aplica para você:</p>
-                                <ul className="list-disc list-inside space-y-2 text-sm">
-                                    <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,00</li>
-                                    <li><strong>De R$ 80,00 a R$ 99,99:</strong> Comissão de 14% + Taxa de R$ 16,00</li>
-                                    <li><strong>De R$ 100,00 a R$ 199,99:</strong> Comissão de 14% + Taxa de R$ 20,00</li>
-                                    <li><strong>De R$ 200,00 a R$ 499,99:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
-                                    <li><strong>Acima de R$ 500,00:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
-                                </ul>
-                                <div className="mt-3 text-sm space-y-1">
-                                    <p><strong>+ Taxas Adicionais:</strong> Taxa de 2,5% (Campanha) e taxa de R$ 3,00 (CPF alto volume) são somadas quando aplicável.</p>
-                                    <p><strong>Regra de Baixo Valor (CNPJ):</strong> Para itens abaixo de R$ 8,00, a taxa fixa é 50% do valor do produto.</p>
-                                    <p><strong>Regra de Baixo Valor (CPF):</strong> Para itens abaixo de R$ 12,00, a taxa é regressiva (ex: R$10 paga R$6,50; R$8 paga R$6).</p>
-                                </div>
-                                <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                                   <p className="font-semibold text-blue-800 text-sm">Não se preocupe em decorar as regras! A ferramenta aplica a lógica correta para encontrar o preço ideal para o seu cenário.</p>
-                                </div>
-                            </FormulaCard>
-                            <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)">
-                                <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
-                                <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
-                            </FormulaCard>
-                            <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)">
-                                <p>O cálculo para venda direta considera as taxas de pagamento que você configurar (maquininha, PIX, etc.), além da sua margem e imposto.</p>
-                                <p>O <strong>"% Total"</strong> é a soma da sua margem, do imposto e das taxas percentuais de pagamento.</p>
-                            </FormulaCard>
-                        </>
-                    )}
+                    
+                    <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)" isLocked={isRestricted}>
+                        <p className='mb-2'>O cálculo da Shopee (ref. Mar/2026) possui taxas progressivas e regras especiais que a calculadora aplica para você:</p>
+                        <ul className="list-disc list-inside space-y-2 text-sm">
+                            <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,00</li>
+                            <li><strong>De R$ 80,00 a R$ 99,99:</strong> Comissão de 14% + Taxa de R$ 16,00</li>
+                            <li><strong>De R$ 100,00 a R$ 199,99:</strong> Comissão de 14% + Taxa de R$ 20,00</li>
+                            <li><strong>De R$ 200,00 a R$ 499,99:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
+                            <li><strong>Acima de R$ 500,00:</strong> Comissão de 14% + Taxa de R$ 26,00</li>
+                        </ul>
+                        <div className="mt-3 text-sm space-y-1">
+                            <p><strong>+ Taxas Adicionais:</strong> Taxa de 2,5% (Campanha) e taxa de R$ 3,00 (CPF alto volume) são somadas quando aplicável.</p>
+                            <p><strong>Regra de Baixo Valor (CNPJ):</strong> Para itens abaixo de R$ 8,00, a taxa fixa é 50% do valor do produto.</p>
+                            <p><strong>Regra de Baixo Valor (CPF):</strong> Para itens abaixo de R$ 12,00, a taxa é regressiva (ex: R$10 paga R$6,50; R$8 paga R$6).</p>
+                        </div>
+                        <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                           <p className="font-semibold text-blue-800 text-sm">Não se preocupe em decorar as regras! A ferramenta aplica a lógica correta para encontrar o preço ideal para o seu cenário.</p>
+                        </div>
+                    </FormulaCard>
+
+                    <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)" isLocked={isRestricted}>
+                        <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
+                        <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
+                    </FormulaCard>
+
+                    <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)" isLocked={isRestricted}>
+                        <p>O cálculo para venda direta considera as taxas de pagamento que você configurar (maquininha, PIX, etc.), além da sua margem e imposto.</p>
+                        <p>O <strong>"% Total"</strong> é a soma da sua margem, do imposto e das taxas percentuais de pagamento.</p>
+                    </FormulaCard>
                  </div>
             </div>
 

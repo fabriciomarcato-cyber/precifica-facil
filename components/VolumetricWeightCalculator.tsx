@@ -2,7 +2,11 @@
 import React, { useState } from 'react';
 import { Package, Info } from 'lucide-react';
 
-export default function VolumetricWeightCalculator() {
+interface VolumetricWeightCalculatorProps {
+  accessLevel: 'restricted' | 'full';
+}
+
+export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWeightCalculatorProps) {
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
@@ -20,8 +24,23 @@ export default function VolumetricWeightCalculator() {
   const finalWeight = volumetricWeight <= 2 ? pw : Math.max(pw, volumetricWeight);
 
   return (
-    <div className="bg-yellow-50 p-6 rounded-xl shadow-lg mb-8 border border-yellow-200">
-      <div className="border-b pb-4 mb-6 flex items-center gap-3">
+    <div className="relative overflow-hidden rounded-xl shadow-lg mb-8 border border-yellow-200">
+      {accessLevel === 'restricted' && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[6px] transition-all">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 flex flex-col items-center text-center max-w-sm mx-4 transform scale-110">
+            <div className="bg-yellow-100 p-4 rounded-full mb-4">
+              <Package className="w-10 h-10 text-yellow-600" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Calculadora de Peso</h3>
+            <p className="text-sm text-gray-600 font-medium mb-6">
+              Descubra qual peso o Mercado Livre usará para cobrar seu frete e evite cobranças indevidas.
+            </p>
+            <p className="text-xs font-black text-yellow-600 uppercase tracking-widest animate-bounce">Disponível no Plano Pro</p>
+          </div>
+        </div>
+      )}
+      <div className={`bg-yellow-50 p-6 ${accessLevel === 'restricted' ? 'filter blur-[2px] pointer-events-none' : ''}`}>
+        <div className="border-b pb-4 mb-6 flex items-center gap-3">
         <img 
           src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" 
           alt="Mercado Livre Logo" 
@@ -107,5 +126,6 @@ export default function VolumetricWeightCalculator() {
         </p>
       </div>
     </div>
-  );
+  </div>
+);
 }
