@@ -35,11 +35,14 @@ const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formul
     return (
         <div className={`${colorClasses} p-6 rounded-xl shadow-md border flex flex-col h-full relative overflow-hidden`}>
             {isLocked && (
-                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-4">
-                    <div className="bg-white/90 p-3 rounded-full shadow-sm mb-2">
-                        <Lock className="w-5 h-5 text-gray-400" />
+                <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-[4px] flex flex-col items-center justify-center text-center p-4">
+                    <div className="bg-white p-4 rounded-full shadow-lg mb-4 border border-gray-100">
+                        <Lock className="w-8 h-8 text-blue-600/40" />
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">DISPONÍVEL NO PLANO PRO</p>
+                    <div className="space-y-1">
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">PLANO PRO</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400">RECURSO BLOQUEADO</p>
+                    </div>
                 </div>
             )}
             <div className={`flex flex-col h-full ${isLocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
@@ -104,7 +107,7 @@ export default function ExplanationSection({ accessLevel }: { accessLevel: strin
                         </div>
                     </FormulaCard>
                     
-                    <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)" isLocked={isRestricted}>
+                    <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">
                         <p className='mb-2'>O cálculo da Shopee (ref. Mar/2026) possui taxas progressivas e regras especiais que a calculadora aplica para você:</p>
                         <ul className="list-disc list-inside space-y-2 text-sm">
                             <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,00</li>
@@ -123,12 +126,12 @@ export default function ExplanationSection({ accessLevel }: { accessLevel: strin
                         </div>
                     </FormulaCard>
 
-                    <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)" isLocked={isRestricted}>
+                    <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)">
                         <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
                         <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
                     </FormulaCard>
 
-                    <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)" isLocked={isRestricted}>
+                    <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)">
                         <p>O cálculo para venda direta considera as taxas de pagamento que você configurar (maquininha, PIX, etc.), além da sua margem e imposto.</p>
                         <p>O <strong>"% Total"</strong> é a soma da sua margem, do imposto e das taxas percentuais de pagamento.</p>
                     </FormulaCard>

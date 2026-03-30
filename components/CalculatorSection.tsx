@@ -24,26 +24,29 @@ interface CalculatorSectionProps {
 }
 
 const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
-    <div className="p-4 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center bg-white h-full min-h-[480px] shadow-sm">
-         <div className="text-center space-y-4">
-            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">
+    <div className="p-4 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center bg-gray-50/50 h-full min-h-[480px] shadow-sm group hover:border-blue-200 transition-colors">
+         <div className="text-center space-y-12">
+            <h3 className="text-2xl font-black text-gray-300 uppercase tracking-widest group-hover:text-blue-200 transition-colors">
                 {(platform === Platform.ML_CLASSICO || platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : platform}
             </h3>
             <div className="flex flex-col items-center">
-                <div className="p-3 bg-gray-50 rounded-full mb-3">
-                    <Lock className="w-6 h-6 text-gray-300" />
+                <div className="p-8 bg-white rounded-full mb-6 shadow-xl border border-gray-100 group-hover:scale-110 transition-transform">
+                    <Lock className="w-16 h-16 text-blue-600/20" />
                 </div>
-                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">DISPONÍVEL NO PLANO PRO</p>
+                <div className="space-y-2">
+                    <p className="text-sm font-black text-blue-600 uppercase tracking-[0.3em]">PLANO PRO</p>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">RECURSO BLOQUEADO</p>
+                </div>
             </div>
          </div>
     </div>
 );
 
 const FreebieBadge: React.FC = () => (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="bg-[#16A34A] text-white px-4 py-1 rounded-full shadow-lg border-2 border-white flex flex-col items-center leading-tight">
+    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-30">
+        <div className="bg-[#16A34A] text-white px-6 py-2 rounded-full shadow-2xl border-4 border-white flex flex-col items-center leading-tight scale-110">
             <span className="text-[10px] font-black uppercase tracking-tighter">Demonstração</span>
-            <span className="text-xs font-black uppercase tracking-tighter">Gratuita</span>
+            <span className="text-sm font-black uppercase tracking-tighter">Gratuita</span>
         </div>
     </div>
 );
@@ -185,10 +188,12 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
         {priceResults.length > 0 ? (
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {displayedPriceResults.map((res) => {
+                    const isDemo = false; // No demo mode for price calculation as all are accessible
                     const isNegative = res.grossProfit < 0;
                     const colorClasses = getPlatformColor(res.platform, isNegative);
                     return (
-                    <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
+                    <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
+                        {isDemo && <FreebieBadge />}
                         
                         <div className="mb-6 text-center">
                             <div className="flex flex-col items-center">
@@ -283,7 +288,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                       const isDemo = isRestricted && res.platform === INVERSE_CALC_DEMO_PLATFORM;
                       const colorClasses = getPlatformColor(res.platform, !!isNegative);
                       return (
-                          <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
+                          <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                               {isDemo && <FreebieBadge />}
                               
                               <div className="mb-6 text-center">
@@ -384,7 +389,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                   const isDemo = isRestricted && res.platform === MARGIN_SIM_DEMO_PLATFORM;
                   const colorClasses = getPlatformColor(res.platform, isNegative);
                   return (
-                      <div key={res.platform} className={`relative p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
+                      <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                           {isDemo && <FreebieBadge />}
                           
                           <div className="mb-6 text-center">

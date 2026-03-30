@@ -26,16 +26,19 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
   return (
     <div className="relative overflow-hidden rounded-xl shadow-lg mb-8 border border-yellow-200">
       {accessLevel === 'restricted' && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[6px] transition-all">
-          <div className="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 flex flex-col items-center text-center max-w-sm mx-4 transform scale-110">
-            <div className="bg-yellow-100 p-4 rounded-full mb-4">
-              <Package className="w-10 h-10 text-yellow-600" />
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[8px] transition-all">
+          <div className="bg-white p-10 rounded-[40px] shadow-2xl border-4 border-yellow-500 flex flex-col items-center text-center max-w-md mx-4 transform scale-110">
+            <div className="bg-yellow-100 p-6 rounded-full mb-6 shadow-inner">
+              <Package className="w-12 h-12 text-yellow-600" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">DISPONÍVEL NO PLANO PRO</h3>
-            <p className="text-sm text-gray-600 font-medium mb-6">
+            <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3">DISPONÍVEL NO PLANO PRO</h3>
+            <p className="text-base text-gray-600 font-bold mb-8 leading-tight">
               Descubra qual peso o Mercado Livre usará para cobrar seu frete e evite cobranças indevidas.
             </p>
-            <p className="text-xs font-black text-yellow-600 uppercase tracking-widest animate-bounce">Ative seu acesso Pro para liberar</p>
+            <div className="space-y-2">
+                <p className="text-sm font-black text-yellow-600 uppercase tracking-[0.2em] animate-pulse">RECURSO BLOQUEADO</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ative seu acesso Pro para liberar</p>
+            </div>
           </div>
         </div>
       )}
