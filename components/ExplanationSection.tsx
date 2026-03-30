@@ -39,7 +39,7 @@ const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formul
                     <div className="bg-white/90 p-3 rounded-full shadow-sm mb-2">
                         <Lock className="w-5 h-5 text-gray-400" />
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Disponível no Pro</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">DISPONÍVEL NO PLANO PRO</p>
                 </div>
             )}
             <div className={`flex flex-col h-full ${isLocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}>

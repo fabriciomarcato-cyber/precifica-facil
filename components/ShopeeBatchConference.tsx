@@ -160,7 +160,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
             <div className="bg-orange-100 p-4 rounded-full mb-4">
               <Lock className="w-10 h-10 text-[#EE4D2D]" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Recurso Exclusivo Pro</h3>
+            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">DISPONÍVEL NO PLANO PRO</h3>
             <p className="text-sm text-gray-600 font-medium mb-6">
               A Conferência em Lote permite analisar centenas de produtos da Shopee de uma só vez usando Inteligência Artificial.
             </p>
@@ -173,7 +173,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                 <li>• Filtros Avançados de Reajuste</li>
               </ul>
             </div>
-            <p className="text-xs font-black text-[#EE4D2D] uppercase tracking-widest animate-bounce">Ative seu acesso para liberar</p>
+            <p className="text-xs font-black text-[#EE4D2D] uppercase tracking-widest animate-bounce">Ative seu acesso Pro para liberar</p>
           </div>
         </div>
       )}

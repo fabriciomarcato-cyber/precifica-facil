@@ -31,11 +31,11 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
             <div className="bg-yellow-100 p-4 rounded-full mb-4">
               <Package className="w-10 h-10 text-yellow-600" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">Calculadora de Peso</h3>
+            <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-2">DISPONÍVEL NO PLANO PRO</h3>
             <p className="text-sm text-gray-600 font-medium mb-6">
               Descubra qual peso o Mercado Livre usará para cobrar seu frete e evite cobranças indevidas.
             </p>
-            <p className="text-xs font-black text-yellow-600 uppercase tracking-widest animate-bounce">Disponível no Plano Pro</p>
+            <p className="text-xs font-black text-yellow-600 uppercase tracking-widest animate-bounce">Ative seu acesso Pro para liberar</p>
           </div>
         </div>
       )}

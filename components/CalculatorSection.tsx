@@ -24,21 +24,28 @@ interface CalculatorSectionProps {
 }
 
 const LockedPlatformCard: React.FC<{ platform: Platform }> = ({ platform }) => (
-    <div className="p-4 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center bg-gray-50/50 h-full min-h-[450px]">
-         <h3 className="text-sm font-bold text-gray-400 mt-3 uppercase tracking-widest">
-            {(platform === Platform.ML_CLASSICO || platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : platform}
-         </h3>
-         <div className="mt-6 text-center">
-            <Lock className="w-6 h-6 text-gray-300 mx-auto" />
-            <p className="text-xs text-gray-400 mt-2 uppercase font-bold tracking-wider">Disponível no Plano Pro</p>
+    <div className="p-4 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center bg-white h-full min-h-[480px] shadow-sm">
+         <div className="text-center space-y-4">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">
+                {(platform === Platform.ML_CLASSICO || platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : platform}
+            </h3>
+            <div className="flex flex-col items-center">
+                <div className="p-3 bg-gray-50 rounded-full mb-3">
+                    <Lock className="w-6 h-6 text-gray-300" />
+                </div>
+                <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">DISPONÍVEL NO PLANO PRO</p>
+            </div>
          </div>
     </div>
 );
 
 const FreebieBadge: React.FC = () => (
-    <span className="absolute top-2 left-1/2 transform -translate-x-1/2 text-sm font-bold px-3 py-1 rounded-full bg-green-600 text-white z-10 shadow-sm">
-        Demonstração Gratuita
-    </span>
+    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="bg-[#16A34A] text-white px-4 py-1 rounded-full shadow-lg border-2 border-white flex flex-col items-center leading-tight">
+            <span className="text-[10px] font-black uppercase tracking-tighter">Demonstração</span>
+            <span className="text-xs font-black uppercase tracking-tighter">Gratuita</span>
+        </div>
+    </div>
 );
 
 
