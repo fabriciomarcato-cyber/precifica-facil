@@ -193,7 +193,7 @@ export default function App() {
             accessMessage={accessMessage}
             revalidateAccess={revalidateAccess}
           />
-          <ExplanationSection />
+          <ExplanationSection accessLevel={accessLevel} />
         </main>
         
         <AdminDashboard 
