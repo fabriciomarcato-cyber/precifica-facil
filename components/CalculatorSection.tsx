@@ -148,14 +148,12 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
   const lockedPricePlatforms: Platform[] = [];
   const displayedPriceResults = priceResults.filter(r => activePricePlatforms.includes(r.platform));
   
-  const INVERSE_CALC_DEMO_PLATFORM = Platform.TIKTOK_SHOP;
-  const activeInversePlatforms = isRestricted ? [INVERSE_CALC_DEMO_PLATFORM] : allPlatforms;
-  const lockedInversePlatforms = isRestricted ? allPlatforms.filter(p => p !== INVERSE_CALC_DEMO_PLATFORM) : [];
+  const activeInversePlatforms = allPlatforms;
+  const lockedInversePlatforms: Platform[] = [];
   const displayedInverseResults = inverseResults.filter(r => activeInversePlatforms.includes(r.platform));
 
-  const MARGIN_SIM_DEMO_PLATFORM = Platform.INSTAGRAM;
-  const activeMarginPlatforms = isRestricted ? [MARGIN_SIM_DEMO_PLATFORM] : allPlatforms;
-  const lockedMarginPlatforms = isRestricted ? allPlatforms.filter(p => p !== MARGIN_SIM_DEMO_PLATFORM) : [];
+  const activeMarginPlatforms = allPlatforms;
+  const lockedMarginPlatforms: Platform[] = [];
   const displayedMarginResults = marginResults.filter(r => activeMarginPlatforms.includes(r.platform));
 
   return (
@@ -268,25 +266,128 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
             <div className="text-center text-gray-500 py-12"><p className="text-lg">Digite o custo do produto e clique em "Calcular Preço de Venda".</p></div>
         )}
       </Card>
-      
-      <Card 
-          title="Cálculo Inverso - Qual Custo Comprar?"
-          subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
-      >
-          <div className="flex flex-col sm:flex-row items-end gap-3">
-              <div className="w-full sm:w-48">
-                  <label htmlFor="desiredPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda Desejado (R$):</label>
-                  <input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+
+      {accessLevel === 'full' && (
+        <>
+          <Card 
+              title="Cálculo Inverso - Qual Custo Comprar?"
+              subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
+          >
+              <div className="flex flex-col sm:flex-row items-end gap-3">
+                  <div className="w-full sm:w-48">
+                      <label htmlFor="desiredPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda Desejado (R$):</label>
+                      <input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                  </div>
+                  <button onClick={handleInverseCalculation} className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors shadow-sm text-sm">Calcular Custo Máximo</button>
               </div>
-              <button onClick={handleInverseCalculation} className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors shadow-sm text-sm">Calcular Custo Máximo</button>
-          </div>
-          {inverseCalcError && <p className="text-red-600 text-sm mt-2">{inverseCalcError}</p>}
-          {inverseResults.length > 0 ? (
+              {inverseCalcError && <p className="text-red-600 text-sm mt-2">{inverseCalcError}</p>}
+              {inverseResults.length > 0 ? (
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                      {displayedInverseResults.map((res) => {
+                          const isNegative = res.maxProductCost && res.maxProductCost < 0;
+                          const isDemo = false;
+                          const colorClasses = getPlatformColor(res.platform, !!isNegative);
+                          return (
+                              <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
+                                  {isDemo && <FreebieBadge />}
+                                  
+                                  <div className="mb-6 text-center">
+                                      <div className="flex flex-col items-center">
+                                          <div className="flex items-center justify-center gap-2 mb-1">
+                                              <h3 className="text-xl font-black uppercase tracking-tight">
+                                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
+                                              </h3>
+                                              { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-wider ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-700'}`}>
+                                                      {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
+                                                  </span>
+                                              )}
+                                          </div>
+                                          {res.platform === Platform.SHOPEE && (
+                                              <p className="text-[10px] opacity-70 uppercase font-black tracking-widest">CÁLCULO: {settings.shopee.sellerType}</p>
+                                          )}
+                                          {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
+                                              <p className="text-[10px] opacity-60 font-bold">Peso: {settings.mercadoLivre.productWeight}kg</p>
+                                          )}
+                                      </div>
+                                  </div>
+
+                                  <div className="text-center mb-8">
+                                      <p className="opacity-60 text-sm font-bold mb-1">Custo Máximo do Produto</p>
+                                      <p className={`text-5xl font-black tracking-tighter ${isNegative ? 'text-red-700' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]')}`}>{formatCurrency(res.maxProductCost)}</p>
+                                  </div>
+
+                                  <div className="w-full space-y-3.5 flex-grow text-sm font-medium">
+                                      <div className="flex justify-between items-center">
+                                          <span className="opacity-60">Preço de Venda</span>
+                                          <span className="font-black">{formatCurrency(res.sellingPrice)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="opacity-60">Margem ({formatPercentage(res.contributionMarginPercent)})</span>
+                                          <span className="font-black">{formatCurrency(res.grossProfit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="opacity-60">Comissão ({formatPercentage(res.commissionPercent)})</span>
+                                          <span className="font-black">{formatCurrency(res.commission)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="opacity-60">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
+                                          <span className="font-black">{formatCurrency(res.tax)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className="opacity-60">Taxa Fixa/Frete</span>
+                                          <span className="font-black">{formatCurrency(res.fixedFee)}</span>
+                                      </div>
+                                  </div>
+
+                                  <div className={`w-full border-t mt-6 pt-4 space-y-3 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
+                                      <div className="flex justify-between items-center">
+                                          <span className={`text-lg font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>Margem Desejada</span>
+                                          <span className={`text-xl font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                          <span className={`text-lg font-black ${res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]'}`}>Margem Final</span>
+                                          <span className={`text-xl font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]')}`}>{formatPercentage(res.calculatedMargin)}</span>
+                                      </div>
+                                      {isNegative && (
+                                          <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
+                                              <AlertTriangle className="w-4 h-4" />
+                                              <span>INVIÁVEL</span>
+                                          </div>
+                                      )}
+                                  </div>
+                              </div>
+                          );
+                      })}
+                      {lockedInversePlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
+                  </div>
+              ) : (
+                  <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
+              )}
+          </Card>
+
+          <Card 
+              title="Simulação de Margem por Preço de Venda"
+              subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
+          >
+              <div className="flex flex-col sm:flex-row items-end gap-3">
+                  <div className="w-full sm:w-48">
+                      <label htmlFor="simProductCost" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Custo Produto (R$):</label>
+                      <input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                  </div>
+                  <div className="w-full sm:w-48">
+                      <label htmlFor="simSellingPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda (R$):</label>
+                      <input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                  </div>
+                  <button onClick={handleMarginSimulation} className="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-6 rounded-md hover:bg-green-700 transition-colors shadow-sm text-sm">Simular Margem</button>
+              </div>
+              {marginSimError && <p className="text-red-600 text-sm mt-2">{marginSimError}</p>}
+              {marginResults.length > 0 ? (
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                  {displayedInverseResults.map((res) => {
-                      const isNegative = res.maxProductCost && res.maxProductCost < 0;
-                      const isDemo = isRestricted && res.platform === INVERSE_CALC_DEMO_PLATFORM;
-                      const colorClasses = getPlatformColor(res.platform, !!isNegative);
+                  {displayedMarginResults.map((res) => {
+                      const isNegative = res.grossProfit < 0;
+                      const isDemo = false;
+                      const colorClasses = getPlatformColor(res.platform, isNegative);
                       return (
                           <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
                               {isDemo && <FreebieBadge />}
@@ -313,8 +414,8 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                               </div>
 
                               <div className="text-center mb-8">
-                                  <p className="opacity-60 text-sm font-bold mb-1">Custo Máximo do Produto</p>
-                                  <p className={`text-5xl font-black tracking-tighter ${isNegative ? 'text-red-700' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]')}`}>{formatCurrency(res.maxProductCost)}</p>
+                                  <p className="opacity-60 text-sm font-bold mb-1">Lucro Bruto Simulado</p>
+                                  <p className={`text-5xl font-black tracking-tighter ${isNegative ? 'text-red-700' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</p>
                               </div>
 
                               <div className="w-full space-y-3.5 flex-grow text-sm font-medium">
@@ -323,8 +424,8 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                       <span className="font-black">{formatCurrency(res.sellingPrice)}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
-                                      <span className="opacity-60">Margem ({formatPercentage(res.contributionMarginPercent)})</span>
-                                      <span className="font-black">{formatCurrency(res.grossProfit)}</span>
+                                      <span className="opacity-60">Custo do Produto</span>
+                                      <span className="font-black">{formatCurrency(res.productCost)}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
                                       <span className="opacity-60">Comissão ({formatPercentage(res.commissionPercent)})</span>
@@ -342,7 +443,7 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
 
                               <div className={`w-full border-t mt-6 pt-4 space-y-3 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
                                   <div className="flex justify-between items-center">
-                                      <span className={`text-lg font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>Margem Desejada</span>
+                                      <span className={`text-lg font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>Lucro Bruto</span>
                                       <span className={`text-xl font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
                                   </div>
                                   <div className="flex justify-between items-center">
@@ -352,123 +453,24 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                   {isNegative && (
                                       <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
                                           <AlertTriangle className="w-4 h-4" />
-                                          <span>INVIÁVEL</span>
+                                          <span>PREJUÍZO</span>
                                       </div>
                                   )}
                               </div>
                           </div>
                       );
                   })}
-                  {lockedInversePlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
+                  {lockedMarginPlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
               </div>
-          ) : (
-              <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
-          )}
-      </Card>
+              ) : (
+                      <div className="text-center text-gray-500 py-12"><p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p></div>
+              )}
+          </Card>
 
-      <Card 
-          title="Simulação de Margem por Preço de Venda"
-          subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
-      >
-          <div className="flex flex-col sm:flex-row items-end gap-3">
-              <div className="w-full sm:w-48">
-                  <label htmlFor="simProductCost" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Custo Produto (R$):</label>
-                  <input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
-              </div>
-              <div className="w-full sm:w-48">
-                  <label htmlFor="simSellingPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda (R$):</label>
-                  <input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
-              </div>
-              <button onClick={handleMarginSimulation} className="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-6 rounded-md hover:bg-green-700 transition-colors shadow-sm text-sm">Simular Margem</button>
-          </div>
-          {marginSimError && <p className="text-red-600 text-sm mt-2">{marginSimError}</p>}
-          {marginResults.length > 0 ? (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {displayedMarginResults.map((res) => {
-                  const isNegative = res.grossProfit < 0;
-                  const isDemo = isRestricted && res.platform === MARGIN_SIM_DEMO_PLATFORM;
-                  const colorClasses = getPlatformColor(res.platform, isNegative);
-                  return (
-                      <div key={res.platform} className={`relative ${isDemo ? 'pt-20 pb-8 px-6' : 'p-6'} rounded-2xl border flex flex-col ${colorClasses} min-h-[480px] shadow-xl transition-transform hover:scale-[1.02]`}>
-                          {isDemo && <FreebieBadge />}
-                          
-                          <div className="mb-6 text-center">
-                              <div className="flex flex-col items-center">
-                                  <div className="flex items-center justify-center gap-2 mb-1">
-                                      <h3 className="text-xl font-black uppercase tracking-tight">
-                                          {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
-                                      </h3>
-                                      { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-wider ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                              {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
-                                          </span>
-                                      )}
-                                  </div>
-                                  {res.platform === Platform.SHOPEE && (
-                                      <p className="text-[10px] opacity-70 uppercase font-black tracking-widest">CÁLCULO: {settings.shopee.sellerType}</p>
-                                  )}
-                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                      <p className="text-[10px] opacity-60 font-bold">Peso: {settings.mercadoLivre.productWeight}kg</p>
-                                  )}
-                              </div>
-                          </div>
-
-                          <div className="text-center mb-8">
-                              <p className="opacity-60 text-sm font-bold mb-1">Lucro Bruto Simulado</p>
-                              <p className={`text-5xl font-black tracking-tighter ${isNegative ? 'text-red-700' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</p>
-                          </div>
-
-                          <div className="w-full space-y-3.5 flex-grow text-sm font-medium">
-                              <div className="flex justify-between items-center">
-                                  <span className="opacity-60">Preço de Venda</span>
-                                  <span className="font-black">{formatCurrency(res.sellingPrice)}</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                  <span className="opacity-60">Custo do Produto</span>
-                                  <span className="font-black">{formatCurrency(res.productCost)}</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                  <span className="opacity-60">Comissão ({formatPercentage(res.commissionPercent)})</span>
-                                  <span className="font-black">{formatCurrency(res.commission)}</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                  <span className="opacity-60">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
-                                  <span className="font-black">{formatCurrency(res.tax)}</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                  <span className="opacity-60">Taxa Fixa/Frete</span>
-                                  <span className="font-black">{formatCurrency(res.fixedFee)}</span>
-                              </div>
-                          </div>
-
-                          <div className={`w-full border-t mt-6 pt-4 space-y-3 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
-                              <div className="flex justify-between items-center">
-                                  <span className={`text-lg font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>Lucro Bruto</span>
-                                  <span className={`text-xl font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                  <span className={`text-lg font-black ${res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]'}`}>Margem Final</span>
-                                  <span className={`text-xl font-black ${isNegative ? 'text-red-800' : (res.platform === Platform.SHOPEE ? 'text-white' : 'text-[#2563EB]')}`}>{formatPercentage(res.calculatedMargin)}</span>
-                              </div>
-                              {isNegative && (
-                                  <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
-                                      <AlertTriangle className="w-4 h-4" />
-                                      <span>PREJUÍZO</span>
-                                  </div>
-                              )}
-                          </div>
-                      </div>
-                  );
-              })}
-              {lockedMarginPlatforms.map(platform => <LockedPlatformCard key={platform} platform={platform} />)}
-          </div>
-      ) : (
-              <div className="text-center text-gray-500 py-12"><p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p></div>
+          <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
+          <VolumetricWeightCalculator accessLevel={accessLevel} />
+        </>
       )}
-      </Card>
-
-      <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
-      <VolumetricWeightCalculator accessLevel={accessLevel} />
     </>
   );
 }

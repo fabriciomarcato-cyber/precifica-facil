@@ -165,14 +165,16 @@ export default function App() {
                   <ShieldCheck className="w-6 h-6"/>
                 </button>
               )}
-              <button
-                onClick={() => setIsHelpOpen(true)}
-                className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center"
-                title="Ajuda"
-                aria-label="Abrir ajuda"
-              >
-                <HelpCircle className="w-6 h-6" />
-              </button>
+              {accessLevel === 'full' && (
+                <button
+                  onClick={() => setIsHelpOpen(true)}
+                  className="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center"
+                  title="Ajuda"
+                  aria-label="Abrir ajuda"
+                >
+                  <HelpCircle className="w-6 h-6" />
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -193,7 +195,7 @@ export default function App() {
             accessMessage={accessMessage}
             revalidateAccess={revalidateAccess}
           />
-          <ExplanationSection accessLevel={accessLevel} />
+          {accessLevel === 'full' && <ExplanationSection accessLevel={accessLevel} />}
         </main>
         
         <AdminDashboard 
