@@ -51,6 +51,23 @@ const FreebieBadge: React.FC = () => (
     </div>
 );
 
+const ProFeatureWrapper: React.FC<{ isRestricted: boolean; children: React.ReactNode }> = ({ isRestricted, children }) => {
+  return (
+    <div className="relative">
+      <div className={isRestricted ? 'blur-[4px] pointer-events-none select-none opacity-60' : ''}>
+        {children}
+      </div>
+      {isRestricted && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-white/10 backdrop-blur-[2px] rounded-xl">
+          <div className="bg-white/90 p-6 rounded-2xl shadow-2xl border-2 border-blue-500 flex items-center gap-3 transform scale-110">
+            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">🔒 Função disponível apenas na Versão Pró</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; }>> = ({ title, subtitle, children }) => (
     <div className="relative bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
@@ -267,18 +284,17 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
         )}
       </Card>
 
-      {accessLevel === 'full' && (
-        <>
-          <Card 
-              title="Cálculo Inverso - Qual Custo Comprar?"
-              subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
-          >
+      <Card 
+          title="Cálculo Inverso - Qual Custo Comprar?"
+          subtitle="Defina o preço de venda e descubra o custo máximo de compra para manter sua margem de lucro."
+      >
+          <ProFeatureWrapper isRestricted={isRestricted}>
               <div className="flex flex-col sm:flex-row items-end gap-3">
                   <div className="w-full sm:w-48">
                       <label htmlFor="desiredPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda Desejado (R$):</label>
-                      <input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                      <input id="desiredPrice" type="number" value={desiredPrice} onChange={(e) => setDesiredPrice(e.target.value)} placeholder="120.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900" disabled={isRestricted}/>
                   </div>
-                  <button onClick={handleInverseCalculation} className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors shadow-sm text-sm">Calcular Custo Máximo</button>
+                  <button onClick={handleInverseCalculation} className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors shadow-sm text-sm" disabled={isRestricted}>Calcular Custo Máximo</button>
               </div>
               {inverseCalcError && <p className="text-red-600 text-sm mt-2">{inverseCalcError}</p>}
               {inverseResults.length > 0 ? (
@@ -364,22 +380,24 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
               ) : (
                   <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
               )}
-          </Card>
+          </ProFeatureWrapper>
+      </Card>
 
-          <Card 
-              title="Simulação de Margem por Preço de Venda"
-              subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
-          >
+      <Card 
+          title="Simulação de Margem por Preço de Venda"
+          subtitle="Simule diferentes preços para ver automaticamente o lucro e a margem em cada canal."
+      >
+          <ProFeatureWrapper isRestricted={isRestricted}>
               <div className="flex flex-col sm:flex-row items-end gap-3">
                   <div className="w-full sm:w-48">
                       <label htmlFor="simProductCost" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Custo Produto (R$):</label>
-                      <input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                      <input id="simProductCost" type="number" value={simProductCost} onChange={(e) => setSimProductCost(e.target.value)} placeholder="25.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900" disabled={isRestricted}/>
                   </div>
                   <div className="w-full sm:w-48">
                       <label htmlFor="simSellingPrice" className="block text-xs font-bold text-gray-600 uppercase tracking-tight mb-1">Preço de Venda (R$):</label>
-                      <input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"/>
+                      <input id="simSellingPrice" type="number" value={simSellingPrice} onChange={(e) => setSimSellingPrice(e.target.value)} placeholder="80.00" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900" disabled={isRestricted}/>
                   </div>
-                  <button onClick={handleMarginSimulation} className="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-6 rounded-md hover:bg-green-700 transition-colors shadow-sm text-sm">Simular Margem</button>
+                  <button onClick={handleMarginSimulation} className="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-6 rounded-md hover:bg-green-700 transition-colors shadow-sm text-sm" disabled={isRestricted}>Simular Margem</button>
               </div>
               {marginSimError && <p className="text-red-600 text-sm mt-2">{marginSimError}</p>}
               {marginResults.length > 0 ? (
@@ -465,12 +483,11 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
               ) : (
                       <div className="text-center text-gray-500 py-12"><p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p></div>
               )}
-          </Card>
+          </ProFeatureWrapper>
+      </Card>
 
-          <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
-          <VolumetricWeightCalculator accessLevel={accessLevel} />
-        </>
-      )}
+      <ShopeeBatchConference settings={settings} accessLevel={accessLevel} />
+      <VolumetricWeightCalculator accessLevel={accessLevel} />
     </>
   );
 }

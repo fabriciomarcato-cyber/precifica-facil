@@ -154,259 +154,238 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
 
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-8 border border-orange-600">
-      {accessLevel === 'restricted' && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[8px] transition-all">
-          <div className="bg-white p-10 rounded-[40px] shadow-2xl border-4 border-orange-500 flex flex-col items-center text-center max-w-md mx-4 transform scale-110">
-            <div className="bg-orange-100 p-6 rounded-full mb-6 shadow-inner">
-              <Lock className="w-12 h-12 text-[#EE4D2D]" />
-            </div>
-            <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3">DISPONÍVEL NO PLANO PRO</h3>
-            <p className="text-base text-gray-600 font-bold mb-8 leading-tight">
-              A Conferência em Lote permite analisar centenas de produtos da Shopee de uma só vez usando Inteligência Artificial.
-            </p>
-            <div className="w-full p-6 bg-orange-50 rounded-3xl border-2 border-orange-100 mb-8">
-              <p className="text-xs font-black text-orange-800 uppercase tracking-widest mb-3">Benefícios Exclusivos Pro:</p>
-              <ul className="text-left text-xs text-orange-700 font-black space-y-2">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                  Importação de Planilhas (Excel/CSV)
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                  Análise Instantânea com IA
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                  Exportação para PDF e Excel
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-                  Filtros Avançados de Reajuste
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-                <p className="text-sm font-black text-[#EE4D2D] uppercase tracking-[0.2em] animate-pulse">RECURSO BLOQUEADO</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ative seu acesso Pro para liberar</p>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className={`bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 text-white ${accessLevel === 'restricted' ? 'filter blur-[2px] pointer-events-none' : ''}`}>
-        <div className="border-b border-white/20 pb-6 mb-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-black uppercase tracking-tighter">CONFERÊNCIA EM LOTE - SHOPEE</h2>
-          <p className="text-sm text-white/80 font-medium mt-1">
-            Analise margens e preços ideais para centenas de produtos simultaneamente.
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <label className="block text-xs font-black uppercase tracking-widest text-white/90 mb-2">
-                Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço Atual):
-              </label>
-              <div className="flex items-center gap-2 text-white/70">
-                <Info className="w-4 h-4" />
-                <span className="text-xs font-bold">Dica: Você pode colar diretamente do Excel ou subir o arquivo abaixo.</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".csv,.xlsx,.xls"
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-black py-2.5 px-4 rounded-xl border border-white/30 transition-all shadow-lg backdrop-blur-sm uppercase tracking-wider"
-              >
-                <FileUp className="w-4 h-4" />
-                Importar Planilha
-              </button>
-            </div>
-          </div>
-          
-          <textarea
-            value={inputData}
-            onChange={(e) => setInputData(e.target.value)}
-            placeholder={`Exemplo:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
-            className="w-full h-48 p-4 bg-white/10 border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-transparent font-mono text-sm text-white placeholder-white/40 shadow-inner backdrop-blur-sm"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-6 items-center justify-between">
-          <div className="flex flex-wrap gap-4 items-center">
-            <button
-              onClick={handleRunBatch}
-              disabled={isLoading}
-              className="flex items-center gap-3 bg-white text-[#EE4D2D] font-black py-3 px-8 rounded-xl hover:bg-gray-100 transition-all disabled:bg-white/50 shadow-xl uppercase tracking-wider text-sm"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Processando IA...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-5 h-5" />
-                  Iniciar Análise
-                </>
-              )}
-            </button>
-            
-            <div className="flex items-center gap-4 text-[10px] text-white/60 font-black uppercase tracking-widest">
-              <div className="flex items-center gap-1.5">
-                <FileSpreadsheet className="w-4 h-4" />
-                <span>Excel/CSV</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <FileJson className="w-4 h-4" />
-                <span>JSON</span>
-              </div>
+      <div className={accessLevel === 'restricted' ? 'blur-[4px] pointer-events-none select-none opacity-60' : ''}>
+        <div className="bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 text-white">
+          <div className="border-b border-white/20 pb-6 mb-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-black uppercase tracking-tighter">CONFERÊNCIA EM LOTE - SHOPEE</h2>
+              <p className="text-sm text-white/80 font-medium mt-1">
+                Analise margens e preços ideais para centenas de produtos simultaneamente.
+              </p>
             </div>
           </div>
 
-          {results.length > 0 && (
-            <div className="flex flex-wrap items-center gap-6 bg-black/10 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Filtrar:</span>
-                <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/20">
+          <div className="space-y-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <label className="block text-xs font-black uppercase tracking-widest text-white/90 mb-2">
+                    Dados dos Produtos (SKU, Descrição, Custo, Estoque, Preço Atual):
+                  </label>
+                  <div className="flex items-center gap-2 text-white/70">
+                    <Info className="w-4 h-4" />
+                    <span className="text-xs font-bold">Dica: Você pode colar diretamente do Excel ou subir o arquivo abaixo.</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    disabled={accessLevel === 'restricted'}
+                  />
                   <button
-                    onClick={() => setFilterType('all')}
-                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'all' ? 'bg-white text-[#EE4D2D] shadow-lg' : 'text-white/70 hover:text-white'}`}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={accessLevel === 'restricted'}
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-black py-2.5 px-4 rounded-xl border border-white/30 transition-all shadow-lg backdrop-blur-sm uppercase tracking-wider"
                   >
-                    Todos
-                  </button>
-                  <button
-                    onClick={() => setFilterType('adjustment')}
-                    className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-lg' : 'text-white/70 hover:text-white'}`}
-                  >
-                    Reajustes
+                    <FileUp className="w-4 h-4" />
+                    Importar Planilha
                   </button>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Ordenar:</span>
-                <select
-                  value={sortType}
-                  onChange={(e) => setSortType(e.target.value as any)}
-                  className="bg-white/10 border border-white/20 text-white text-[10px] font-black rounded-xl focus:ring-2 focus:ring-white/50 block p-2 shadow-lg uppercase tracking-wider outline-none"
-                >
-                  <option value="none" className="text-gray-900">Padrão</option>
-                  <option value="alphabetical" className="text-gray-900">Alfabética</option>
-                  <option value="margin-asc" className="text-gray-900">Margem (Menor)</option>
-                  <option value="margin-desc" className="text-gray-900">Margem (Maior)</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-3 ml-auto border-l border-white/20 pl-6">
-                <button
-                  onClick={exportToExcel}
-                  className="flex items-center gap-2 bg-green-500 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg uppercase tracking-wider"
-                  title="Exportar para Excel"
-                >
-                  <Download className="w-4 h-4" />
-                  Excel
-                </button>
-                <button
-                  onClick={exportToPDF}
-                  className="flex items-center gap-2 bg-red-600 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all shadow-lg uppercase tracking-wider"
-                  title="Exportar para PDF"
-                >
-                  <FileText className="w-4 h-4" />
-                  PDF
-                </button>
-              </div>
+              
+              <textarea
+                value={inputData}
+                onChange={(e) => setInputData(e.target.value)}
+                disabled={accessLevel === 'restricted'}
+                placeholder={`Exemplo:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
+                className="w-full h-48 p-4 bg-white/10 border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-transparent font-mono text-sm text-white placeholder-white/40 shadow-inner backdrop-blur-sm"
+              />
             </div>
-          )}
+
+            <div className="flex flex-wrap gap-6 items-center justify-between">
+              <div className="flex flex-wrap gap-4 items-center">
+                <button
+                  onClick={handleRunBatch}
+                  disabled={isLoading || accessLevel === 'restricted'}
+                  className="flex items-center gap-3 bg-white text-[#EE4D2D] font-black py-3 px-8 rounded-xl hover:bg-gray-100 transition-all disabled:bg-white/50 shadow-xl uppercase tracking-wider text-sm"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processando IA...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5" />
+                      Iniciar Análise
+                    </>
+                  )}
+                </button>
+                
+                <div className="flex items-center gap-4 text-[10px] text-white/60 font-black uppercase tracking-widest">
+                  <div className="flex items-center gap-1.5">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Excel/CSV</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <FileJson className="w-4 h-4" />
+                    <span>JSON</span>
+                  </div>
+                </div>
+              </div>
+
+              {results.length > 0 && (
+                <div className="flex flex-wrap items-center gap-6 bg-black/10 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Filtrar:</span>
+                    <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/20">
+                      <button
+                        onClick={() => setFilterType('all')}
+                        disabled={accessLevel === 'restricted'}
+                        className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'all' ? 'bg-white text-[#EE4D2D] shadow-lg' : 'text-white/70 hover:text-white'}`}
+                      >
+                        Todos
+                      </button>
+                      <button
+                        onClick={() => setFilterType('adjustment')}
+                        disabled={accessLevel === 'restricted'}
+                        className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-lg' : 'text-white/70 hover:text-white'}`}
+                      >
+                        Reajustes
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Ordenar:</span>
+                    <select
+                      value={sortType}
+                      onChange={(e) => setSortType(e.target.value as any)}
+                      disabled={accessLevel === 'restricted'}
+                      className="bg-white/10 border border-white/20 text-white text-[10px] font-black rounded-xl focus:ring-2 focus:ring-white/50 block p-2 shadow-lg uppercase tracking-wider outline-none"
+                    >
+                      <option value="none" className="text-gray-900">Padrão</option>
+                      <option value="alphabetical" className="text-gray-900">Alfabética</option>
+                      <option value="margin-asc" className="text-gray-900">Margem (Menor)</option>
+                      <option value="margin-desc" className="text-gray-900">Margem (Maior)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3 ml-auto border-l border-white/20 pl-6">
+                    <button
+                      onClick={exportToExcel}
+                      disabled={accessLevel === 'restricted'}
+                      className="flex items-center gap-2 bg-green-500 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg uppercase tracking-wider"
+                      title="Exportar para Excel"
+                    >
+                      <Download className="w-4 h-4" />
+                      Excel
+                    </button>
+                    <button
+                      onClick={exportToPDF}
+                      disabled={accessLevel === 'restricted'}
+                      className="flex items-center gap-2 bg-red-600 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all shadow-lg uppercase tracking-wider"
+                      title="Exportar para PDF"
+                    >
+                      <FileText className="w-4 h-4" />
+                      PDF
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {error && (
+              <div className="p-4 bg-white/10 border border-white/20 text-white rounded-xl flex items-center gap-3 backdrop-blur-md animate-pulse">
+                <AlertCircle className="w-6 h-6 text-yellow-300" />
+                <span className="font-bold">{error}</span>
+              </div>
+            )}
+
+            {results.length > 0 && (
+              <div className="mt-10 overflow-hidden rounded-2xl border border-white/20 shadow-2xl bg-white">
+                <div className="bg-gray-50 p-4 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest">
+                    <Filter className="w-4 h-4" />
+                    <span>Exibindo <strong>{filteredResults.length}</strong> de <strong>{results.length}</strong> produtos</span>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">SKU</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Descrição</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Custo</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Comissão</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Taxa</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Estoque</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Preço Atual</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Margem Atual</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Novo Preço</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Nova Margem</th>
+                        <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {filteredResults.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-900">{item.sku}</td>
+                          <td className="px-4 py-4 text-sm font-medium text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
+                            {item.descricao_produto}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                            {formatCurrency(item.custo_produto)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                            {item.comissao_porcentagem}%
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                            {formatCurrency(item.taxa_fixa)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-400 font-mono">
+                            {item.estoque}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                            {formatCurrency(item.preco_venda_atual)}
+                          </td>
+                          <td className={`px-4 py-4 whitespace-nowrap text-sm font-black ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
+                            {item.margem_atual_porcentagem.toFixed(2)}%
+                          </td>
+                          <td className={`px-4 py-4 whitespace-nowrap text-base font-black ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-900'}`}>
+                            {formatCurrency(item.novo_preco_venda)}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
+                            {item.margem_novo_preco_porcentagem.toFixed(2)}%
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${getStatusClass(item.precisa_de_reajuste)}`}>
+                              {getStatusIcon(item.precisa_de_reajuste)}
+                              {item.precisa_de_reajuste ? 'Reajustar' : 'Ok'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-
-        {error && (
-          <div className="p-4 bg-white/10 border border-white/20 text-white rounded-xl flex items-center gap-3 backdrop-blur-md animate-pulse">
-            <AlertCircle className="w-6 h-6 text-yellow-300" />
-            <span className="font-bold">{error}</span>
-          </div>
-        )}
-
-        {results.length > 0 && (
-          <div className="mt-10 overflow-hidden rounded-2xl border border-white/20 shadow-2xl bg-white">
-            <div className="bg-gray-50 p-4 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest">
-                <Filter className="w-4 h-4" />
-                <span>Exibindo <strong>{filteredResults.length}</strong> de <strong>{results.length}</strong> produtos</span>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">SKU</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Descrição</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Custo</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Comissão</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Taxa</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Estoque</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Preço Atual</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Margem Atual</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Novo Preço</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Nova Margem</th>
-                    <th className="px-4 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredResults.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-900">{item.sku}</td>
-                      <td className="px-4 py-4 text-sm font-medium text-gray-600 max-w-xs truncate" title={item.descricao_produto}>
-                        {item.descricao_produto}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
-                        {formatCurrency(item.custo_produto)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
-                        {item.comissao_porcentagem}%
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
-                        {formatCurrency(item.taxa_fixa)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-black text-gray-400 font-mono">
-                        {item.estoque}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        {formatCurrency(item.preco_venda_atual)}
-                      </td>
-                      <td className={`px-4 py-4 whitespace-nowrap text-sm font-black ${item.precisa_de_reajuste ? 'text-red-600' : 'text-green-600'}`}>
-                        {item.margem_atual_porcentagem.toFixed(2)}%
-                      </td>
-                      <td className={`px-4 py-4 whitespace-nowrap text-base font-black ${item.precisa_de_reajuste ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {formatCurrency(item.novo_preco_venda)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-500">
-                        {item.margem_novo_preco_porcentagem.toFixed(2)}%
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${getStatusClass(item.precisa_de_reajuste)}`}>
-                          {getStatusIcon(item.precisa_de_reajuste)}
-                          {item.precisa_de_reajuste ? 'Reajustar' : 'Ok'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
+      {accessLevel === 'restricted' && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-[2px]">
+          <div className="bg-white/90 p-6 rounded-2xl shadow-2xl border-2 border-orange-500 flex items-center gap-3 transform scale-110">
+            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">🔒 Função disponível apenas na Versão Pró</span>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
 }

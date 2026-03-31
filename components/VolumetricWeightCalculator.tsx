@@ -25,110 +25,106 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
 
   return (
     <div className="relative overflow-hidden rounded-xl shadow-lg mb-8 border border-yellow-200">
-      {accessLevel === 'restricted' && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[8px] transition-all">
-          <div className="bg-white p-10 rounded-[40px] shadow-2xl border-4 border-yellow-500 flex flex-col items-center text-center max-w-md mx-4 transform scale-110">
-            <div className="bg-yellow-100 p-6 rounded-full mb-6 shadow-inner">
-              <Package className="w-12 h-12 text-yellow-600" />
+      <div className={accessLevel === 'restricted' ? 'blur-[4px] pointer-events-none select-none opacity-60' : ''}>
+        <div className="bg-yellow-50 p-6">
+          <div className="border-b pb-4 mb-6 flex items-center gap-3">
+            <img 
+              src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" 
+              alt="Mercado Livre Logo" 
+              className="h-10 w-auto object-contain"
+              referrerPolicy="no-referrer"
+            />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Calculadora de Peso Volumétrico (Mercado Livre)</h2>
+              <p className="text-sm text-gray-500">Descubra qual peso será usado para calcular o seu frete.</p>
             </div>
-            <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-3">DISPONÍVEL NO PLANO PRO</h3>
-            <p className="text-base text-gray-600 font-bold mb-8 leading-tight">
-              Descubra qual peso o Mercado Livre usará para cobrar seu frete e evite cobranças indevidas.
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Comprimento (cm)</label>
+              <input
+                type="number"
+                value={length}
+                onChange={(e) => setLength(e.target.value)}
+                disabled={accessLevel === 'restricted'}
+                placeholder="Ex: 30"
+                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Largura (cm)</label>
+              <input
+                type="number"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                disabled={accessLevel === 'restricted'}
+                placeholder="Ex: 20"
+                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Altura (cm)</label>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                disabled={accessLevel === 'restricted'}
+                placeholder="Ex: 15"
+                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Peso Físico (kg)</label>
+              <input
+                type="number"
+                value={physicalWeight}
+                onChange={(e) => setPhysicalWeight(e.target.value)}
+                disabled={accessLevel === 'restricted'}
+                placeholder="Ex: 0.5"
+                className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50 p-6 rounded-lg border border-blue-100">
+            <div className="text-center md:text-left">
+              <p className="text-sm text-blue-800 font-semibold mb-1">Peso Volumétrico Calculado:</p>
+              <p className="text-3xl font-bold text-blue-600">{volumetricWeight.toFixed(3)} kg</p>
+              <p className="text-xs text-blue-500 mt-1">(C x L x A) / 6000</p>
+            </div>
+            
+            <div className="text-center md:text-right border-t md:border-t-0 md:border-l border-blue-200 pt-4 md:pt-0 md:pl-6">
+              <p className="text-sm text-gray-700 font-semibold mb-1">Peso Taxável Final:</p>
+              <p className="text-4xl font-black text-gray-900">{finalWeight.toFixed(3)} kg</p>
+              <div className="flex items-center justify-center md:justify-end gap-1 mt-2 text-xs text-gray-500">
+                <Info className="w-3 h-3" />
+                <span>
+                  {volumetricWeight <= 2 
+                    ? "Volumétrico ≤ 2kg: ML usa o peso físico." 
+                    : volumetricWeight > pw 
+                      ? "Volumétrico > Físico: será usado o volumétrico." 
+                      : "Físico > Volumétrico: será usado o físico."}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100 flex gap-3">
+            <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-yellow-800">
+              <strong>Atenção:</strong> O peso que você deve inserir nas <strong>Configurações</strong> do Precifica Fácil para o Mercado Livre é este <strong>Peso Taxável Final</strong>. É com base nele que o sistema calculará o frete correto.
             </p>
-            <div className="space-y-2">
-                <p className="text-sm font-black text-yellow-600 uppercase tracking-[0.2em] animate-pulse">RECURSO BLOQUEADO</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ative seu acesso Pro para liberar</p>
-            </div>
+          </div>
+        </div>
+      </div>
+      {accessLevel === 'restricted' && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-[2px]">
+          <div className="bg-white/90 p-6 rounded-2xl shadow-2xl border-2 border-orange-500 flex items-center gap-3 transform scale-110">
+            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">🔒 Função disponível apenas na Versão Pró</span>
           </div>
         </div>
       )}
-      <div className={`bg-yellow-50 p-6 ${accessLevel === 'restricted' ? 'filter blur-[2px] pointer-events-none' : ''}`}>
-        <div className="border-b pb-4 mb-6 flex items-center gap-3">
-        <img 
-          src="https://i.postimg.cc/RZpfX1wT/Mercado_Livre.png" 
-          alt="Mercado Livre Logo" 
-          className="h-10 w-auto object-contain"
-          referrerPolicy="no-referrer"
-        />
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Calculadora de Peso Volumétrico (Mercado Livre)</h2>
-          <p className="text-sm text-gray-500">Descubra qual peso será usado para calcular o seu frete.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Comprimento (cm)</label>
-          <input
-            type="number"
-            value={length}
-            onChange={(e) => setLength(e.target.value)}
-            placeholder="Ex: 30"
-            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Largura (cm)</label>
-          <input
-            type="number"
-            value={width}
-            onChange={(e) => setWidth(e.target.value)}
-            placeholder="Ex: 20"
-            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Altura (cm)</label>
-          <input
-            type="number"
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-            placeholder="Ex: 15"
-            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Peso Físico (kg)</label>
-          <input
-            type="number"
-            value={physicalWeight}
-            onChange={(e) => setPhysicalWeight(e.target.value)}
-            placeholder="Ex: 0.5"
-            className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50 p-6 rounded-lg border border-blue-100">
-        <div className="text-center md:text-left">
-          <p className="text-sm text-blue-800 font-semibold mb-1">Peso Volumétrico Calculado:</p>
-          <p className="text-3xl font-bold text-blue-600">{volumetricWeight.toFixed(3)} kg</p>
-          <p className="text-xs text-blue-500 mt-1">(C x L x A) / 6000</p>
-        </div>
-        
-        <div className="text-center md:text-right border-t md:border-t-0 md:border-l border-blue-200 pt-4 md:pt-0 md:pl-6">
-          <p className="text-sm text-gray-700 font-semibold mb-1">Peso Taxável Final:</p>
-          <p className="text-4xl font-black text-gray-900">{finalWeight.toFixed(3)} kg</p>
-          <div className="flex items-center justify-center md:justify-end gap-1 mt-2 text-xs text-gray-500">
-            <Info className="w-3 h-3" />
-            <span>
-              {volumetricWeight <= 2 
-                ? "Volumétrico ≤ 2kg: ML usa o peso físico." 
-                : volumetricWeight > pw 
-                  ? "Volumétrico > Físico: será usado o volumétrico." 
-                  : "Físico > Volumétrico: será usado o físico."}
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100 flex gap-3">
-        <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-yellow-800">
-          <strong>Atenção:</strong> O peso que você deve inserir nas <strong>Configurações</strong> do Precifica Fácil para o Mercado Livre é este <strong>Peso Taxável Final</strong>. É com base nele que o sistema calculará o frete correto.
-        </p>
-      </div>
     </div>
-  </div>
-);
+  );
 }
