@@ -70,7 +70,9 @@ export async function activateCoupon(code: string) {
     throw new Error('Você precisa estar logado para ativar um cupom.');
   }
 
-  const couponId = code.toUpperCase().trim();
+  const trimmedCode = code.trim();
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedCode);
+  const couponId = isEmail ? trimmedCode.toLowerCase() : trimmedCode.toUpperCase();
   const couponRef = doc(db, 'coupons', couponId);
 
   try {

@@ -22,12 +22,12 @@ const ActivationInput: React.FC<{
         setError('');
         setSuccess(false);
         
-        // Padronização: 3 blocos de 4 caracteres alfanuméricos (Ex: K9B2-X7M4-P1Q8)
-        const couponPattern = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-        const formattedCode = code.trim().toUpperCase();
+        // Validação de e-mail
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const formattedCode = code.trim().toLowerCase();
 
-        if (!couponPattern.test(formattedCode)) {
-            setError('Padrão inválido (Ex: K9B2-X7M4-P1Q8)');
+        if (!emailPattern.test(formattedCode)) {
+            setError('Por favor, insira um e-mail válido.');
             return;
         }
 
@@ -53,7 +53,7 @@ const ActivationInput: React.FC<{
                         setCode(e.target.value);
                         if (success) setSuccess(false);
                     }}
-                    placeholder="K9B2-X7M4-P1Q8"
+                    placeholder="seu@email.com"
                     className="rounded-lg border-gray-300 shadow-md text-sm px-3 py-3 bg-white text-gray-900 w-44 focus:ring-blue-500 focus:border-blue-500 h-[48px]"
                 />
                 <button

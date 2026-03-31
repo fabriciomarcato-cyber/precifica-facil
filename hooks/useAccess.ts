@@ -141,10 +141,12 @@ export function useAccess() {
   };
 
   const activate = useCallback(async (code: string): Promise<{ success: boolean; message?: string }> => {
-    const upperCaseCode = code.toUpperCase();
+    const trimmedCode = code.trim();
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedCode);
+    const formattedCode = isEmail ? trimmedCode.toLowerCase() : trimmedCode.toUpperCase();
     
     // Check regular codes
-    const regularHours = CODES[upperCaseCode];
+    const regularHours = CODES[formattedCode];
     if (regularHours) {
       try {
         const expirationTimestamp = Date.now() + regularHours * 60 * 60 * 1000;
@@ -163,7 +165,7 @@ export function useAccess() {
     // If no valid code was found in local list, try Firebase
     if (user) {
       try {
-        const result = await activateCoupon(upperCaseCode);
+        const result = await activateCoupon(formattedCode);
         if (result.success && result.expirationDate) {
           const expirationTimestamp = result.expirationDate.getTime();
           window.localStorage.setItem(ACCESS_KEY, 'full');
@@ -174,7 +176,7 @@ export function useAccess() {
           return { success: true };
         }
       } catch (error: any) {
-        let errorMsg = 'Código de acesso inválido.';
+        let errorMsg = 'E-mail ou código de acesso inválido.';
         try {
           const parsed = JSON.parse(error.message);
           errorMsg = parsed.error || errorMsg;
@@ -184,10 +186,10 @@ export function useAccess() {
         return { success: false, message: errorMsg };
       }
     } else {
-      return { success: false, message: 'Código de acesso inválido ou você precisa estar logado para ativar este cupom.' };
+      return { success: false, message: 'E-mail ou código de acesso inválido ou você precisa estar logado para ativar.' };
     }
 
-    return { success: false, message: 'Código de acesso inválido.' };
+    return { success: false, message: 'E-mail ou código de acesso inválido.' };
   }, [user]);
 
   return { user, accessLevel, expiration, isLoading, activate, message, revalidateAccess, login };
