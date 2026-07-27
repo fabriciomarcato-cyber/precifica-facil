@@ -216,9 +216,17 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
 
             <SettingsCard title="TikTok Shop" platform={Platform.TIKTOK_SHOP}>
               <InputField label="Margem Contribuição TikTok (%):" unit="%" value={settings.tiktok.contributionMargin} onChange={(e) => handleInputChange('tiktok', 'contributionMargin', e.target.value)} />
-              <InputField label="Comissão Fixa (%):" unit="%" value={settings.tiktok.commission} onChange={(e) => handleInputChange('tiktok', 'commission', e.target.value)} />
-              <InputField label="Comissão Frete Grátis (%):" unit="%" value={settings.tiktok.shippingCommission} onChange={(e) => handleInputChange('tiktok', 'shippingCommission', e.target.value)} />
-              <InputField label="Taxas Adicionais:" unit="R$" value={settings.tiktok.fixedFee} onChange={(e) => handleInputChange('tiktok', 'fixedFee', e.target.value)} />
+              <InputField label="Comissão de Afiliado (%):" unit="%" value={settings.tiktok.affiliateCommission ?? 0} onChange={(e) => handleInputChange('tiktok', 'affiliateCommission', e.target.value)} />
+              <div className="md:col-span-2 pt-3 border-t border-gray-200 mt-2">
+                <div className="bg-white/80 p-3 rounded-lg border border-gray-200 text-xs text-gray-700 space-y-1">
+                  <p className="font-bold text-gray-900">Regras de Tarifas do TikTok Shop (Vigentes):</p>
+                  <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-gray-600">
+                    <li>Preço &lt; R$ 50,00: <strong>10%</strong> comissão + <strong>R$ 4,00</strong> taxa fixa</li>
+                    <li>Preço &ge; R$ 50,00: <strong>6%</strong> comissão + <strong>R$ 6,00</strong> taxa fixa</li>
+                  </ul>
+                  <p className="text-[10px] text-gray-500 italic mt-1">* A comissão de afiliado informada é somada à comissão base.</p>
+                </div>
+              </div>
             </SettingsCard>
 
             <SettingsCard title="Instagram" platform={Platform.INSTAGRAM}>

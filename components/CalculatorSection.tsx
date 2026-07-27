@@ -228,6 +228,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                 {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                     <p className="text-[10px] opacity-60 font-bold">Peso: {settings.mercadoLivre.productWeight}kg</p>
                                 )}
+                                {res.platform === Platform.TIKTOK_SHOP && (
+                                    <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
+                                        <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
+                                        {(settings.tiktok.affiliateCommission || 0) > 0 && (
+                                            <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -324,6 +332,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                           )}
                                           {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                               <p className="text-[10px] opacity-60 font-bold">Peso: {settings.mercadoLivre.productWeight}kg</p>
+                                          )}
+                                          {res.platform === Platform.TIKTOK_SHOP && (
+                                              <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
+                                                  <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
+                                                  {(settings.tiktok.affiliateCommission || 0) > 0 && (
+                                                      <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
+                                                  )}
+                                              </div>
                                           )}
                                       </div>
                                   </div>
@@ -427,6 +443,14 @@ export default function CalculatorSection({ settings, accessLevel, activate, exp
                                       )}
                                       {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
                                           <p className="text-[10px] opacity-60 font-bold">Peso: {settings.mercadoLivre.productWeight}kg</p>
+                                      )}
+                                      {res.platform === Platform.TIKTOK_SHOP && (
+                                          <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
+                                              <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
+                                              {(settings.tiktok.affiliateCommission || 0) > 0 && (
+                                                  <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
+                                              )}
+                                          </div>
                                       )}
                                   </div>
                               </div>

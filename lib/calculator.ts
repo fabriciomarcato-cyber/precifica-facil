@@ -272,6 +272,96 @@ function calculateShopeePrice(
 }
 
 
+/**
+ * Retorna a estrutura de taxas do TikTok Shop com base no Preço de Venda e na comissão de afiliado:
+ * - Preço < R$ 50,00: Comissão base 10% + Taxa fixa R$ 4,00 por item.
+ * - Preço >= R$ 50,00: Comissão base 6% + Taxa fixa R$ 6,00 por item.
+ * 
+ * A comissão de afiliado (se informada) é somada à comissão base.
+ */
+export function getTikTokShopFeeComponents(price: number, affiliateCommissionPercent: number = 0) {
+  const isUnder50 = price < 50.00;
+  const baseCommissionPercent = isUnder50 ? 0.10 : 0.06;
+  const fixedFee = isUnder50 ? 4.00 : 6.00;
+  const affiliateDecimal = (affiliateCommissionPercent || 0) / 100;
+  const totalCommissionPercent = baseCommissionPercent + affiliateDecimal;
+
+  return {
+    baseCommissionPercent,
+    fixedFee,
+    affiliateCommissionPercentDecimal: affiliateDecimal,
+    totalCommissionPercent,
+  };
+}
+
+/**
+ * Calcula o Preço de Venda do TikTok Shop testando as faixas de preço (< R$ 50 vs >= R$ 50)
+ * e aplicando a comissão de afiliado opcional.
+ */
+export function calculateTikTokShopPrice(
+  productCost: number,
+  settings: AppSettings,
+  affiliateCommissionPercentOverride?: number
+) {
+  const taxPercent = settings.simplesNacional / 100;
+  const marginPercent = settings.tiktok.contributionMargin / 100;
+  const affiliatePercent = (affiliateCommissionPercentOverride !== undefined
+    ? affiliateCommissionPercentOverride
+    : (settings.tiktok.affiliateCommission || 0));
+  const affiliateDecimal = affiliatePercent / 100;
+
+  // Faixa 1: Preço < R$ 50,00 (10% + R$ 4,00)
+  const totalRate1 = marginPercent + 0.10 + affiliateDecimal + taxPercent;
+  let price1 = Infinity;
+  if (1 - totalRate1 > 0) {
+    price1 = (productCost + 4.00) / (1 - totalRate1);
+  }
+
+  // Faixa 2: Preço >= R$ 50,00 (6% + R$ 6,00)
+  const totalRate2 = marginPercent + 0.06 + affiliateDecimal + taxPercent;
+  let price2 = Infinity;
+  if (1 - totalRate2 > 0) {
+    price2 = (productCost + 6.00) / (1 - totalRate2);
+  }
+
+  let finalPrice = Infinity;
+  let baseCommDecimal = 0.06;
+  let fixedFee = 6.00;
+
+  if (price1 < 50.00) {
+    finalPrice = price1;
+    baseCommDecimal = 0.10;
+    fixedFee = 4.00;
+  } else if (price2 >= 50.00) {
+    finalPrice = price2;
+    baseCommDecimal = 0.06;
+    fixedFee = 6.00;
+  } else {
+    // Ponto de transição na borda de R$ 50,00
+    finalPrice = price2;
+    baseCommDecimal = 0.06;
+    fixedFee = 6.00;
+  }
+
+  const totalCommDecimal = baseCommDecimal + affiliateDecimal;
+  const commissionValue = finalPrice * totalCommDecimal;
+  const taxValue = finalPrice * taxPercent;
+  const grossProfit = finalPrice - productCost - fixedFee - commissionValue - taxValue;
+  const calculatedMargin = isFinite(finalPrice) && finalPrice > 0 ? (grossProfit / finalPrice) * 100 : 0;
+
+  return {
+    finalPrice,
+    fixedFee,
+    commissionValue,
+    taxValue,
+    grossProfit,
+    calculatedMargin,
+    commissionPercent: totalCommDecimal * 100,
+    baseCommissionPercent: baseCommDecimal * 100,
+    affiliateCommissionPercent: affiliatePercent,
+  };
+}
+
 export function calculateIndividualPrices(productCost: number, weightInKg: number, settings: AppSettings): CalculationResult[] {
   if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
     return [];
@@ -332,24 +422,18 @@ export function calculateIndividualPrices(productCost: number, weightInKg: numbe
   });
 
   // TikTok Shop
-  const tiktokMargin = settings.tiktok.contributionMargin / 100;
-  const tiktokCommission = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
-  const tiktokTotalPercent = tiktokMargin + tiktokCommission + taxPercent;
-  const tiktokPrice = (productCost + settings.tiktok.fixedFee) / (1 - tiktokTotalPercent);
-  const tiktokCommissionValue = tiktokPrice * tiktokCommission;
-  const tiktokTaxValue = tiktokPrice * taxPercent;
-  const tiktokGrossProfit = tiktokPrice - productCost - settings.tiktok.fixedFee - tiktokCommissionValue - tiktokTaxValue;
+  const tiktokResult = calculateTikTokShopPrice(productCost, settings);
   results.push({
     platform: Platform.TIKTOK_SHOP,
-    sellingPrice: tiktokPrice,
+    sellingPrice: tiktokResult.finalPrice,
     productCost: productCost,
-    fixedFee: settings.tiktok.fixedFee,
-    commission: tiktokCommissionValue,
-    tax: tiktokTaxValue,
-    grossProfit: tiktokGrossProfit,
-    calculatedMargin: (tiktokGrossProfit / tiktokPrice) * 100,
+    fixedFee: tiktokResult.fixedFee,
+    commission: tiktokResult.commissionValue,
+    tax: tiktokResult.taxValue,
+    grossProfit: tiktokResult.grossProfit,
+    calculatedMargin: tiktokResult.calculatedMargin,
     contributionMarginPercent: settings.tiktok.contributionMargin,
-    commissionPercent: settings.tiktok.commission + settings.tiktok.shippingCommission,
+    commissionPercent: tiktokResult.commissionPercent,
     taxPercent: settings.simplesNacional,
   });
 
@@ -416,12 +500,14 @@ export function calculateMaxCost(desiredPrice: number, weightInKg: number, setti
                 marginPercent = settings.shopee.contributionMargin / 100;
                 contributionMargin = settings.shopee.contributionMargin;
                 break;
-            case Platform.TIKTOK_SHOP:
-                commissionRate = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
-                fixedFee = settings.tiktok.fixedFee;
+            case Platform.TIKTOK_SHOP: {
+                const tiktokFees = getTikTokShopFeeComponents(desiredPrice, settings.tiktok.affiliateCommission || 0);
+                commissionRate = tiktokFees.totalCommissionPercent;
+                fixedFee = tiktokFees.fixedFee;
                 marginPercent = settings.tiktok.contributionMargin / 100;
                 contributionMargin = settings.tiktok.contributionMargin;
                 break;
+            }
             case Platform.INSTAGRAM:
                 commissionRate = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
                 fixedFee = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;
@@ -482,10 +568,12 @@ export function simulateMargin(productCost: number, sellingPrice: number, weight
                 commissionRate = shopeeFeesSim.commissionPercent;
                 fixedFee = shopeeFeesSim.fixedFee;
                 break;
-            case Platform.TIKTOK_SHOP:
-                commissionRate = (settings.tiktok.commission + settings.tiktok.shippingCommission) / 100;
-                fixedFee = settings.tiktok.fixedFee;
+            case Platform.TIKTOK_SHOP: {
+                const tiktokFeesSim = getTikTokShopFeeComponents(sellingPrice, settings.tiktok.affiliateCommission || 0);
+                commissionRate = tiktokFeesSim.totalCommissionPercent;
+                fixedFee = tiktokFeesSim.fixedFee;
                 break;
+            }
             case Platform.INSTAGRAM:
                 commissionRate = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
                 fixedFee = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;

@@ -22,9 +22,10 @@ const defaultSettings: AppSettings = {
   },
   tiktok: {
     contributionMargin: 15,
+    affiliateCommission: 0,
     commission: 6,
-    shippingCommission: 6,
-    fixedFee: 2.00,
+    shippingCommission: 0,
+    fixedFee: 6.00,
   },
   instagram: {
     contributionMargin: 15,

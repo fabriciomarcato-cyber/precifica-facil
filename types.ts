@@ -25,9 +25,10 @@ export interface ShopeeSettings {
 
 export interface TikTokShopSettings {
   contributionMargin: number;
-  commission: number;
-  shippingCommission: number;
-  fixedFee: number;
+  affiliateCommission: number;
+  commission?: number;
+  shippingCommission?: number;
+  fixedFee?: number;
 }
 
 export interface InstagramSettings {

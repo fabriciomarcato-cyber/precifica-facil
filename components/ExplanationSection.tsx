@@ -127,8 +127,14 @@ export default function ExplanationSection({ accessLevel }: { accessLevel: strin
                     </FormulaCard>
 
                     <FormulaCard platform={Platform.TIKTOK_SHOP} formula="(Custo + Taxa Fixa) / (1 - % Total)">
-                        <p>O TikTok Shop soma a comissão padrão com uma comissão de frete grátis, além de taxas adicionais.</p>
-                        <p>O <strong>"% Total"</strong> inclui sua margem, as duas comissões e o imposto.</p>
+                        <p>O cálculo do TikTok Shop aplica regras condicionais de acordo com o valor final da venda:</p>
+                        <ul className="list-disc list-inside space-y-1 my-2 text-sm">
+                            <li><strong>Abaixo de R$ 50,00 (&lt; R$ 50,00):</strong> Comissão base de 10% + Taxa fixa de R$ 4,00</li>
+                            <li><strong>A partir de R$ 50,00 (&ge; R$ 50,00):</strong> Comissão base de 6% + Taxa fixa de R$ 6,00</li>
+                        </ul>
+                        <p className="text-sm mt-2">
+                            <strong>Comissão de Afiliado (Opcional):</strong> A porcentagem informada para afiliados é somada à comissão base do TikTok para compor o <strong>% Total</strong>.
+                        </p>
                     </FormulaCard>
 
                     <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)">
