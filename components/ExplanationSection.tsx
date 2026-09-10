@@ -2,7 +2,7 @@
 import React from 'react';
 import { Platform } from '../types';
 import { getMarketplaceIcon } from './MarketplaceIcons';
-import { Percent, DollarSign, Truck, Banknote, Lock } from 'lucide-react';
+import { Percent, DollarSign, Truck, Banknote } from 'lucide-react';
 
 const InfoCard: React.FC<React.PropsWithChildren<{ icon: React.ReactNode; title: string }>> = ({ icon, title, children }) => (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col h-full">
@@ -30,22 +30,11 @@ const getPlatformColor = (platform: Platform) => {
     }
 };
 
-const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string; isLocked?: boolean }>> = ({ platform, formula, isLocked, children }) => {
+const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formula: string }>> = ({ platform, formula, children }) => {
     const colorClasses = getPlatformColor(platform);
     return (
         <div className={`${colorClasses} p-6 rounded-xl shadow-md border flex flex-col h-full relative overflow-hidden`}>
-            {isLocked && (
-                <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-[4px] flex flex-col items-center justify-center text-center p-4">
-                    <div className="bg-white p-4 rounded-full shadow-lg mb-4 border border-gray-100">
-                        <Lock className="w-8 h-8 text-blue-600/40" />
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600">PLANO PRO</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400">RECURSO BLOQUEADO</p>
-                    </div>
-                </div>
-            )}
-            <div className={`flex flex-col h-full ${isLocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+            <div className="flex flex-col h-full">
                 <div className="flex items-center mb-4">
                     {getMarketplaceIcon(platform)}
                     <h4 className="text-xl font-bold text-gray-800 ml-3">{platform}</h4>
@@ -61,8 +50,7 @@ const FormulaCard: React.FC<React.PropsWithChildren<{ platform: Platform; formul
     );
 };
 
-export default function ExplanationSection({ accessLevel }: { accessLevel: string }) {
-    const isRestricted = accessLevel === 'restricted';
+export default function ExplanationSection() {
     return (
         <div className="mt-16">
             <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Entenda os principais conceitos usados nos cálculos</h2>
@@ -99,8 +87,8 @@ export default function ExplanationSection({ accessLevel }: { accessLevel: strin
                  <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Resumo das Fórmulas de Cálculo</h2>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <FormulaCard platform={Platform.ML_CLASSICO} formula="(Custo + Frete) / (1 - % Total)">
-                        <p>O cálculo do Mercado Livre (ref. Mar/2026) usa um <strong>custo de frete variável</strong>, que depende do <strong>preço</strong> e do <strong>peso</strong> do produto, conforme a nova tabela de custos operacionais.</p>
-                        <p>Essa nova taxa substitui a antiga "taxa fixa" e é aplicada a todas as faixas de preço.</p>
+                        <p>O cálculo do Mercado Livre (ref. a partir de 24/08/2026) usa um <strong>custo de frete e gestão operacional</strong>, que varia conforme o <strong>preço de venda</strong> e o <strong>peso</strong> do produto, segundo a tabela oficial unificada nacionalmente.</p>
+                        <p>Abaixo de R$ 79,00 aplica-se a taxa operacional reduzida/padrão (com faixas até R$ 18,99, R$ 48,99 e R$ 78,99). A partir de R$ 79,00 aplica-se o frete grátis e rápido obrigatório.</p>
                         <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                            <p className="font-semibold text-yellow-800 text-sm">Atenção: O custo de frete do ML depende do <strong>preço</strong> e do <strong>peso</strong>. Insira o peso correto para um cálculo preciso.</p>
                            <p className="text-yellow-700 text-sm mt-1">Lembre-se de usar o maior valor entre o peso físico e o cúbico (C x L x A / 6000).</p>

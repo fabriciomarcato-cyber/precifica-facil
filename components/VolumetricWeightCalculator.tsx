@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Package, Info } from 'lucide-react';
 
 interface VolumetricWeightCalculatorProps {
-  accessLevel: 'restricted' | 'full';
+  accessLevel?: 'restricted' | 'full';
 }
 
-export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWeightCalculatorProps) {
+export default function VolumetricWeightCalculator({ accessLevel = 'full' }: VolumetricWeightCalculatorProps) {
   const [length, setLength] = useState('');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
@@ -25,7 +25,7 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
 
   return (
     <div className="relative overflow-hidden rounded-xl shadow-lg mb-8 border border-yellow-200">
-      <div className={accessLevel === 'restricted' ? 'blur-[4px] pointer-events-none select-none opacity-60' : ''}>
+      <div>
         <div className="bg-yellow-50 p-6">
           <div className="border-b pb-4 mb-6 flex items-center gap-3">
             <img 
@@ -47,7 +47,6 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
                 type="number"
                 value={length}
                 onChange={(e) => setLength(e.target.value)}
-                disabled={accessLevel === 'restricted'}
                 placeholder="Ex: 30"
                 className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
               />
@@ -58,7 +57,6 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
                 type="number"
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
-                disabled={accessLevel === 'restricted'}
                 placeholder="Ex: 20"
                 className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
               />
@@ -69,7 +67,6 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
                 type="number"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
-                disabled={accessLevel === 'restricted'}
                 placeholder="Ex: 15"
                 className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
               />
@@ -80,7 +77,6 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
                 type="number"
                 value={physicalWeight}
                 onChange={(e) => setPhysicalWeight(e.target.value)}
-                disabled={accessLevel === 'restricted'}
                 placeholder="Ex: 0.5"
                 className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
               />
@@ -113,18 +109,11 @@ export default function VolumetricWeightCalculator({ accessLevel }: VolumetricWe
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100 flex gap-3">
             <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-yellow-800">
-              <strong>Atenção:</strong> O peso que você deve inserir nas <strong>Configurações</strong> do Precifica Fácil para o Mercado Livre é este <strong>Peso Taxável Final</strong>. É com base nele que o sistema calculará o frete correto.
+              <strong>Atenção:</strong> O peso que você deve inserir no campo de peso do Precifica Fácil para o Mercado Livre é este <strong>Peso Taxável Final</strong>. É com base nele que o sistema calculará o frete correto.
             </p>
           </div>
         </div>
       </div>
-      {accessLevel === 'restricted' && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-[2px]">
-          <div className="bg-white/90 p-6 rounded-2xl shadow-2xl border-2 border-orange-500 flex items-center gap-3 transform scale-110">
-            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">🔒 Função disponível apenas na Versão Pró</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

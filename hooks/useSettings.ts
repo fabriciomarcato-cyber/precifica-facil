@@ -11,8 +11,6 @@ const defaultSettings: AppSettings = {
     classicCommission: 14,
     premiumCommission: 19,
     productWeight: 1,
-    useManualFixedFee: false,
-    manualFixedFeeValue: 0,
   },
   shopee: {
     contributionMargin: 17,
@@ -44,9 +42,11 @@ export function useSettings() {
         // Basic migration: merge stored settings with defaults to add new fields
         const parsedSettings = JSON.parse(storedSettings);
         
-        // Ensure old shippingFee is not carried over
-        if (parsedSettings.mercadoLivre && parsedSettings.mercadoLivre.shippingFee) {
-            delete parsedSettings.mercadoLivre.shippingFee;
+        // Ensure obsolete or manual fee overrides are removed so official 2026 table is always used
+        if (parsedSettings.mercadoLivre) {
+          delete parsedSettings.mercadoLivre.shippingFee;
+          delete parsedSettings.mercadoLivre.useManualFixedFee;
+          delete parsedSettings.mercadoLivre.manualFixedFeeValue;
         }
 
         return {

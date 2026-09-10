@@ -1,17 +1,15 @@
 
 // FIX: Correctly import `useState` from React to resolve syntax and reference errors.
 import React, { useState } from 'react';
-// FIX: The Platform enum is used as a value in `marketplaceStyles`, so it must be imported as a value, not just a type.
-import { Platform, type AppSettings, ShopeeSettings } from '../types';
-import { getMarketplaceIcon } from './MarketplaceIcons';
-import { Lock, Settings } from 'lucide-react';
+import { Platform, type AppSettings, type ShopeeSettings } from '../types';
+import { Settings } from 'lucide-react';
+import { parseNumber, parseWeight } from '../lib/calculator';
 
 interface SettingsPanelProps {
   initialSettings: AppSettings;
   onSave: (settings: AppSettings) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  accessLevel: 'restricted' | 'full';
 }
 
 const getPlatformColor = (platform: Platform) => {
@@ -30,19 +28,13 @@ const getPlatformColor = (platform: Platform) => {
   }
 };
 
-const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform; disabled?: boolean }>> = ({ title, platform, children, disabled }) => {
+const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform }>> = ({ title, platform, children }) => {
     const colorClasses = getPlatformColor(platform);
     const isShopee = platform === Platform.SHOPEE;
     
     return (
-        <div className={`relative ${colorClasses} p-6 rounded-xl shadow-lg border-2 transition-all ${disabled ? 'opacity-60' : 'hover:shadow-xl'}`}>
-            {disabled && (
-                 <div className="absolute inset-0 bg-gray-50 bg-opacity-70 flex items-center justify-center rounded-xl z-10 flex-col p-4 text-center">
-                    <Lock className="w-8 h-8 text-gray-500 mb-2" />
-                    <span className="text-sm font-bold text-gray-600 uppercase tracking-tight">Recurso Pro</span>
-                 </div>
-            )}
-            <div className={disabled ? 'pointer-events-none' : ''}>
+        <div className={`relative ${colorClasses} p-6 rounded-xl shadow-lg border-2 transition-all hover:shadow-xl`}>
+            <div>
                 <div className="mb-6 text-center">
                     <h3 className={`text-xl font-black uppercase tracking-tight ${isShopee ? 'text-white' : 'text-gray-800'}`}>{title}</h3>
                 </div>
@@ -55,7 +47,7 @@ const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: 
 };
 
 
-const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit?: string; isShopee?: boolean }> = ({ label, value, onChange, unit, isShopee }) => (
+const InputField: React.FC<{ label: string; value: number; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; unit?: string; isShopee?: boolean; placeholder?: string }> = ({ label, value, onChange, unit, isShopee, placeholder }) => (
   <div className="w-full">
     <label className={`block text-[10px] font-black uppercase tracking-wider leading-tight mb-1 ${isShopee ? 'text-white/90' : 'text-gray-600'}`}>{label}</label>
     <div className="relative rounded-lg shadow-sm">
@@ -63,10 +55,11 @@ const InputField: React.FC<{ label: string; value: number; onChange: (e: React.C
         <span className={`${isShopee ? 'text-white/70' : 'text-gray-500'} text-[10px] font-bold`}>{unit}</span>
       </div>
       <input
-        type="number"
-        step="0.01"
+        type="text"
+        inputMode="decimal"
         value={value}
         onChange={onChange}
+        placeholder={placeholder}
         className={`block w-full rounded-lg border-0 pl-8 pr-3 py-1.5 focus:ring-2 focus:ring-white/50 text-sm font-bold shadow-inner transition-all ${isShopee ? 'bg-white/10 text-white placeholder-white/40 ring-1 ring-white/20' : 'bg-white text-gray-900 ring-1 ring-gray-300'}`}
       />
     </div>
@@ -74,9 +67,8 @@ const InputField: React.FC<{ label: string; value: number; onChange: (e: React.C
 );
 
 
-export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOpen, accessLevel }: SettingsPanelProps) {
+export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOpen }: SettingsPanelProps) {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
-  const isRestricted = accessLevel === 'restricted';
 
   const handleSave = () => {
     onSave(settings);
@@ -85,7 +77,10 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
   };
   
   const handleInputChange = (section: Exclude<keyof AppSettings, 'simplesNacional' | 'shopee'>, field: string, value: string) => {
-    const numericValue = parseFloat(value) || 0;
+    let numericValue = parseNumber(value);
+    if (field === 'productWeight') {
+      numericValue = parseWeight(value);
+    }
     setSettings(prev => {
         const updatedSection = { ...prev[section], [field]: numericValue };
         return { ...prev, [section]: updatedSection };
@@ -104,16 +99,9 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
   };
 
   const handleGeneralChange = (field: 'simplesNacional', value: string) => {
-     const numericValue = parseFloat(value) || 0;
+     const numericValue = parseNumber(value);
      setSettings(prev => ({...prev, [field]: numericValue }));
   }
-
-  const handleToggleChange = (section: 'mercadoLivre', field: string, value: boolean) => {
-    setSettings(prev => {
-        const updatedSection = { ...prev[section], [field]: value };
-        return { ...prev, [section]: updatedSection };
-    });
-  };
 
   if (!isOpen) {
     return null;
@@ -158,31 +146,11 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
 
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             <SettingsCard title="Mercado Livre" platform={Platform.ML_CLASSICO}>
-              <InputField label="Margem Contribuição (%):" unit="%" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
-              <InputField label="Peso Volumétrico do Produto (kg):" unit="kg" value={settings.mercadoLivre.productWeight} onChange={(e) => handleInputChange('mercadoLivre', 'productWeight', e.target.value)} />
+              <div className="md:col-span-2">
+                <InputField label="Margem Contribuição (%):" unit="%" value={settings.mercadoLivre.contributionMargin} onChange={(e) => handleInputChange('mercadoLivre', 'contributionMargin', e.target.value)} />
+              </div>
               <InputField label="Comissão Clássico (%):" unit="%" value={settings.mercadoLivre.classicCommission} onChange={(e) => handleInputChange('mercadoLivre', 'classicCommission', e.target.value)} />
               <InputField label="Comissão Premium (%):" unit="%" value={settings.mercadoLivre.premiumCommission} onChange={(e) => handleInputChange('mercadoLivre', 'premiumCommission', e.target.value)} />
-              
-              <div className="md:col-span-2 space-y-3 pt-4 border-t border-black/10 mt-2">
-                <label className="flex items-center cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    checked={settings.mercadoLivre.useManualFixedFee} 
-                    onChange={(e) => handleToggleChange('mercadoLivre', 'useManualFixedFee', e.target.checked)}
-                    className="h-5 w-5 rounded border-gray-400 text-blue-600 focus:ring-blue-500 transition-all" 
-                  />
-                  <span className="ml-3 text-sm font-black uppercase tracking-tight text-gray-700 group-hover:text-black transition-colors">Usar Taxa Fixa/Frete Manual</span>
-                </label>
-                
-                {settings.mercadoLivre.useManualFixedFee && (
-                  <InputField 
-                    label="Valor Taxa Fixa/Frete (R$):" 
-                    unit="R$" 
-                    value={settings.mercadoLivre.manualFixedFeeValue} 
-                    onChange={(e) => handleInputChange('mercadoLivre', 'manualFixedFeeValue', e.target.value)} 
-                  />
-                )}
-              </div>
             </SettingsCard>
 
             <SettingsCard title="Shopee" platform={Platform.SHOPEE}>

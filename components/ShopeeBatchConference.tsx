@@ -10,10 +10,10 @@ import autoTable from 'jspdf-autotable';
 
 interface ShopeeBatchConferenceProps {
   settings: AppSettings;
-  accessLevel: 'restricted' | 'full';
+  accessLevel?: 'restricted' | 'full';
 }
 
-export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeBatchConferenceProps) {
+export default function ShopeeBatchConference({ settings, accessLevel = 'full' }: ShopeeBatchConferenceProps) {
   const [inputData, setInputData] = useState('');
   const [results, setResults] = useState<ShopeeBatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -154,7 +154,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
 
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-8 border border-orange-600">
-      <div className={accessLevel === 'restricted' ? 'blur-[4px] pointer-events-none select-none opacity-60' : ''}>
+      <div>
         <div className="bg-gradient-to-br from-[#EE4D2D] to-[#FF6321] p-8 text-white">
           <div className="border-b border-white/20 pb-6 mb-8">
             <div className="text-center">
@@ -185,11 +185,9 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     onChange={handleFileUpload}
                     accept=".csv,.xlsx,.xls"
                     className="hidden"
-                    disabled={accessLevel === 'restricted'}
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={accessLevel === 'restricted'}
                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-black py-2.5 px-4 rounded-xl border border-white/30 transition-all shadow-lg backdrop-blur-sm uppercase tracking-wider"
                   >
                     <FileUp className="w-4 h-4" />
@@ -201,7 +199,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
               <textarea
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
-                disabled={accessLevel === 'restricted'}
                 placeholder={`Exemplo:\nSKU,Descrição,Custo,Estoque,Preço de Venda Atual\n2237,Produto X,50.00,10,89.90`}
                 className="w-full h-48 p-4 bg-white/10 border border-white/30 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-transparent font-mono text-sm text-white placeholder-white/40 shadow-inner backdrop-blur-sm"
               />
@@ -211,7 +208,7 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
               <div className="flex flex-wrap gap-4 items-center">
                 <button
                   onClick={handleRunBatch}
-                  disabled={isLoading || accessLevel === 'restricted'}
+                  disabled={isLoading}
                   className="flex items-center gap-3 bg-white text-[#EE4D2D] font-black py-3 px-8 rounded-xl hover:bg-gray-100 transition-all disabled:bg-white/50 shadow-xl uppercase tracking-wider text-sm"
                 >
                   {isLoading ? (
@@ -246,14 +243,12 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/20">
                       <button
                         onClick={() => setFilterType('all')}
-                        disabled={accessLevel === 'restricted'}
                         className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'all' ? 'bg-white text-[#EE4D2D] shadow-lg' : 'text-white/70 hover:text-white'}`}
                       >
                         Todos
                       </button>
                       <button
                         onClick={() => setFilterType('adjustment')}
-                        disabled={accessLevel === 'restricted'}
                         className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase tracking-wider ${filterType === 'adjustment' ? 'bg-white text-red-600 shadow-lg' : 'text-white/70 hover:text-white'}`}
                       >
                         Reajustes
@@ -266,7 +261,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     <select
                       value={sortType}
                       onChange={(e) => setSortType(e.target.value as any)}
-                      disabled={accessLevel === 'restricted'}
                       className="bg-white/10 border border-white/20 text-white text-[10px] font-black rounded-xl focus:ring-2 focus:ring-white/50 block p-2 shadow-lg uppercase tracking-wider outline-none"
                     >
                       <option value="none" className="text-gray-900">Padrão</option>
@@ -279,7 +273,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                   <div className="flex items-center gap-3 ml-auto border-l border-white/20 pl-6">
                     <button
                       onClick={exportToExcel}
-                      disabled={accessLevel === 'restricted'}
                       className="flex items-center gap-2 bg-green-500 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg uppercase tracking-wider"
                       title="Exportar para Excel"
                     >
@@ -288,7 +281,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
                     </button>
                     <button
                       onClick={exportToPDF}
-                      disabled={accessLevel === 'restricted'}
                       className="flex items-center gap-2 bg-red-600 text-white text-[10px] font-black py-2.5 px-4 rounded-xl hover:bg-red-700 transition-all shadow-lg uppercase tracking-wider"
                       title="Exportar para PDF"
                     >
@@ -379,13 +371,6 @@ export default function ShopeeBatchConference({ settings, accessLevel }: ShopeeB
           </div>
         </div>
       </div>
-      {accessLevel === 'restricted' && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-[2px]">
-          <div className="bg-white/90 p-6 rounded-2xl shadow-2xl border-2 border-orange-500 flex items-center gap-3 transform scale-110">
-            <span className="text-xl font-black text-gray-900 uppercase tracking-tight">🔒 Função disponível apenas na Versão Pró</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

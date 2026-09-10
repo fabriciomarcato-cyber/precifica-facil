@@ -1,5 +1,6 @@
 {
   "name": "Precifica Fácil",
   "description": "Uma calculadora de preços para produtos vendidos em marketplaces como Mercado Livre, Shopee, TikTok Shop e Instagram. Calcule o preço de venda, o custo máximo de compra e simule margens de lucro.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

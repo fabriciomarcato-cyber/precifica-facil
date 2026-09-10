@@ -12,8 +12,6 @@ export interface MercadoLivreSettings {
   classicCommission: number;
   premiumCommission: number;
   productWeight: number;
-  useManualFixedFee: boolean;
-  manualFixedFeeValue: number;
 }
 
 export interface ShopeeSettings {
