@@ -188,7 +188,7 @@ function calculateMercadoLivrePrice(
 /**
  * Determines the fee structure for Shopee based on the new 2026 rules.
  */
-function getShopeeFeeComponents(price: number, settings: AppSettings): { commissionPercent: number, fixedFee: number } {
+export function getShopeeFeeComponents(price: number, settings: AppSettings): { commissionPercent: number, fixedFee: number } {
     const { sellerType, highVolumeCPF, inCampaign } = settings.shopee;
     let commissionPercent = 0;
     let fixedFee = 0;
@@ -248,7 +248,7 @@ function getShopeeFeeComponents(price: number, settings: AppSettings): { commiss
 /**
  * Iteratively calculates the final selling price for Shopee.
  */
-function calculateShopeePrice(
+export function calculateShopeePrice(
   productCost: number,
   settings: AppSettings
 ): { 

@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { AppSettings } from '../types';
 import { runShopeeBatchConference, ShopeeBatchResult } from '../services/geminiService';
-import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText, FileUp, Lock } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Loader2, Upload, FileJson, FileSpreadsheet, Download, Filter, FileText, FileUp } from 'lucide-react';
 import { formatCurrency } from '../lib/calculator';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -10,10 +10,9 @@ import autoTable from 'jspdf-autotable';
 
 interface ShopeeBatchConferenceProps {
   settings: AppSettings;
-  accessLevel?: 'restricted' | 'full';
 }
 
-export default function ShopeeBatchConference({ settings, accessLevel = 'full' }: ShopeeBatchConferenceProps) {
+export default function ShopeeBatchConference({ settings }: ShopeeBatchConferenceProps) {
   const [inputData, setInputData] = useState('');
   const [results, setResults] = useState<ShopeeBatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -214,7 +213,7 @@ export default function ShopeeBatchConference({ settings, accessLevel = 'full' }
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Processando IA...
+                      Processando...
                     </>
                   ) : (
                     <>
