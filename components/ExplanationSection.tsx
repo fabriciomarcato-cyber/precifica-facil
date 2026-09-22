@@ -100,7 +100,7 @@ export default function ExplanationSection() {
                     <FormulaCard platform={Platform.SHOPEE} formula="(Custo + Taxa Fixa) / (1 - % Total)">
                         <p className='mb-2'>O cálculo da Shopee (ref. Mar/2026) possui taxas progressivas e regras especiais que a calculadora aplica para você:</p>
                         <ul className="list-disc list-inside space-y-2 text-sm">
-                            <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,00</li>
+                            <li><strong>Até R$ 79,99:</strong> Comissão de 20% + Taxa de R$ 4,50</li>
                             <li><strong>De R$ 80,00 a R$ 99,99:</strong> Comissão de 14% + Taxa de R$ 16,00</li>
                             <li><strong>De R$ 100,00 a R$ 199,99:</strong> Comissão de 14% + Taxa de R$ 20,00</li>
                             <li><strong>De R$ 200,00 a R$ 499,99:</strong> Comissão de 14% + Taxa de R$ 26,00</li>

@@ -194,11 +194,11 @@ export function getShopeeFeeComponents(price: number, settings: AppSettings): { 
     let fixedFee = 0;
 
     // Special case for CPF low value (< R$12), which has a total commission formula.
-    // Total commission = price * 0.25 + 4
-    // We represent this as commissionPercent = 0.25 and fixedFee = 4 to fit the iterative formula.
+    // Total commission = price * 0.25 + 4.50
+    // We represent this as commissionPercent = 0.25 and fixedFee = 4.50 to fit the iterative formula.
     if (sellerType === 'cpf' && price < 12) {
         commissionPercent = 0.25;
-        fixedFee = 4.00;
+        fixedFee = 4.50;
         // The R$3 CPF fee is NOT added here, as this is a specific total commission rule.
         // The campaign fee is added on top.
         if (inCampaign) {
@@ -210,7 +210,7 @@ export function getShopeeFeeComponents(price: number, settings: AppSettings): { 
     // Standard progressive commission for all sellers
     if (price <= 79.99) {
         commissionPercent = 0.20;
-        fixedFee = 4.00;
+        fixedFee = 4.50;
     } else if (price <= 99.99) {
         commissionPercent = 0.14;
         fixedFee = 16.00;

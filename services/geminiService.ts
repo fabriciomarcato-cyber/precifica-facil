@@ -345,9 +345,9 @@ Você receberá:
 
 REGRAS DE CÁLCULO (OBRIGATÓRIO SEGUIR EXATAMENTE):
 1. DEFINIÇÃO DE COMISSÃO E TAXA FIXA (SHOPEE):
-   - Se Vendedor for "CPF" E Preço de Venda < R$ 12,00: Comissão Base = 25% | Taxa Fixa = R$ 4,00
+   - Se Vendedor for "CPF" E Preço de Venda < R$ 12,00: Comissão Base = 25% | Taxa Fixa = R$ 4,50
    - Demais casos:
-     - Se PV <= R$ 79,99: Comissão Base = 20% | Taxa Fixa = R$ 4,00
+     - Se PV <= R$ 79,99: Comissão Base = 20% | Taxa Fixa = R$ 4,50
      - Se PV entre R$ 80,00 e R$ 99,99: Comissão Base = 14% | Taxa Fixa = R$ 16,00
      - Se PV entre R$ 100,00 e R$ 199,99: Comissão Base = 14% | Taxa Fixa = R$ 20,00
      - Se PV entre R$ 200,00 e R$ 499,99: Comissão Base = 14% | Taxa Fixa = R$ 26,00
