@@ -32,6 +32,11 @@ const defaultSettings: AppSettings = {
     pixFeePercent: 0,
     pixFeeFixed: 0,
   },
+  shein: {
+    contributionMargin: 15,
+    commission: 18,
+    productWeight: 0.3,
+  },
 };
 
 export function useSettings() {
@@ -56,6 +61,7 @@ export function useSettings() {
             shopee: {...defaultSettings.shopee, ...parsedSettings.shopee},
             tiktok: {...defaultSettings.tiktok, ...parsedSettings.tiktok},
             instagram: {...defaultSettings.instagram, ...parsedSettings.instagram},
+            shein: {...defaultSettings.shein, ...(parsedSettings.shein || {})},
         };
       }
     } catch (error) {

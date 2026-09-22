@@ -19,6 +19,12 @@ export const getMarketplaceIcon = (platform: Platform, className: string = "w-[5
         case Platform.INSTAGRAM:
             src = 'https://i.postimg.cc/6pbRYVCz/Instagram.png';
             break;
+        case Platform.SHEIN:
+            return (
+                <div className={`${className} flex items-center justify-center bg-black text-white font-black tracking-widest text-xs px-2 py-1 rounded-md shadow-sm select-none border border-neutral-700`}>
+                    <span className="font-black tracking-widest text-xs">SHEIN</span>
+                </div>
+            );
         default:
             return <Store className={`${className} text-blue-600`} />;
     }

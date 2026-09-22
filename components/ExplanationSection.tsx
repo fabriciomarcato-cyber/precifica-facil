@@ -25,6 +25,8 @@ const getPlatformColor = (platform: Platform) => {
             return 'bg-gray-50 border-gray-200';
         case Platform.INSTAGRAM:
             return 'bg-blue-50 border-blue-200';
+        case Platform.SHEIN:
+            return 'bg-neutral-100 border-neutral-300';
         default:
             return 'bg-white border-gray-200';
     }
@@ -128,6 +130,21 @@ export default function ExplanationSection() {
                     <FormulaCard platform={Platform.INSTAGRAM} formula="(Custo + Taxas Fixas) / (1 - % Total)">
                         <p>O cálculo para venda direta considera as taxas de pagamento que você configurar (maquininha, PIX, etc.), além da sua margem e imposto.</p>
                         <p>O <strong>"% Total"</strong> é a soma da sua margem, do imposto e das taxas percentuais de pagamento.</p>
+                    </FormulaCard>
+
+                    <FormulaCard platform={Platform.SHEIN} formula="(Custo + Frete por Peso) / (1 - (18% + Margem + Imposto))">
+                        <p>O cálculo da Shein aplica uma <strong>comissão fixa de 18%</strong> sobre o preço de venda e uma <strong>taxa de intermediação de frete</strong> progressiva baseada no peso real ou cúbico do produto:</p>
+                        <ul className="list-disc list-inside space-y-1 my-2 text-sm">
+                            <li><strong>Até 0,3 kg:</strong> R$ 4,00</li>
+                            <li><strong>0,3 a 0,6 kg:</strong> R$ 5,00 | <strong>0,6 a 0,9 kg:</strong> R$ 6,00</li>
+                            <li><strong>0,9 a 1,2 kg:</strong> R$ 8,00 | <strong>1,2 a 1,5 kg:</strong> R$ 10,00</li>
+                            <li><strong>1,5 a 2,0 kg:</strong> R$ 12,00 | <strong>2,0 a 5,0 kg:</strong> R$ 15,00</li>
+                            <li><strong>5 a 9 kg:</strong> R$ 32,00 | <strong>9 a 13 kg:</strong> R$ 63,00 | <strong>13 a 17 kg:</strong> R$ 73,00</li>
+                            <li><strong>17 a 23 kg:</strong> R$ 89,00 | <strong>Acima de 23 kg:</strong> R$ 106,00</li>
+                        </ul>
+                        <div className="mt-2 p-3 bg-neutral-100 border border-neutral-300 rounded text-sm text-neutral-800">
+                            <strong>Ponto de Equilíbrio (Margem Zero):</strong> Preço mínimo para cobrir todos os custos, imposto, os 18% de comissão e a taxa de frete sem lucro nem prejuízo: <code className="font-mono text-xs">(Custo + Frete) / (1 - (18% + Imposto))</code>.
+                        </div>
                     </FormulaCard>
                  </div>
             </div>

@@ -397,6 +397,113 @@ export function calculateTikTokShopPrice(
   };
 }
 
+/**
+ * Tabela Oficial de Taxa de Intermediação de Frete da Shein por peso (kg):
+ * 0 kg < p <= 0,3 kg   -> R$ 4,00
+ * 0,3 kg < p <= 0,6 kg -> R$ 5,00
+ * 0,6 kg < p <= 0,9 kg -> R$ 6,00
+ * 0,9 kg < p <= 1,2 kg -> R$ 8,00
+ * 1,2 kg < p <= 1,5 kg -> R$ 10,00
+ * 1,5 kg < p <= 2,0 kg -> R$ 12,00
+ * 2,0 kg < p <= 5,0 kg -> R$ 15,00
+ * 5,0 kg < p <= 9,0 kg -> R$ 32,00
+ * 9,0 kg < p <= 13,0 kg -> R$ 63,00
+ * 13,0 kg < p <= 17,0 kg -> R$ 73,00
+ * 17,0 kg < p <= 23,0 kg -> R$ 89,00
+ * p > 23,0 kg          -> R$ 106,00
+ */
+export function calcularFreteShein(peso: number | string): number {
+  const p = typeof peso === 'string' ? parseWeight(peso) : peso;
+  if (!p || p <= 0) return 0;
+  if (p <= 0.3) return 4.00;
+  if (p <= 0.6) return 5.00;
+  if (p <= 0.9) return 6.00;
+  if (p <= 1.2) return 8.00;
+  if (p <= 1.5) return 10.00;
+  if (p <= 2.0) return 12.00;
+  if (p <= 5.0) return 15.00;
+  if (p <= 9.0) return 32.00;
+  if (p <= 13.0) return 63.00;
+  if (p <= 17.0) return 73.00;
+  if (p <= 23.0) return 89.00;
+  return 106.00;
+}
+
+export const getSheinShippingFee = calcularFreteShein;
+
+export function getSheinTierLabel(peso: number | string): string {
+  const p = typeof peso === 'string' ? parseWeight(peso) : peso;
+  if (!p || p <= 0) return 'Informe o peso (kg)';
+  if (p <= 0.3) return 'Até 0,3 kg (R$ 4,00)';
+  if (p <= 0.6) return '0,3 kg a 0,6 kg (R$ 5,00)';
+  if (p <= 0.9) return '0,6 kg a 0,9 kg (R$ 6,00)';
+  if (p <= 1.2) return '0,9 kg a 1,2 kg (R$ 8,00)';
+  if (p <= 1.5) return '1,2 kg a 1,5 kg (R$ 10,00)';
+  if (p <= 2.0) return '1,5 kg a 2,0 kg (R$ 12,00)';
+  if (p <= 5.0) return '2,0 kg a 5,0 kg (R$ 15,00)';
+  if (p <= 9.0) return '5,0 kg a 9,0 kg (R$ 32,00)';
+  if (p <= 13.0) return '9,0 kg a 13,0 kg (R$ 63,00)';
+  if (p <= 17.0) return '13,0 kg a 17,0 kg (R$ 73,00)';
+  if (p <= 23.0) return '17,0 kg a 23,0 kg (R$ 89,00)';
+  return 'Acima de 23,0 kg (R$ 106,00)';
+}
+
+/**
+ * Cálculo 1: Formação de Preço de Venda da Shein
+ * Considera comissão fixa de 18%, impostos (Simples Nacional), margem pretendida
+ * e soma a taxa de frete correspondente à faixa de peso.
+ * Cálculo 3: Ponto de Equilíbrio / Margem Zero: (Custo + Frete) / (1 - (18% + Imposto))
+ */
+export function calculateSheinPrice(
+  productCost: number,
+  weightInKg: number,
+  settings: AppSettings
+): {
+  finalPrice: number;
+  fixedFee: number;
+  commissionValue: number;
+  taxValue: number;
+  grossProfit: number;
+  calculatedMargin: number;
+  commissionPercent: number;
+  breakEvenPrice: number;
+} {
+  const taxRate = (settings.simplesNacional || 0) / 100;
+  const marginPercent = settings.shein?.contributionMargin ?? 15;
+  const marginRate = marginPercent / 100;
+  const commissionPercent = settings.shein?.commission ?? 18;
+  const commissionRate = commissionPercent / 100;
+  const fixedFee = calcularFreteShein(weightInKg);
+
+  const totalDeductionRate = marginRate + commissionRate + taxRate;
+  let finalPrice = 0;
+  if (1 - totalDeductionRate > 0) {
+    finalPrice = (productCost + fixedFee) / (1 - totalDeductionRate);
+  } else {
+    finalPrice = Infinity;
+  }
+
+  const commissionValue = finalPrice * commissionRate;
+  const taxValue = finalPrice * taxRate;
+  const grossProfit = finalPrice - productCost - fixedFee - commissionValue - taxValue;
+  const calculatedMargin = isFinite(finalPrice) && finalPrice > 0 ? (grossProfit / finalPrice) * 100 : 0;
+
+  // Cálculo 3: Ponto de Equilíbrio (Margem Zero)
+  const breakEvenDeduction = commissionRate + taxRate;
+  const breakEvenPrice = (1 - breakEvenDeduction > 0) ? (productCost + fixedFee) / (1 - breakEvenDeduction) : 0;
+
+  return {
+    finalPrice,
+    fixedFee,
+    commissionValue,
+    taxValue,
+    grossProfit,
+    calculatedMargin,
+    commissionPercent,
+    breakEvenPrice,
+  };
+}
+
 export function calculateIndividualPrices(productCost: number, weightInKg: number, settings: AppSettings): CalculationResult[] {
   if (!settings || !settings.mercadoLivre || !settings.shopee || !settings.tiktok || !settings.instagram) {
     return [];
@@ -495,6 +602,24 @@ export function calculateIndividualPrices(productCost: number, weightInKg: numbe
     taxPercent: settings.simplesNacional,
   });
 
+  // Shein
+  const sheinResult = calculateSheinPrice(productCost, weightInKg, settings);
+  results.push({
+    platform: Platform.SHEIN,
+    sellingPrice: sheinResult.finalPrice,
+    productCost: productCost,
+    fixedFee: sheinResult.fixedFee,
+    commission: sheinResult.commissionValue,
+    tax: sheinResult.taxValue,
+    grossProfit: sheinResult.grossProfit,
+    calculatedMargin: sheinResult.calculatedMargin,
+    contributionMarginPercent: settings.shein?.contributionMargin ?? 15,
+    commissionPercent: sheinResult.commissionPercent,
+    taxPercent: settings.simplesNacional,
+    breakEvenPrice: sheinResult.breakEvenPrice,
+    weightUsed: weightInKg,
+  });
+
   return results;
 }
 
@@ -506,7 +631,7 @@ export function calculateMaxCost(desiredPrice: number, weightInKg: number, setti
     const taxPercent = settings.simplesNacional / 100;
 
     const platforms = [
-        Platform.ML_CLASSICO, Platform.ML_PREMIUM, Platform.SHOPEE, Platform.TIKTOK_SHOP, Platform.INSTAGRAM
+        Platform.ML_CLASSICO, Platform.ML_PREMIUM, Platform.SHOPEE, Platform.TIKTOK_SHOP, Platform.INSTAGRAM, Platform.SHEIN
     ];
 
     platforms.forEach(platform => {
@@ -549,12 +674,23 @@ export function calculateMaxCost(desiredPrice: number, weightInKg: number, setti
                 marginPercent = settings.instagram.contributionMargin / 100;
                 contributionMargin = settings.instagram.contributionMargin;
                 break;
+            case Platform.SHEIN:
+                commissionRate = (settings.shein?.commission ?? 18) / 100;
+                fixedFee = calcularFreteShein(weightInKg);
+                marginPercent = (settings.shein?.contributionMargin ?? 15) / 100;
+                contributionMargin = settings.shein?.contributionMargin ?? 15;
+                break;
         }
 
         const commissionValue = desiredPrice * commissionRate;
         const taxValue = desiredPrice * taxPercent;
         const profitValue = desiredPrice * marginPercent;
         const maxCost = desiredPrice - fixedFee - commissionValue - taxValue - profitValue;
+
+        const breakEvenDeduction = commissionRate + taxPercent;
+        const breakEvenPrice = (1 - breakEvenDeduction > 0)
+          ? (Math.max(0, maxCost) + fixedFee) / (1 - breakEvenDeduction)
+          : undefined;
 
         results.push({
             platform,
@@ -568,6 +704,8 @@ export function calculateMaxCost(desiredPrice: number, weightInKg: number, setti
             contributionMarginPercent: contributionMargin,
             commissionPercent: commissionRate * 100,
             taxPercent: settings.simplesNacional,
+            breakEvenPrice,
+            weightUsed: weightInKg,
         });
     });
 
@@ -582,7 +720,7 @@ export function simulateMargin(productCost: number, sellingPrice: number, weight
     const taxRate = settings.simplesNacional / 100;
     
     const platforms = [
-        Platform.ML_CLASSICO, Platform.ML_PREMIUM, Platform.SHOPEE, Platform.TIKTOK_SHOP, Platform.INSTAGRAM
+        Platform.ML_CLASSICO, Platform.ML_PREMIUM, Platform.SHOPEE, Platform.TIKTOK_SHOP, Platform.INSTAGRAM, Platform.SHEIN
     ];
 
     platforms.forEach(platform => {
@@ -613,12 +751,22 @@ export function simulateMargin(productCost: number, sellingPrice: number, weight
                 commissionRate = (settings.instagram.machineFeePercent / 100) + (settings.instagram.pixFeePercent / 100);
                 fixedFee = settings.instagram.machineFeeFixed + settings.instagram.pixFeeFixed;
                 break;
+            case Platform.SHEIN:
+                commissionRate = (settings.shein?.commission ?? 18) / 100;
+                fixedFee = calcularFreteShein(weightInKg);
+                break;
         }
 
         const commissionValue = sellingPrice * commissionRate;
         const taxValue = sellingPrice * taxRate;
         const grossProfit = sellingPrice - productCost - fixedFee - commissionValue - taxValue;
         const calculatedMargin = sellingPrice > 0 ? (grossProfit / sellingPrice) * 100 : 0;
+
+        // Cálculo 3: Ponto de Equilíbrio (Margem Zero)
+        const breakEvenDeduction = commissionRate + taxRate;
+        const breakEvenPrice = (1 - breakEvenDeduction > 0)
+          ? (productCost + fixedFee) / (1 - breakEvenDeduction)
+          : undefined;
 
         results.push({
             platform,
@@ -631,6 +779,8 @@ export function simulateMargin(productCost: number, sellingPrice: number, weight
             calculatedMargin,
             commissionPercent: commissionRate * 100,
             taxPercent: settings.simplesNacional,
+            breakEvenPrice,
+            weightUsed: weightInKg,
         });
     });
 

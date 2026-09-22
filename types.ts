@@ -5,6 +5,7 @@ export enum Platform {
   SHOPEE = 'Shopee',
   TIKTOK_SHOP = 'TikTok Shop',
   INSTAGRAM = 'Instagram',
+  SHEIN = 'Shein',
 }
 
 export interface MercadoLivreSettings {
@@ -37,12 +38,19 @@ export interface InstagramSettings {
   pixFeeFixed: number;
 }
 
+export interface SheinSettings {
+  contributionMargin: number;
+  commission: number; // Fixed at 18% by default
+  productWeight?: number;
+}
+
 export interface AppSettings {
   simplesNacional: number;
   mercadoLivre: MercadoLivreSettings;
   shopee: ShopeeSettings;
   tiktok: TikTokShopSettings;
   instagram: InstagramSettings;
+  shein: SheinSettings;
 }
 
 export interface CalculationResult {
@@ -58,4 +66,6 @@ export interface CalculationResult {
   contributionMarginPercent?: number;
   commissionPercent?: number;
   taxPercent?: number;
+  breakEvenPrice?: number;
+  weightUsed?: number;
 }

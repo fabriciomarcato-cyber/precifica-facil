@@ -23,6 +23,8 @@ const getPlatformColor = (platform: Platform) => {
       return 'bg-[#E9EBF0] border-gray-300 text-gray-900';
     case Platform.INSTAGRAM:
       return 'bg-blue-50 border-blue-200 text-gray-900';
+    case Platform.SHEIN:
+      return 'bg-gradient-to-b from-neutral-900 to-black border-neutral-700 text-white';
     default:
       return 'bg-white border-gray-200 text-gray-900';
   }
@@ -30,13 +32,13 @@ const getPlatformColor = (platform: Platform) => {
 
 const SettingsCard: React.FC<React.PropsWithChildren<{ title: string; platform: Platform }>> = ({ title, platform, children }) => {
     const colorClasses = getPlatformColor(platform);
-    const isShopee = platform === Platform.SHOPEE;
+    const isDark = platform === Platform.SHOPEE || platform === Platform.SHEIN;
     
     return (
         <div className={`relative ${colorClasses} p-6 rounded-xl shadow-lg border-2 transition-all hover:shadow-xl`}>
             <div>
                 <div className="mb-6 text-center">
-                    <h3 className={`text-xl font-black uppercase tracking-tight ${isShopee ? 'text-white' : 'text-gray-800'}`}>{title}</h3>
+                    <h3 className={`text-xl font-black uppercase tracking-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>{title}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {children}
@@ -208,6 +210,35 @@ export default function SettingsPanel({ initialSettings, onSave, isOpen, setIsOp
               <InputField label="Taxa Fixa da Maquininha (R$):" unit="R$" value={settings.instagram.machineFeeFixed} onChange={(e) => handleInputChange('instagram', 'machineFeeFixed', e.target.value)} />
               <InputField label="Taxa PIX (%):" unit="%" value={settings.instagram.pixFeePercent} onChange={(e) => handleInputChange('instagram', 'pixFeePercent', e.target.value)} />
               <InputField label="Taxa Fixa PIX (R$):" unit="R$" value={settings.instagram.pixFeeFixed} onChange={(e) => handleInputChange('instagram', 'pixFeeFixed', e.target.value)} />
+            </SettingsCard>
+
+            <SettingsCard title="Shein" platform={Platform.SHEIN}>
+              <div className="md:col-span-2">
+                <InputField isShopee label="Margem Contribuição Shein (%):" unit="%" value={settings.shein?.contributionMargin ?? 15} onChange={(e) => handleInputChange('shein', 'contributionMargin', e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <InputField isShopee label="Comissão Fixa Shein (%):" unit="%" value={settings.shein?.commission ?? 18} onChange={(e) => handleInputChange('shein', 'commission', e.target.value)} />
+              </div>
+              <div className="md:col-span-2 pt-3 border-t border-neutral-700 mt-2">
+                <div className="bg-neutral-800/80 p-3 rounded-lg border border-neutral-700 text-xs text-neutral-300 space-y-1.5">
+                  <p className="font-bold text-white">Taxa de Frete por Peso (Shein):</p>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-neutral-300">
+                    <span>≤ 0,3 kg: <strong>R$ 4,00</strong></span>
+                    <span>0,3 a 0,6 kg: <strong>R$ 5,00</strong></span>
+                    <span>0,6 a 0,9 kg: <strong>R$ 6,00</strong></span>
+                    <span>0,9 a 1,2 kg: <strong>R$ 8,00</strong></span>
+                    <span>1,2 a 1,5 kg: <strong>R$ 10,00</strong></span>
+                    <span>1,5 a 2,0 kg: <strong>R$ 12,00</strong></span>
+                    <span>2,0 a 5,0 kg: <strong>R$ 15,00</strong></span>
+                    <span>5,0 a 9,0 kg: <strong>R$ 32,00</strong></span>
+                    <span>9,0 a 13,0 kg: <strong>R$ 63,00</strong></span>
+                    <span>13,0 a 17,0 kg: <strong>R$ 73,00</strong></span>
+                    <span>17,0 a 23,0 kg: <strong>R$ 89,00</strong></span>
+                    <span>&gt; 23,0 kg: <strong>R$ 106,00</strong></span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 italic mt-1">* A taxa de frete é atribuída dinamicamente ao digitar o peso do produto.</p>
+                </div>
+              </div>
             </SettingsCard>
           </div>
         </div>
