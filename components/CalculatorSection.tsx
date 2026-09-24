@@ -16,6 +16,7 @@ import { getMarketplaceIcon } from './MarketplaceIcons';
 import { AlertTriangle, Info, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lucide-react';
 
 import ShopeeBatchConference from './ShopeeBatchConference';
+import MercadoLivreBatchConference from './MercadoLivreBatchConference';
 import VolumetricWeightCalculator from './VolumetricWeightCalculator';
 
 interface CalculatorSectionProps {
@@ -861,6 +862,7 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
           )}
       </Card>
 
+      <MercadoLivreBatchConference settings={settings} />
       <ShopeeBatchConference settings={settings} />
       <VolumetricWeightCalculator />
     </>
