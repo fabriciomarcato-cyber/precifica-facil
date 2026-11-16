@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Package, Info } from 'lucide-react';
+import { parseNumber, parseWeight } from '../lib/calculator';
 
 interface VolumetricWeightCalculatorProps {
   accessLevel?: 'restricted' | 'full';
@@ -12,10 +13,10 @@ export default function VolumetricWeightCalculator({ accessLevel = 'full' }: Vol
   const [height, setHeight] = useState('');
   const [physicalWeight, setPhysicalWeight] = useState('');
   
-  const l = parseFloat(length) || 0;
-  const w = parseFloat(width) || 0;
-  const h = parseFloat(height) || 0;
-  const pw = parseFloat(physicalWeight) || 0;
+  const l = parseNumber(length);
+  const w = parseNumber(width);
+  const h = parseNumber(height);
+  const pw = parseWeight(physicalWeight);
   
   const volumetricWeight = (l * w * h) / 6000;
   
@@ -44,7 +45,8 @@ export default function VolumetricWeightCalculator({ accessLevel = 'full' }: Vol
             <div>
               <label className="block text-sm font-medium text-gray-700">Comprimento (cm)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={length}
                 onChange={(e) => setLength(e.target.value)}
                 placeholder="Ex: 30"
@@ -54,7 +56,8 @@ export default function VolumetricWeightCalculator({ accessLevel = 'full' }: Vol
             <div>
               <label className="block text-sm font-medium text-gray-700">Largura (cm)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={width}
                 onChange={(e) => setWidth(e.target.value)}
                 placeholder="Ex: 20"
@@ -64,7 +67,8 @@ export default function VolumetricWeightCalculator({ accessLevel = 'full' }: Vol
             <div>
               <label className="block text-sm font-medium text-gray-700">Altura (cm)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 placeholder="Ex: 15"
@@ -74,10 +78,11 @@ export default function VolumetricWeightCalculator({ accessLevel = 'full' }: Vol
             <div>
               <label className="block text-sm font-medium text-gray-700">Peso Físico (kg)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={physicalWeight}
                 onChange={(e) => setPhysicalWeight(e.target.value)}
-                placeholder="Ex: 0.5"
+                placeholder="Ex: 0,500"
                 className="mt-1 block w-full rounded-md border-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 bg-white text-gray-900"
               />
             </div>

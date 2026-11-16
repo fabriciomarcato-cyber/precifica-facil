@@ -62,28 +62,19 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const [desiredPrice, setDesiredPrice] = useState('');
   const [simProductCost, setSimProductCost] = useState('');
   const [simSellingPrice, setSimSellingPrice] = useState('');
-  const [mlWeightInput, setMlWeightInput] = useState(() => 
-    settings.mercadoLivre.productWeight ? String(settings.mercadoLivre.productWeight) : '1'
+  const [mlWeightInput, setMlWeightInput] = useState<string>(() =>
+    settings.mercadoLivre.productWeight && settings.mercadoLivre.productWeight >= 0.001
+      ? String(settings.mercadoLivre.productWeight).replace('.', ',')
+      : ''
   );
 
-  useEffect(() => {
-    if (settings.mercadoLivre.productWeight) {
-      setMlWeightInput(String(settings.mercadoLivre.productWeight));
-    }
-  }, [settings.mercadoLivre.productWeight]);
-
   const updateWeight = (val: string) => {
+    // Mantém o estado visual exatamente como string durante a digitação
+    // sem forçar fallbacks prematuros (ex: 1) quando o usuário apaga ou digita "0,"
     setMlWeightInput(val);
-    const parsed = parseWeight(val);
-    if (parsed > 0 && setSettings) {
-      setSettings(prev => ({
-        ...prev,
-        mercadoLivre: { ...prev.mercadoLivre, productWeight: parsed }
-      }));
-    }
   };
 
-  const currentWeight = parseWeight(mlWeightInput || settings.mercadoLivre.productWeight);
+  const currentWeight = parseWeight(mlWeightInput);
 
   const [priceResults, setPriceResults] = useState<CalculationResult[]>([]);
   const [inverseResults, setInverseResults] = useState<CalculationResult[]>([]);
@@ -93,44 +84,111 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const [inverseCalcError, setInverseCalcError] = useState('');
   const [marginSimError, setMarginSimError] = useState('');
 
-  useEffect(() => { priceResults.length > 0 && setPriceResults([]); priceCalcError && setPriceCalcError(''); }, [productCost, settings, mlWeightInput, selectedMarketplace]);
-  useEffect(() => { inverseResults.length > 0 && setInverseResults([]); inverseCalcError && setInverseCalcError(''); }, [desiredPrice, settings, mlWeightInput, selectedMarketplace]);
-  useEffect(() => { marginResults.length > 0 && setMarginResults([]); marginSimError && setMarginSimError(''); }, [simProductCost, simSellingPrice, settings, mlWeightInput, selectedMarketplace]);
+  useEffect(() => {
+    priceResults.length > 0 && setPriceResults([]);
+    priceCalcError && setPriceCalcError('');
+  }, [
+    productCost,
+    mlWeightInput,
+    selectedMarketplace,
+    settings.simplesNacional,
+    settings.mercadoLivre.contributionMargin,
+    settings.mercadoLivre.classicCommission,
+    settings.mercadoLivre.premiumCommission,
+    settings.shopee,
+    settings.tiktok,
+    settings.instagram,
+    settings.shein,
+  ]);
+
+  useEffect(() => {
+    inverseResults.length > 0 && setInverseResults([]);
+    inverseCalcError && setInverseCalcError('');
+  }, [
+    desiredPrice,
+    mlWeightInput,
+    selectedMarketplace,
+    settings.simplesNacional,
+    settings.mercadoLivre.contributionMargin,
+    settings.mercadoLivre.classicCommission,
+    settings.mercadoLivre.premiumCommission,
+    settings.shopee,
+    settings.tiktok,
+    settings.instagram,
+    settings.shein,
+  ]);
+
+  useEffect(() => {
+    marginResults.length > 0 && setMarginResults([]);
+    marginSimError && setMarginSimError('');
+  }, [
+    simProductCost,
+    simSellingPrice,
+    mlWeightInput,
+    selectedMarketplace,
+    settings.simplesNacional,
+    settings.mercadoLivre.contributionMargin,
+    settings.mercadoLivre.classicCommission,
+    settings.mercadoLivre.premiumCommission,
+    settings.shopee,
+    settings.tiktok,
+    settings.instagram,
+    settings.shein,
+  ]);
+
+  const persistValidWeight = (weight: number) => {
+    if (setSettings && weight >= 0.001 && settings.mercadoLivre.productWeight !== weight) {
+      setSettings(prev => ({
+        ...prev,
+        mercadoLivre: { ...prev.mercadoLivre, productWeight: weight }
+      }));
+    }
+  };
 
   const handlePriceCalculation = () => {
     const cost = parseNumber(productCost);
-    const weight = currentWeight;
+    const weight = parseWeight(mlWeightInput);
 
-    if (selectedMarketplace === Platform.SHEIN && (!weight || weight <= 0)) {
-      setPriceCalcError('O peso do produto (em kg) é obrigatório para calcular na Shein.');
+    if (!weight || weight < 0.001) {
+      setPriceCalcError(
+        selectedMarketplace === Platform.SHEIN
+          ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
+          : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
+      );
       setPriceResults([]);
       return;
     }
 
-    if (cost > 0 && weight > 0) {
+    if (cost > 0) {
       setPriceCalcError('');
+      persistValidWeight(weight);
       setPriceResults(calculateIndividualPrices(cost, weight, settings));
     } else {
-      setPriceCalcError('Insira um custo válido maior que zero e informe o peso.');
+      setPriceCalcError('Insira um custo válido maior que zero.');
       setPriceResults([]);
     }
   };
   
   const handleInverseCalculation = () => {
     const price = parseNumber(desiredPrice);
-    const weight = currentWeight;
+    const weight = parseWeight(mlWeightInput);
 
-    if (selectedMarketplace === Platform.SHEIN && (!weight || weight <= 0)) {
-      setInverseCalcError('O peso do produto (em kg) é obrigatório para calcular na Shein.');
+    if (!weight || weight < 0.001) {
+      setInverseCalcError(
+        selectedMarketplace === Platform.SHEIN
+          ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
+          : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
+      );
       setInverseResults([]);
       return;
     }
 
-    if (price > 0 && weight > 0) {
+    if (price > 0) {
       setInverseCalcError('');
+      persistValidWeight(weight);
       setInverseResults(calculateMaxCost(price, weight, settings));
     } else {
-      setInverseCalcError('Insira um preço de venda válido maior que zero e informe o peso.');
+      setInverseCalcError('Insira um preço de venda válido maior que zero.');
       setInverseResults([]);
     }
   };
@@ -138,19 +196,24 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const handleMarginSimulation = () => {
     const cost = parseNumber(simProductCost);
     const price = parseNumber(simSellingPrice);
-    const weight = currentWeight;
+    const weight = parseWeight(mlWeightInput);
 
-    if (selectedMarketplace === Platform.SHEIN && (!weight || weight <= 0)) {
-      setMarginSimError('O peso do produto (em kg) é obrigatório para calcular na Shein.');
+    if (!weight || weight < 0.001) {
+      setMarginSimError(
+        selectedMarketplace === Platform.SHEIN
+          ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
+          : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
+      );
       setMarginResults([]);
       return;
     }
 
-    if (cost > 0 && price > 0 && weight > 0) {
+    if (cost > 0 && price > 0) {
       setMarginSimError('');
+      persistValidWeight(weight);
       setMarginResults(simulateMargin(cost, price, weight, settings));
     } else {
-      setMarginSimError('Insira custo e preço válidos (maiores que zero) e informe o peso.');
+      setMarginSimError('Insira custo e preço válidos (maiores que zero).');
       setMarginResults([]);
     }
   };

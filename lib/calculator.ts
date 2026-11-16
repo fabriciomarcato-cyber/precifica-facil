@@ -29,15 +29,32 @@ export function parseNumber(value: string | number | undefined | null): number {
 }
 
 /**
- * Trata o peso informado, aceitando kg (ex: 0.9 ou 0,900) e convertendo inteligentemente se digitado em gramas (ex: 900 -> 0.9kg).
+ * Trata o peso informado, aceitando kg (ex: 0.9, 0,900, 0.001) e convertendo inteligentemente se digitado em gramas (ex: 900g ou 900 -> 0.9kg).
+ * Retorna 0 quando vazio ou inválido (sem fallback prematuro para 1kg).
  */
 export function parseWeight(value: string | number | undefined | null): number {
-  const num = parseNumber(value);
-  if (num <= 0) return 1; // Padrão seguro de 1kg
-  // Se o usuário digitou em gramas (ex: 900g, 500g, 300g ao invés de kg):
-  if (num >= 100 && num <= 150000) {
+  if (value === undefined || value === null || value === '') return 0;
+  if (typeof value === 'number') {
+    return isNaN(value) || value <= 0 ? 0 : value;
+  }
+  const raw = value.toString().trim().toLowerCase();
+  if (!raw) return 0;
+
+  // Verifica se o usuário digitou explicitamente a unidade em gramas (ex: "900g", "50g", "350 g")
+  const hasGramsUnit = /\d\s*g\b/.test(raw) && !raw.includes('kg');
+  const cleaned = raw.replace(/[^\d.,]/g, '').replace(',', '.');
+  const num = parseFloat(cleaned);
+  if (isNaN(num) || num <= 0) return 0;
+
+  if (hasGramsUnit) {
     return num / 1000;
   }
+
+  // Se o usuário digitou um número inteiro em gramas (ex: 900, 500, 300 ao invés de kg):
+  if (num >= 100 && num <= 150000 && !cleaned.includes('.')) {
+    return num / 1000;
+  }
+
   return num;
 }
 
@@ -98,6 +115,7 @@ const priceTiers = [
 export function getMercadoLivreShippingFee(price: number | string, weightInKg: number | string): number {
     const numPrice = parseNumber(price);
     const numWeight = parseWeight(weightInKg);
+    if (numWeight < 0.001) return 0;
 
     const priceTier = priceTiers.find(tier => numPrice <= tier.maxPrice);
     const weightTier = mlShippingTiers.find(tier => numWeight <= tier.maxWeight);
@@ -414,7 +432,7 @@ export function calculateTikTokShopPrice(
  */
 export function calcularFreteShein(peso: number | string): number {
   const p = typeof peso === 'string' ? parseWeight(peso) : peso;
-  if (!p || p <= 0) return 0;
+  if (!p || p < 0.001) return 0;
   if (p <= 0.3) return 4.00;
   if (p <= 0.6) return 5.00;
   if (p <= 0.9) return 6.00;
@@ -434,6 +452,7 @@ export const getSheinShippingFee = calcularFreteShein;
 export function getSheinTierLabel(peso: number | string): string {
   const p = typeof peso === 'string' ? parseWeight(peso) : peso;
   if (!p || p <= 0) return 'Informe o peso (kg)';
+  if (p < 0.001) return 'Peso mínimo: 0,001 kg (1g)';
   if (p <= 0.3) return 'Até 0,3 kg (R$ 4,00)';
   if (p <= 0.6) return '0,3 kg a 0,6 kg (R$ 5,00)';
   if (p <= 0.9) return '0,6 kg a 0,9 kg (R$ 6,00)';
