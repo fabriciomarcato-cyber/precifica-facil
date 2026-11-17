@@ -8,13 +8,12 @@ import {
     calcularFreteShein,
     getSheinTierLabel,
     formatCurrency,
-    formatPercentage,
     parseNumber,
     parseWeight
 } from '../lib/calculator';
-import { getMarketplaceIcon } from './MarketplaceIcons';
-import { AlertTriangle, Info, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lucide-react';
+import { AlertTriangle, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lucide-react';
 
+import ResultsComparisonTable from './ResultsComparisonTable';
 import ShopeeBatchConference from './ShopeeBatchConference';
 import MercadoLivreBatchConference from './MercadoLivreBatchConference';
 import VolumetricWeightCalculator from './VolumetricWeightCalculator';
@@ -34,27 +33,6 @@ const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; 
         {children}
     </div>
 );
-
-
-const getPlatformColor = (platform: Platform, isNegative: boolean) => {
-    if (isNegative) return 'bg-red-50 border-red-400 text-gray-900';
-    
-    switch (platform) {
-        case Platform.ML_CLASSICO:
-        case Platform.ML_PREMIUM:
-            return 'bg-[#FFE600] border-yellow-400 text-gray-900';
-        case Platform.SHOPEE:
-            return 'bg-gradient-to-b from-[#EE4D2D] to-[#FF6321] border-orange-600 text-white';
-        case Platform.TIKTOK_SHOP:
-            return 'bg-[#E9EBF0] border-gray-300 text-gray-900';
-        case Platform.INSTAGRAM:
-            return 'bg-blue-50 border-blue-200 text-gray-900';
-        case Platform.SHEIN:
-            return 'bg-gradient-to-b from-neutral-900 to-black border-neutral-700 text-white';
-        default:
-            return 'bg-slate-100 border-slate-200 text-gray-900';
-    }
-};
 
 export default function CalculatorSection({ settings, setSettings }: CalculatorSectionProps) {
   const [selectedMarketplace, setSelectedMarketplace] = useState<string>('all');
@@ -240,13 +218,6 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const displayedInverseResults = filterPlatformResults(inverseResults);
   const displayedMarginResults = filterPlatformResults(marginResults);
 
-  const getResultsGridClass = (count: number) => {
-    if (count === 1) return 'max-w-md mx-auto grid grid-cols-1';
-    if (count === 2) return 'max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-5';
-    if (count <= 4) return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5';
-    return 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6';
-  };
-
   const renderMarketplaceSelector = () => (
     <div className="mb-6 flex flex-wrap items-center gap-2 border-b pb-4">
       <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Canal de Venda:</span>
@@ -385,103 +356,12 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
         )}
         
         {priceResults.length > 0 ? (
-            <div className={`mt-8 ${getResultsGridClass(displayedPriceResults.length)}`}>
-                {displayedPriceResults.map((res) => {
-                    const isNegative = res.grossProfit < 0;
-                    const isDark = res.platform === Platform.SHOPEE || res.platform === Platform.SHEIN;
-                    const colorClasses = getPlatformColor(res.platform, isNegative);
-                    return (
-                    <div key={res.platform} className={`relative p-5 sm:p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[460px] shadow-lg overflow-hidden transition-transform hover:scale-[1.01]`}>
-                        <div className="mb-5 text-center">
-                            <div className="flex flex-col items-center">
-                                <div className="flex items-center justify-center gap-2 mb-1">
-                                    <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight truncate">
-                                        {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
-                                    </h3>
-                                    { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-wider shrink-0 ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                            {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
-                                        </span>
-                                    )}
-                                </div>
-                                {res.platform === Platform.SHOPEE && (
-                                    <p className="text-[10px] opacity-70 uppercase font-black tracking-widest">CÁLCULO: {settings.shopee.sellerType}</p>
-                                )}
-                                {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                    <p className="text-[10px] opacity-75 font-bold">Peso: {currentWeight}kg</p>
-                                )}
-                                {res.platform === Platform.SHEIN && (
-                                    <div className="text-[10px] opacity-90 font-bold flex flex-col items-center">
-                                        <span className="uppercase tracking-widest font-black text-white">Comissão Fixa: 18%</span>
-                                        <span className="text-neutral-300 text-[10px]">Frete: {formatCurrency(res.fixedFee)} ({currentWeight}kg)</span>
-                                    </div>
-                                )}
-                                {res.platform === Platform.TIKTOK_SHOP && (
-                                    <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
-                                        <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
-                                        {(settings.tiktok.affiliateCommission || 0) > 0 && (
-                                            <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="text-center mb-6 px-1">
-                            <p className="opacity-70 text-xs sm:text-sm font-bold mb-1">Preço mínimo de Venda</p>
-                            <p className={`text-3xl sm:text-4xl lg:text-[2.65rem] font-black tracking-tight leading-tight break-words ${isNegative ? 'text-red-700' : (isDark ? 'text-white' : 'text-[#2563EB]')}`}>
-                                {formatCurrency(res.sellingPrice)}
-                            </p>
-                        </div>
-
-                        <div className="w-full space-y-2.5 flex-grow text-xs sm:text-sm font-medium">
-                            <div className="flex justify-between items-center gap-2">
-                                <span className="opacity-75 truncate">Custo do Produto</span>
-                                <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.productCost)}</span>
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className="opacity-75 truncate">Margem ({formatPercentage(res.contributionMarginPercent)})</span>
-                                <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.grossProfit)}</span>
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className="opacity-75 truncate">Comissão ({formatPercentage(res.commissionPercent)})</span>
-                                <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.commission)}</span>
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className="opacity-75 truncate">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
-                                <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.tax)}</span>
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className="opacity-75 truncate">{res.platform === Platform.SHEIN ? 'Frete Shein (por peso)' : 'Taxa Fixa/Frete'}</span>
-                                <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.fixedFee)}</span>
-                            </div>
-                            {res.breakEvenPrice !== undefined && res.breakEvenPrice > 0 && (
-                                <div className="flex justify-between items-center gap-2 pt-2 border-t border-dashed border-current/25">
-                                    <span className="opacity-80 text-xs font-bold truncate">Ponto de Equilíbrio</span>
-                                    <span className="font-black text-xs shrink-0 whitespace-nowrap">{formatCurrency(res.breakEvenPrice)}</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={`w-full border-t mt-5 pt-4 space-y-2.5 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className={`text-sm sm:text-base font-black shrink-0 ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>Lucro Bruto</span>
-                                <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
-                            </div>
-                            <div className="flex justify-between items-center gap-2">
-                                <span className={`text-sm sm:text-base font-black shrink-0 ${isDark ? 'text-white' : 'text-[#2563EB]'}`}>Margem Final</span>
-                                <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#2563EB]')}`}>{formatPercentage(res.calculatedMargin)}</span>
-                            </div>
-                            {isNegative && (
-                                <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    <span>PREJUÍZO DETECTADO</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )})}
-            </div>
+          <ResultsComparisonTable
+            results={displayedPriceResults}
+            mode="price"
+            settings={settings}
+            currentWeight={currentWeight}
+          />
         ) : (
             <div className="text-center text-gray-500 py-12"><p className="text-lg">Digite o custo do produto e clique em "Calcular Preço de Venda".</p></div>
         )}
@@ -590,107 +470,15 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
           </div>
         )}
           {inverseResults.length > 0 ? (
-              <div className={`mt-8 ${getResultsGridClass(displayedInverseResults.length)}`}>
-                  {displayedInverseResults.map((res) => {
-                      const isNegative = res.maxProductCost && res.maxProductCost < 0;
-                      const isDark = res.platform === Platform.SHOPEE || res.platform === Platform.SHEIN;
-                      const colorClasses = getPlatformColor(res.platform, !!isNegative);
-                      return (
-                          <div key={res.platform} className={`relative p-5 sm:p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[460px] shadow-lg overflow-hidden transition-transform hover:scale-[1.01]`}>
-                              <div className="mb-5 text-center">
-                                      <div className="flex flex-col items-center">
-                                          <div className="flex items-center justify-center gap-2 mb-1">
-                                              <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight truncate">
-                                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
-                                              </h3>
-                                              { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-wider shrink-0 ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                                      {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
-                                                  </span>
-                                              )}
-                                          </div>
-                                          {res.platform === Platform.SHOPEE && (
-                                              <p className="text-[10px] opacity-70 uppercase font-black tracking-widest">CÁLCULO: {settings.shopee.sellerType}</p>
-                                          )}
-                                          {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                              <p className="text-[10px] opacity-75 font-bold">Peso: {currentWeight}kg</p>
-                                          )}
-                                          {res.platform === Platform.SHEIN && (
-                                              <div className="text-[10px] opacity-90 font-bold flex flex-col items-center">
-                                                  <span className="uppercase tracking-widest font-black text-white">Comissão Fixa: 18%</span>
-                                                  <span className="text-neutral-300 text-[10px]">Frete: {formatCurrency(res.fixedFee)} ({currentWeight}kg)</span>
-                                              </div>
-                                          )}
-                                          {res.platform === Platform.TIKTOK_SHOP && (
-                                              <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
-                                                  <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
-                                                  {(settings.tiktok.affiliateCommission || 0) > 0 && (
-                                                      <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
-                                                  )}
-                                              </div>
-                                          )}
-                                      </div>
-                                  </div>
-
-                                  <div className="text-center mb-6 px-1">
-                                      <p className="opacity-70 text-xs sm:text-sm font-bold mb-1">Custo Máximo do Produto</p>
-                                      <p className={`text-3xl sm:text-4xl lg:text-[2.65rem] font-black tracking-tight leading-tight break-words ${isNegative ? 'text-red-700' : (isDark ? 'text-white' : 'text-[#2563EB]')}`}>
-                                          {formatCurrency(res.maxProductCost)}
-                                      </p>
-                                  </div>
-
-                                  <div className="w-full space-y-2.5 flex-grow text-xs sm:text-sm font-medium">
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className="opacity-75 truncate">Preço de Venda</span>
-                                          <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.sellingPrice)}</span>
-                                      </div>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className="opacity-75 truncate">Margem ({formatPercentage(res.contributionMarginPercent)})</span>
-                                          <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.grossProfit)}</span>
-                                      </div>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className="opacity-75 truncate">Comissão ({formatPercentage(res.commissionPercent)})</span>
-                                          <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.commission)}</span>
-                                      </div>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className="opacity-75 truncate">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
-                                          <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.tax)}</span>
-                                      </div>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className="opacity-75 truncate">{res.platform === Platform.SHEIN ? 'Frete Shein (por peso)' : 'Taxa Fixa/Frete'}</span>
-                                          <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.fixedFee)}</span>
-                                      </div>
-                                      {res.breakEvenPrice !== undefined && res.breakEvenPrice > 0 && (
-                                          <div className="flex justify-between items-center gap-2 pt-2 border-t border-dashed border-current/25">
-                                              <span className="opacity-80 text-xs font-bold truncate">Ponto de Equilíbrio</span>
-                                              <span className="font-black text-xs shrink-0 whitespace-nowrap">{formatCurrency(res.breakEvenPrice)}</span>
-                                          </div>
-                                      )}
-                                  </div>
-
-                                  <div className={`w-full border-t mt-5 pt-4 space-y-2.5 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className={`text-sm sm:text-base font-black shrink-0 ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>Margem Desejada</span>
-                                          <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
-                                      </div>
-                                      <div className="flex justify-between items-center gap-2">
-                                          <span className={`text-sm sm:text-base font-black shrink-0 ${isDark ? 'text-white' : 'text-[#2563EB]'}`}>Margem Final</span>
-                                          <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#2563EB]')}`}>{formatPercentage(res.calculatedMargin)}</span>
-                                      </div>
-                                      {isNegative && (
-                                          <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
-                                              <AlertTriangle className="w-4 h-4" />
-                                              <span>INVIÁVEL</span>
-                                          </div>
-                                      )}
-                                  </div>
-                              </div>
-                          );
-                      })}
-                  </div>
-              ) : (
-                  <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
-              )}
+            <ResultsComparisonTable
+              results={displayedInverseResults}
+              mode="inverse"
+              settings={settings}
+              currentWeight={currentWeight}
+            />
+          ) : (
+            <div className="text-center text-gray-500 py-12"><p>Digite o preço de venda e clique em "Calcular Custo Máximo".</p></div>
+          )}
       </Card>
 
       <Card 
@@ -822,104 +610,12 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
           </div>
         )}
           {marginResults.length > 0 ? (
-          <div className={`mt-8 ${getResultsGridClass(displayedMarginResults.length)}`}>
-              {displayedMarginResults.map((res) => {
-                  const isNegative = res.grossProfit < 0;
-                  const isDark = res.platform === Platform.SHOPEE || res.platform === Platform.SHEIN;
-                  const colorClasses = getPlatformColor(res.platform, isNegative);
-                  return (
-                      <div key={res.platform} className={`relative p-5 sm:p-6 rounded-2xl border flex flex-col ${colorClasses} min-h-[460px] shadow-lg overflow-hidden transition-transform hover:scale-[1.01]`}>
-                          <div className="mb-5 text-center">
-                              <div className="flex flex-col items-center">
-                                  <div className="flex items-center justify-center gap-2 mb-1">
-                                      <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight truncate">
-                                          {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) ? 'Mercado Livre' : res.platform}
-                                      </h3>
-                                      { (res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white uppercase tracking-wider shrink-0 ${res.platform === Platform.ML_PREMIUM ? 'bg-blue-600' : 'bg-gray-700'}`}>
-                                              {res.platform === Platform.ML_PREMIUM ? 'Premium' : 'Clássico'}
-                                          </span>
-                                      )}
-                                  </div>
-                                  {res.platform === Platform.SHOPEE && (
-                                      <p className="text-[10px] opacity-70 uppercase font-black tracking-widest">CÁLCULO: {settings.shopee.sellerType}</p>
-                                  )}
-                                  {(res.platform === Platform.ML_CLASSICO || res.platform === Platform.ML_PREMIUM) && (
-                                      <p className="text-[10px] opacity-75 font-bold">Peso: {currentWeight}kg</p>
-                                  )}
-                                  {res.platform === Platform.SHEIN && (
-                                      <div className="text-[10px] opacity-90 font-bold flex flex-col items-center">
-                                          <span className="uppercase tracking-widest font-black text-white">Comissão Fixa: 18%</span>
-                                          <span className="text-neutral-300 text-[10px]">Frete: {formatCurrency(res.fixedFee)} ({currentWeight}kg)</span>
-                                      </div>
-                                  )}
-                                  {res.platform === Platform.TIKTOK_SHOP && (
-                                      <div className="text-[10px] opacity-80 font-bold flex flex-col items-center">
-                                          <span>{res.sellingPrice && res.sellingPrice < 50 ? '10% + R$ 4,00 (< R$ 50)' : '6% + R$ 6,00 (≥ R$ 50)'}</span>
-                                          {(settings.tiktok.affiliateCommission || 0) > 0 && (
-                                              <span className="text-blue-700 font-extrabold">+ {settings.tiktok.affiliateCommission}% Afiliado</span>
-                                          )}
-                                      </div>
-                                  )}
-                              </div>
-                          </div>
-
-                          <div className="text-center mb-6 px-1">
-                              <p className="opacity-70 text-xs sm:text-sm font-bold mb-1">Lucro Bruto Simulado</p>
-                              <p className={`text-3xl sm:text-4xl lg:text-[2.65rem] font-black tracking-tight leading-tight break-words ${isNegative ? 'text-red-700' : (isDark ? 'text-white' : 'text-[#166534]')}`}>
-                                  {formatCurrency(res.grossProfit)}
-                              </p>
-                          </div>
-
-                          <div className="w-full space-y-2.5 flex-grow text-xs sm:text-sm font-medium">
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className="opacity-75 truncate">Preço de Venda</span>
-                                  <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.sellingPrice)}</span>
-                              </div>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className="opacity-75 truncate">Custo do Produto</span>
-                                  <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.productCost)}</span>
-                              </div>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className="opacity-75 truncate">Comissão ({formatPercentage(res.commissionPercent)})</span>
-                                  <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.commission)}</span>
-                              </div>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className="opacity-75 truncate">Simples Nacional ({formatPercentage(res.taxPercent)})</span>
-                                  <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.tax)}</span>
-                              </div>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className="opacity-75 truncate">{res.platform === Platform.SHEIN ? 'Frete Shein (por peso)' : 'Taxa Fixa/Frete'}</span>
-                                  <span className="font-black shrink-0 whitespace-nowrap">{formatCurrency(res.fixedFee)}</span>
-                              </div>
-                              {res.breakEvenPrice !== undefined && res.breakEvenPrice > 0 && (
-                                  <div className="flex justify-between items-center gap-2 pt-2 border-t border-dashed border-current/25">
-                                      <span className="opacity-80 text-xs font-bold truncate">Ponto de Equilíbrio</span>
-                                      <span className="font-black text-xs shrink-0 whitespace-nowrap">{formatCurrency(res.breakEvenPrice)}</span>
-                                  </div>
-                              )}
-                          </div>
-
-                          <div className={`w-full border-t mt-5 pt-4 space-y-2.5 ${isNegative ? 'border-red-300' : 'border-black/10'}`}>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className={`text-sm sm:text-base font-black shrink-0 ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>Lucro Bruto</span>
-                                  <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#166534]')}`}>{formatCurrency(res.grossProfit)}</span>
-                              </div>
-                              <div className="flex justify-between items-center gap-2">
-                                  <span className={`text-sm sm:text-base font-black shrink-0 ${isDark ? 'text-white' : 'text-[#2563EB]'}`}>Margem Final</span>
-                                  <span className={`text-base sm:text-xl font-black shrink-0 whitespace-nowrap ${isNegative ? 'text-red-800' : (isDark ? 'text-white' : 'text-[#2563EB]')}`}>{formatPercentage(res.calculatedMargin)}</span>
-                              </div>
-                              {isNegative && (
-                                  <div className="flex items-center justify-center mt-2 text-red-800 font-black text-xs gap-1 animate-pulse">
-                                      <AlertTriangle className="w-4 h-4" />
-                                      <span>PREJUÍZO</span>
-                                  </div>
-                              )}
-                          </div>
-                      </div>
-                  );
-              })}
-          </div>
+            <ResultsComparisonTable
+              results={displayedMarginResults}
+              mode="margin"
+              settings={settings}
+              currentWeight={currentWeight}
+            />
           ) : (
                   <div className="text-center text-gray-500 py-12"><p>Preencha os campos e clique em "Simular Margem" para ver os resultados.</p></div>
           )}
