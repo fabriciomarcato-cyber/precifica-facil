@@ -29,6 +29,18 @@ export function parseNumber(value: string | number | undefined | null): number {
 }
 
 /**
+ * Normaliza textos para busca removendo acentos/diacríticos e convertendo para caixa baixa.
+ */
+export function normalizeSearchText(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/**
  * Trata o peso informado, aceitando kg (ex: 0.9, 0,900, 0.001) e convertendo inteligentemente se digitado em gramas (ex: 900g ou 900 -> 0.9kg).
  * Retorna 0 quando vazio ou inválido (sem fallback prematuro para 1kg).
  */

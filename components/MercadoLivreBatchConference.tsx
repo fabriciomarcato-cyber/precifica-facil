@@ -10,7 +10,7 @@ import {
   generateSampleMercadoLivreWorkbook,
   generateSampleDeParaWorkbook
 } from '../lib/mlBatchCalculator';
-import { formatCurrency } from '../lib/calculator';
+import { formatCurrency, normalizeSearchText } from '../lib/calculator';
 import {
   AlertCircle,
   CheckCircle,
@@ -335,11 +335,13 @@ export default function MercadoLivreBatchConference({ settings }: MercadoLivreBa
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Busca textual por SKU ou Título
+    // Busca textual por SKU ou Título (ignorando acentos e caixa)
     if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
+      const term = normalizeSearchText(searchTerm);
       result = result.filter(
-        it => it.sku.toLowerCase().includes(term) || it.titulo.toLowerCase().includes(term)
+        it =>
+          normalizeSearchText(it.sku).includes(term) ||
+          normalizeSearchText(it.titulo).includes(term)
       );
     }
 

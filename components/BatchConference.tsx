@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AppSettings } from '../types';
-import { formatCurrency } from '../lib/calculator';
+import { formatCurrency, normalizeSearchText } from '../lib/calculator';
 import {
   AuditedBatchItem,
   AuditBatchParams,
@@ -359,9 +359,11 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
     }
 
     if (searchTerm.trim()) {
-      const q = searchTerm.trim().toLowerCase();
+      const q = normalizeSearchText(searchTerm);
       list = list.filter(
-        (i) => i.sku.toLowerCase().includes(q) || i.titulo.toLowerCase().includes(q)
+        (i) =>
+          normalizeSearchText(i.sku).includes(q) ||
+          normalizeSearchText(i.titulo).includes(q)
       );
     }
 
@@ -421,6 +423,12 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
       SKU: it.sku,
       'Produto / Anúncio': it.titulo,
       Canal: it.channel === 'shopee' ? 'Shopee' : 'Mercado Livre',
+      'Tipo de Anúncio':
+        it.channel === 'mercadolivre'
+          ? it.tipoAnuncioAplicado === 'premium'
+            ? 'Premium'
+            : 'Clássico'
+          : '-',
       'Status Cruzamento': it.statusCruzamento,
       'Em Promoção': it.emPromocao ? 'Sim' : 'Não',
       'Preço Comum (R$)': it.precoComum,
@@ -460,6 +468,12 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
     const rows = filteredAndSortedItems.map((it) => ({
       SKU: it.sku,
       Titulo: it.titulo,
+      Tipo_Anuncio:
+        it.channel === 'mercadolivre'
+          ? it.tipoAnuncioAplicado === 'premium'
+            ? 'Premium'
+            : 'Classico'
+          : '-',
       Status_Cruzamento: it.statusCruzamento,
       Em_Promocao: it.emPromocao ? 'Sim' : 'Nao',
       Preco_Comum: it.precoComum,
@@ -872,8 +886,9 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
                   )}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Colunas: <strong>SKU</strong>, Título, <strong>Preço</strong> e{' '}
-                  <strong>Preço em promoção</strong>. Frete calculado pelo Peso bruto do Bling.
+                  Colunas: <strong>SKU</strong>, Título, <strong>Preço</strong>,{' '}
+                  <strong>Preço em promoção</strong> e <strong>Tipo de anúncio</strong>{' '}
+                  (Clássico/Premium). Frete calculado pelo Peso bruto do Bling.
                 </p>
               </div>
 
@@ -1372,7 +1387,17 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
                           <td className="py-3 px-3 text-right align-middle whitespace-nowrap tabular-nums">
                             <div className="text-xs font-medium text-slate-700">
                               {formatCurrency(item.comissaoValor)}{' '}
-                              <span className="text-slate-400">({item.comissaoPercent}%)</span>
+                              <span className="text-slate-400">
+                                ({item.comissaoPercent}%
+                                {!isShopee && item.tipoAnuncioAplicado
+                                  ? ` · ${
+                                      item.tipoAnuncioAplicado === 'premium'
+                                        ? 'Premium'
+                                        : 'Clássico'
+                                    }`
+                                  : ''}
+                                )
+                              </span>
                             </div>
                             <div className="text-[11px] text-slate-500 mt-0.5">
                               {isShopee ? 'Taxa:' : 'Frete:'} {formatCurrency(item.freteTaxaValor)}

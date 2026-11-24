@@ -63,6 +63,7 @@ export interface MergedMarketplaceItem {
 }
 
 export interface AuditedBatchItem extends MergedMarketplaceItem {
+  tipoAnuncioAplicado?: MLListingType;
   comissaoPercent: number;
   comissaoValor: number;
   freteTaxaValor: number;
@@ -111,6 +112,19 @@ export function normalizeHeaderText(header: unknown): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Normaliza o valor da coluna "Tipo de anúncio" do Mercado Livre
+ * removendo espaços extras, acentos e diferenças de caixa.
+ */
+export function normalizeMLListingType(rawValue: unknown): MLListingType | undefined {
+  if (rawValue === null || rawValue === undefined) return undefined;
+  const norm = normalizeHeaderText(rawValue);
+  if (!norm) return undefined;
+  if (norm.includes('premium')) return 'premium';
+  if (norm.includes('classico') || norm.includes('classic')) return 'classico';
+  return undefined;
 }
 
 /**
@@ -584,6 +598,7 @@ export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
  * - Título
  * - Preço
  * - Preço em promoção
+ * - Tipo de anúncio (Clássico ou Premium)
  */
 export function parseMercadoLivreSheetWorkbook(workbook: XLSX.WorkBook): {
   rows: MercadoLivreSheetRow[];
@@ -662,16 +677,20 @@ export function parseMercadoLivreSheetWorkbook(workbook: XLSX.WorkBook): {
         precoIdx = c;
         score += cell === 'preco' ? 5 : 3;
       } else if (
+        tipoIdx === -1 &&
+        (cell === 'tipo de anuncio' ||
+          cell.includes('tipo de anuncio') ||
+          cell === 'tipo anuncio' ||
+          cell === 'exposicao' ||
+          cell === 'tipo')
+      ) {
+        tipoIdx = c;
+        score += cell.includes('tipo de anuncio') ? 3 : 1;
+      } else if (
         tarifaIdx === -1 &&
         (cell.includes('tarifa de venda') || cell.includes('tarifa') || cell.includes('comissao'))
       ) {
         tarifaIdx = c;
-        score += 1;
-      } else if (
-        tipoIdx === -1 &&
-        (cell.includes('tipo de anuncio') || cell === 'exposicao' || cell === 'tipo')
-      ) {
-        tipoIdx = c;
         score += 1;
       }
     }
@@ -694,7 +713,7 @@ export function parseMercadoLivreSheetWorkbook(workbook: XLSX.WorkBook): {
     return {
       rows: parsed,
       errors: [
-        'Cabeçalho do Mercado Livre não reconhecido. Esperado: "SKU", "Título", "Preço" e "Preço em promoção".',
+        'Cabeçalho do Mercado Livre não reconhecido. Esperado: "SKU", "Título", "Preço", "Preço em promoção" e "Tipo de anúncio".',
       ],
     };
   }
@@ -714,12 +733,8 @@ export function parseMercadoLivreSheetWorkbook(workbook: XLSX.WorkBook): {
     const tarifaPlanilhaPercent =
       cols.tarifa !== -1 ? parsePercentCell(row[cols.tarifa]) : undefined;
 
-    let tipoAnuncio: MLListingType | undefined;
-    if (cols.tipo !== -1) {
-      const rawTipo = normalizeHeaderText(row[cols.tipo]);
-      if (rawTipo.includes('premium')) tipoAnuncio = 'premium';
-      else if (rawTipo.includes('classic')) tipoAnuncio = 'classico';
-    }
+    const tipoAnuncio =
+      cols.tipo !== -1 ? normalizeMLListingType(row[cols.tipo]) : undefined;
 
     parsed.push({
       skuNormalizado,
@@ -981,6 +996,7 @@ export function auditMergedItem(
 
   return {
     ...item,
+    tipoAnuncioAplicado: activeType,
     comissaoPercent: round2(chosenCommission),
     comissaoValor: round2(comissaoValor),
     freteTaxaValor: round2(freteTaxaValor),
@@ -1102,30 +1118,35 @@ export function generateMLSampleWorkbook(): XLSX.WorkBook {
       'Título': 'Fone Bluetooth Sem Fio TWS Alta Definição',
       'Preço': 'R$ 99,90',
       'Preço em promoção': 'R$ 84,90',
+      'Tipo de anúncio': 'Clássico',
     },
     {
       'SKU': 'GARRAFA-INOX-1L',
       'Título': 'Garrafa Térmica Inox 1 Litro Academia',
       'Preço': 'R$ 109,90',
       'Preço em promoção': '',
+      'Tipo de anúncio': 'Premium',
     },
     {
       'SKU': 'MOCHILA-EXEC-01',
       'Título': 'Mochila Executiva Impermeável Para Notebook',
       'Preço': 'R$ 139,90',
       'Preço em promoção': 'R$ 112,00',
+      'Tipo de anúncio': 'Premium',
     },
     {
       'SKU': 'LUMINARIA-TOUCH',
       'Título': 'Luminária LED Touch Mesa Escritório',
       'Preço': 'R$ 49,90',
       'Preço em promoção': '',
+      'Tipo de anúncio': 'Clássico',
     },
     {
       'SKU': 'ML-SEM-BLING-99',
       'Título': 'Adaptador HDMI 4K USB-C Hub',
       'Preço': 'R$ 59,90',
       'Preço em promoção': '',
+      'Tipo de anúncio': '',
     },
   ];
   const ws = XLSX.utils.json_to_sheet(data);

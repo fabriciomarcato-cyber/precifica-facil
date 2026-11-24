@@ -1,7 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { AppSettings } from '../types';
-import { formatCurrency, formatPercentage, parseNumber, parseWeight } from '../lib/calculator';
+import {
+  formatCurrency,
+  formatPercentage,
+  normalizeSearchText,
+  parseNumber,
+  parseWeight,
+} from '../lib/calculator';
 import {
   AutoPriceAuditedItem,
   AutoPriceChannel,
@@ -255,10 +261,10 @@ export default function AutoPriceConference({ settings }: AutoPriceConferencePro
       if (channelFilter === 'tiktok' && item.channel !== 'tiktok') return false;
 
       if (searchTerm.trim()) {
-        const q = searchTerm.toLowerCase();
-        const matchSku = item.sku.toLowerCase().includes(q);
-        const matchMktId = item.marketplaceId.toLowerCase().includes(q);
-        const matchTitle = item.title.toLowerCase().includes(q);
+        const q = normalizeSearchText(searchTerm);
+        const matchSku = normalizeSearchText(item.sku).includes(q);
+        const matchMktId = normalizeSearchText(item.marketplaceId).includes(q);
+        const matchTitle = normalizeSearchText(item.title).includes(q);
         if (!matchSku && !matchMktId && !matchTitle) return false;
       }
 
