@@ -14,8 +14,7 @@ import {
 import { AlertTriangle, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lucide-react';
 
 import ResultsComparisonTable from './ResultsComparisonTable';
-import ShopeeBatchConference from './ShopeeBatchConference';
-import MercadoLivreBatchConference from './MercadoLivreBatchConference';
+import BatchConference from './BatchConference';
 import VolumetricWeightCalculator from './VolumetricWeightCalculator';
 
 interface CalculatorSectionProps {
@@ -621,8 +620,7 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
           )}
       </Card>
 
-      <MercadoLivreBatchConference settings={settings} />
-      <ShopeeBatchConference settings={settings} />
+      <BatchConference settings={settings} />
       <VolumetricWeightCalculator />
     </>
   );

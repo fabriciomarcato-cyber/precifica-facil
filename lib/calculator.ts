@@ -139,7 +139,7 @@ function getMercadoLivreFees(price: number, weightInKg: number, _settings?: AppS
 /**
  * Iteratively calculates the final selling price for Mercado Livre, as the fees depend on the final price.
  */
-function calculateMercadoLivrePrice(
+export function calculateMercadoLivrePrice(
   productCost: number,
   baseCommissionPercent: number,
   weightInKg: number,
