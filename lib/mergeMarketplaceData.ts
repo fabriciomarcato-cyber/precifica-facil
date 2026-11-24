@@ -102,16 +102,19 @@ export function normalizeSkuKey(sku: unknown): string {
 }
 
 /**
- * Normaliza cabeçalhos de planilhas removendo acentos, símbolos extras e caixa alta.
+ * Normaliza cabeçalhos de planilhas removendo BOM, quebras de linha (\r, \n),
+ * múltiplos espaços, acentos/diacríticos e convertendo para minúsculas.
  */
 export function normalizeHeaderText(header: unknown): string {
   if (header === null || header === undefined) return '';
   return String(header)
-    .toLowerCase()
+    .replace(/\uFEFF/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .toLowerCase();
 }
 
 /**
@@ -592,6 +595,155 @@ export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
   return { result: { promoMap, totalRows }, errors };
 }
 
+interface MLHeaderCandidate {
+  sheetName: string;
+  rawRows: any[][];
+  headerRowIndex: number;
+  cols: {
+    sku: number;
+    titulo: number;
+    preco: number;
+    promo: number;
+    tarifa: number;
+    tipo: number;
+  };
+  normalizedHeaders: string[];
+  score: number;
+  requiredCount: number;
+}
+
+function matchMLHeaderRow(row: any[]): Omit<MLHeaderCandidate, 'sheetName' | 'rawRows' | 'headerRowIndex'> {
+  const normalizedCells = row.map((cell) => normalizeHeaderText(cell));
+  const normalizedHeaders = normalizedCells.filter(Boolean);
+
+  let skuIdx = -1;
+  let tituloIdx = -1;
+  let precoIdx = -1;
+  let promoIdx = -1;
+  let tarifaIdx = -1;
+  let tipoIdx = -1;
+
+  // Passo 1: correspondências exatas / prioritárias (independente da ordem das colunas)
+  for (let c = 0; c < normalizedCells.length; c++) {
+    const cell = normalizedCells[c];
+    if (!cell) continue;
+
+    if (skuIdx === -1 && (cell === 'sku' || cell === 'codigo sku' || cell === 'codigo (sku)' || cell === 'codigo(sku)')) {
+      skuIdx = c;
+    } else if (tituloIdx === -1 && (cell === 'titulo' || cell === 'titulo do anuncio')) {
+      tituloIdx = c;
+    } else if (
+      promoIdx === -1 &&
+      (cell === 'preco em promocao' || cell === 'preco promocional' || cell === 'preco de promocao')
+    ) {
+      promoIdx = c;
+    } else if (
+      precoIdx === -1 &&
+      (cell === 'preco' || cell === 'preco (r$)' || cell === 'preco atual' || cell === 'preco de venda' || cell === 'valor')
+    ) {
+      precoIdx = c;
+    } else if (
+      tipoIdx === -1 &&
+      (cell === 'tipo de anuncio' || cell === 'tipo anuncio' || cell === 'exposicao' || cell === 'tipo')
+    ) {
+      tipoIdx = c;
+    } else if (
+      tarifaIdx === -1 &&
+      (cell === 'tarifa de venda' || cell === 'tarifa' || cell === 'comissao')
+    ) {
+      tarifaIdx = c;
+    }
+  }
+
+  // Passo 2: variações parciais / flexíveis para colunas ainda não mapeadas
+  for (let c = 0; c < normalizedCells.length; c++) {
+    const cell = normalizedCells[c];
+    if (!cell) continue;
+
+    if (
+      skuIdx === -1 &&
+      c !== tituloIdx &&
+      c !== precoIdx &&
+      c !== promoIdx &&
+      c !== tipoIdx &&
+      (cell.includes('sku') || cell === 'codigo' || cell === 'cod' || cell === 'referencia')
+    ) {
+      skuIdx = c;
+    } else if (
+      tituloIdx === -1 &&
+      c !== skuIdx &&
+      c !== precoIdx &&
+      c !== promoIdx &&
+      c !== tipoIdx &&
+      (cell.includes('titulo') || cell === 'nome' || cell === 'nome do produto' || cell === 'produto' || (cell.includes('anuncio') && !cell.includes('tipo')))
+    ) {
+      tituloIdx = c;
+    } else if (
+      promoIdx === -1 &&
+      c !== skuIdx &&
+      c !== tituloIdx &&
+      c !== precoIdx &&
+      c !== tipoIdx &&
+      (cell.includes('em promocao') || cell.includes('preco promoc') || cell.includes('promocao') || cell.includes('desconto'))
+    ) {
+      promoIdx = c;
+    } else if (
+      precoIdx === -1 &&
+      c !== skuIdx &&
+      c !== tituloIdx &&
+      c !== promoIdx &&
+      c !== tipoIdx &&
+      ((cell.includes('preco') && !cell.includes('promoc') && !cell.includes('custo')) ||
+        (cell.includes('valor') && !cell.includes('custo') && !cell.includes('frete')))
+    ) {
+      precoIdx = c;
+    } else if (
+      tipoIdx === -1 &&
+      c !== skuIdx &&
+      c !== tituloIdx &&
+      c !== precoIdx &&
+      c !== promoIdx &&
+      (cell.includes('tipo de anuncio') || cell.includes('tipo anuncio') || cell.includes('exposicao') || cell.includes('modalidade'))
+    ) {
+      tipoIdx = c;
+    } else if (
+      tarifaIdx === -1 &&
+      c !== skuIdx &&
+      c !== tituloIdx &&
+      c !== precoIdx &&
+      c !== promoIdx &&
+      c !== tipoIdx &&
+      (cell.includes('tarifa') || cell.includes('comissao'))
+    ) {
+      tarifaIdx = c;
+    }
+  }
+
+  let score = 0;
+  if (skuIdx !== -1) score += 5;
+  if (precoIdx !== -1) score += 5;
+  if (tituloIdx !== -1) score += 3;
+  if (promoIdx !== -1) score += 3;
+  if (tipoIdx !== -1) score += 3;
+  if (tarifaIdx !== -1) score += 1;
+
+  const requiredCount = (skuIdx !== -1 ? 1 : 0) + (precoIdx !== -1 || promoIdx !== -1 ? 1 : 0);
+
+  return {
+    cols: {
+      sku: skuIdx,
+      titulo: tituloIdx,
+      preco: precoIdx,
+      promo: promoIdx,
+      tarifa: tarifaIdx,
+      tipo: tipoIdx,
+    },
+    normalizedHeaders,
+    score,
+    requiredCount,
+  };
+}
+
 /**
  * Lê o Arquivo Único do Mercado Livre:
  * - SKU
@@ -606,114 +758,77 @@ export function parseMercadoLivreSheetWorkbook(workbook: XLSX.WorkBook): {
 } {
   const parsed: MercadoLivreSheetRow[] = [];
   const errors: string[] = [];
-  const rawRows = extractSheetRows(workbook);
 
-  if (rawRows.length === 0) {
+  if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
     return { rows: parsed, errors: ['A planilha do Mercado Livre está vazia.'] };
   }
 
-  let headerRowIndex = -1;
-  let bestScore = 0;
-  let cols = {
-    sku: -1,
-    titulo: -1,
-    preco: -1,
-    promo: -1,
-    tarifa: -1,
-    tipo: -1,
-  };
+  let bestCandidate: MLHeaderCandidate | null = null;
+  let firstNonEmptyRowHeaders: string[] = [];
+  let hasAnyRow = false;
 
-  for (let r = 0; r < Math.min(15, rawRows.length); r++) {
-    const row = rawRows[r];
-    if (!Array.isArray(row)) continue;
+  // Examina todas as abas (planilhas reais do ML às vezes têm aba de instruções antes da aba de anúncios)
+  for (const sheetName of workbook.SheetNames) {
+    const ws = workbook.Sheets[sheetName];
+    if (!ws) continue;
+    const rawRows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    if (!Array.isArray(rawRows) || rawRows.length === 0) continue;
 
-    let skuIdx = -1;
-    let tituloIdx = -1;
-    let precoIdx = -1;
-    let promoIdx = -1;
-    let tarifaIdx = -1;
-    let tipoIdx = -1;
-    let score = 0;
+    let nonEmptyRowsScanned = 0;
+    for (let r = 0; r < rawRows.length && nonEmptyRowsScanned < 40; r++) {
+      const row = rawRows[r];
+      if (!Array.isArray(row)) continue;
 
-    for (let c = 0; c < row.length; c++) {
-      const cell = normalizeHeaderText(row[c]);
-      if (!cell) continue;
+      const hasContent = row.some((cell) => normalizeHeaderText(cell) !== '');
+      if (!hasContent) continue; // Ignora linhas iniciais totalmente vazias antes do cabeçalho
+
+      nonEmptyRowsScanned++;
+      hasAnyRow = true;
+
+      const match = matchMLHeaderRow(row);
+      if (firstNonEmptyRowHeaders.length === 0 && match.normalizedHeaders.length > 0) {
+        firstNonEmptyRowHeaders = match.normalizedHeaders;
+      }
 
       if (
-        skuIdx === -1 &&
-        (cell === 'sku' ||
-          cell === 'codigo sku' ||
-          cell === 'codigo (sku)' ||
-          cell.includes('sku'))
+        !bestCandidate ||
+        match.requiredCount > bestCandidate.requiredCount ||
+        (match.requiredCount === bestCandidate.requiredCount && match.score > bestCandidate.score)
       ) {
-        skuIdx = c;
-        score += cell === 'sku' ? 5 : 3;
-      } else if (
-        tituloIdx === -1 &&
-        (cell === 'titulo' ||
-          cell.includes('titulo') ||
-          cell === 'anuncio' ||
-          cell === 'nome do produto')
-      ) {
-        tituloIdx = c;
-        score += cell === 'titulo' ? 4 : 2;
-      } else if (
-        promoIdx === -1 &&
-        (cell === 'preco em promocao' ||
-          cell.includes('em promocao') ||
-          cell.includes('preco promocional') ||
-          cell.includes('preco de promocao'))
-      ) {
-        promoIdx = c;
-        score += 5;
-      } else if (
-        precoIdx === -1 &&
-        (cell === 'preco' ||
-          cell === 'preco atual' ||
-          cell === 'preco de venda' ||
-          cell === 'preco (r$)' ||
-          (cell.includes('preco') && !cell.includes('promoc') && !cell.includes('custo')))
-      ) {
-        precoIdx = c;
-        score += cell === 'preco' ? 5 : 3;
-      } else if (
-        tipoIdx === -1 &&
-        (cell === 'tipo de anuncio' ||
-          cell.includes('tipo de anuncio') ||
-          cell === 'tipo anuncio' ||
-          cell === 'exposicao' ||
-          cell === 'tipo')
-      ) {
-        tipoIdx = c;
-        score += cell.includes('tipo de anuncio') ? 3 : 1;
-      } else if (
-        tarifaIdx === -1 &&
-        (cell.includes('tarifa de venda') || cell.includes('tarifa') || cell.includes('comissao'))
-      ) {
-        tarifaIdx = c;
-        score += 1;
+        bestCandidate = {
+          sheetName,
+          rawRows,
+          headerRowIndex: r,
+          cols: match.cols,
+          normalizedHeaders: match.normalizedHeaders,
+          score: match.score,
+          requiredCount: match.requiredCount,
+        };
       }
-    }
-
-    if (score > bestScore) {
-      bestScore = score;
-      headerRowIndex = r;
-      cols = {
-        sku: skuIdx,
-        titulo: tituloIdx,
-        preco: precoIdx,
-        promo: promoIdx,
-        tarifa: tarifaIdx,
-        tipo: tipoIdx,
-      };
     }
   }
 
-  if (headerRowIndex === -1 || cols.sku === -1 || (cols.preco === -1 && cols.promo === -1)) {
+  if (!hasAnyRow || !bestCandidate) {
+    return { rows: parsed, errors: ['A planilha do Mercado Livre está vazia.'] };
+  }
+
+  const { cols, rawRows, headerRowIndex, normalizedHeaders } = bestCandidate;
+  const missingRequired: string[] = [];
+  if (cols.sku === -1) missingRequired.push('SKU');
+  if (cols.preco === -1 && cols.promo === -1) missingRequired.push('Preço');
+
+  if (missingRequired.length > 0) {
+    const foundCols =
+      normalizedHeaders.length > 0 ? normalizedHeaders : firstNonEmptyRowHeaders;
+    const foundLabel =
+      foundCols.length > 0
+        ? `Colunas normalizadas encontradas: [${foundCols.map((c) => `"${c}"`).join(', ')}].`
+        : 'Nenhuma coluna com texto válido foi identificada na planilha.';
+
     return {
       rows: parsed,
       errors: [
-        'Cabeçalho do Mercado Livre não reconhecido. Esperado: "SKU", "Título", "Preço", "Preço em promoção" e "Tipo de anúncio".',
+        `Cabeçalho do Mercado Livre incompleto (faltando: ${missingRequired.join(', ')}). ${foundLabel}`,
       ],
     };
   }

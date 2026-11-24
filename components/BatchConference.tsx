@@ -150,8 +150,44 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const bstr = event.target?.result;
-        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const buffer = event.target?.result as ArrayBuffer;
+        const lowerName = file.name.toLowerCase();
+
+        if (lowerName.endsWith('.csv') || lowerName.endsWith('.txt')) {
+          const bytes = new Uint8Array(buffer);
+          let text = '';
+          try {
+            text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+          } catch {
+            text = new TextDecoder('windows-1252').decode(bytes);
+          }
+          text = text.replace(/^\uFEFF/, '');
+
+          // Detecta delimitador comum em CSVs brasileiros (';' ou '\t' ou ',')
+          const sampleLine =
+            text
+              .split(/\r?\n/)
+              .find((l) => l.trim().length > 0) || '';
+          const semicolonCount = (sampleLine.match(/;/g) || []).length;
+          const commaCount = (sampleLine.match(/,/g) || []).length;
+          const tabCount = (sampleLine.match(/\t/g) || []).length;
+
+          const fsOption =
+            tabCount > semicolonCount && tabCount > commaCount
+              ? '\t'
+              : semicolonCount > commaCount
+              ? ';'
+              : undefined;
+
+          const workbook = XLSX.read(text, {
+            type: 'string',
+            ...(fsOption ? { FS: fsOption } : {}),
+          });
+          onLoaded(workbook);
+          return;
+        }
+
+        const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
         onLoaded(workbook);
       } catch (err) {
         console.error('Erro ao ler planilha:', err);
@@ -163,7 +199,7 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
     reader.onerror = () => {
       showFeedbackError(`Falha ao abrir o arquivo "${file.name}".`);
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
   // Upload 1: Planilha Base Bling
