@@ -15,7 +15,6 @@ import { AlertTriangle, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lu
 
 import ResultsComparisonTable from './ResultsComparisonTable';
 import BatchConference from './BatchConference';
-import VolumetricWeightCalculator from './VolumetricWeightCalculator';
 
 interface CalculatorSectionProps {
   settings: AppSettings;
@@ -621,7 +620,6 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
       </Card>
 
       <BatchConference settings={settings} />
-      <VolumetricWeightCalculator />
     </>
   );
 }

@@ -127,10 +127,15 @@ const priceTiers = [
 export function getMercadoLivreShippingFee(price: number | string, weightInKg: number | string): number {
     const numPrice = parseNumber(price);
     const numWeight = parseWeight(weightInKg);
-    if (numWeight < 0.001) return 0;
+    const weightInGrams = Math.round(numWeight * 1000);
+    if (weightInGrams < 1) return 0;
 
     const priceTier = priceTiers.find(tier => numPrice <= tier.maxPrice);
-    const weightTier = mlShippingTiers.find(tier => numWeight <= tier.maxWeight);
+    // Regra do Mercado Livre: pesos exatamente no limite de transição (ex: 0,3 kg, 0,5 kg, 1 kg, 1,5 kg, 2 kg, 3 kg, 4 kg...)
+    // são enquadrados na faixa seguinte (mais cara), portanto o limite superior de cada faixa é exclusivo (< maxWeight).
+    const weightTier = mlShippingTiers.find(
+      tier => tier.maxWeight === Infinity || weightInGrams < Math.round(tier.maxWeight * 1000)
+    );
 
     if (priceTier && weightTier) {
         return weightTier.costs[priceTier.index];
