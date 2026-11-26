@@ -803,8 +803,8 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
                     )}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Colunas: <strong>SKU de referência</strong>, Nome do Produto e{' '}
-                    <strong>Preço</strong>.
+                    Aceita exportação bruta da Shopee (cabeçalho linha 3): <strong>SKU de referência</strong>{' '}
+                    (Col. E) e <strong>Preço</strong> (Col. G).
                   </p>
                 </div>
 
@@ -862,8 +862,8 @@ export default function BatchConference({ settings }: BatchConferenceProps) {
                     )}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
-                    Colunas: <strong>Nº de Ref. SKU</strong> (ou Parent SKU) e{' '}
-                    <strong>Preço de desconto</strong>.
+                    Aceita exportação bruta (linha 1): <strong>Parent SKU</strong> (Col. C, fallback
+                    Ref. SKU) e <strong>Preço de desconto</strong> (Col. H).
                   </p>
                 </div>
 

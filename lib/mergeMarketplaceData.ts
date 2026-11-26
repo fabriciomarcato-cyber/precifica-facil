@@ -175,6 +175,72 @@ export function parseBrazilianNumber(value: unknown): number {
 }
 
 /**
+ * Converte estritamente uma célula monetária/numérica em `number | null`.
+ * Aceita ponto ou vírgula decimal, separadores de milhar, prefixo "R$"/"BRL" e espaços extras.
+ * Retorna `null` para células vazias ou textos de instrução (ex.: "Insira de 1.00 a 500000.00", "Opcional").
+ */
+export function parseStrictPriceValue(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  let str = String(value).trim();
+  if (!str) return null;
+
+  let isNegative = false;
+  if (str.startsWith('-')) {
+    isNegative = true;
+    str = str.slice(1).trim();
+  } else if (str.startsWith('+')) {
+    str = str.slice(1).trim();
+  }
+
+  str = str.replace(/^(?:R\$|BRL)\s*/i, '').trim();
+  if (!str) return null;
+
+  if (str.startsWith('-')) {
+    isNegative = true;
+    str = str.slice(1).trim();
+  }
+
+  if (!/^[\d.,]+$/.test(str) || !/\d/.test(str) || /^[.,]+$/.test(str)) {
+    return null;
+  }
+
+  const hasComma = str.includes(',');
+  const hasDot = str.includes('.');
+
+  if (hasComma && hasDot) {
+    if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
+      if (!/^\d{1,3}(?:\.\d{3})*,\d+$/.test(str)) return null;
+      str = str.replace(/\./g, '').replace(',', '.');
+    } else {
+      if (!/^\d{1,3}(?:,\d{3})*\.\d+$/.test(str)) return null;
+      str = str.replace(/,/g, '');
+    }
+  } else if (hasComma) {
+    const commaCount = (str.match(/,/g) || []).length;
+    if (commaCount > 1) {
+      if (!/^\d{1,3}(?:,\d{3})+$/.test(str)) return null;
+      str = str.replace(/,/g, '');
+    } else {
+      str = str.replace(',', '.');
+    }
+  } else if (hasDot) {
+    const dotCount = (str.match(/\./g) || []).length;
+    if (dotCount > 1) {
+      if (!/^\d{1,3}(?:\.\d{3})+$/.test(str)) return null;
+      str = str.replace(/\./g, '');
+    }
+  }
+
+  const num = parseFloat(str);
+  if (Number.isNaN(num) || !Number.isFinite(num)) return null;
+  return isNegative ? -num : num;
+}
+
+/**
  * Converte o Peso Bruto do Bling (em kg). Aceita "0,350", "1.25", ou texto explícito com "g" (ex: "350g" -> 0.35kg).
  */
 export function parseBlingWeightKg(value: unknown): number {
@@ -363,11 +429,42 @@ export function parseBlingWorkbook(workbook: XLSX.WorkBook): {
   return { blingMap, totalRows: blingMap.size, errors };
 }
 
+function isShopeeInstructionOrMetaRow(row: any[]): boolean {
+  const nonEmpty = row.map((c) => normalizeHeaderText(c)).filter(Boolean);
+  if (nonEmpty.length === 0) return true;
+  const metaKeys = nonEmpty.filter((c) => c.startsWith('et_title_') || c.startsWith('ps_'));
+  if (metaKeys.length >= 2) return true;
+  if (nonEmpty.some((c) => c.startsWith('insira ') || c.length > 80)) return true;
+  return false;
+}
+
+function isShopeeSkuHeader(cell: string): boolean {
+  return (
+    cell === 'sku de referencia' ||
+    cell.includes('sku de referencia') ||
+    cell === 'nº de ref. sku' ||
+    cell === 'no de ref. sku' ||
+    cell === 'ref. sku' ||
+    cell === 'sku'
+  );
+}
+
+function isShopeePriceHeader(cell: string): boolean {
+  return (
+    cell === 'preco' ||
+    cell === 'preco (r$)' ||
+    cell === 'preco atual' ||
+    cell === 'preco de venda' ||
+    cell === 'price' ||
+    (cell.includes('preco') && !cell.includes('desconto') && !cell.includes('custo') && cell.length <= 35)
+  );
+}
+
 /**
- * Lê o Arquivo de Preço Comum da Shopee:
- * - SKU de referência
- * - Nome do Produto
- * - Preço
+ * Lê o Arquivo de Preço Normal / Preço Comum da Shopee (incluindo exportação bruta da plataforma):
+ * - Cabeçalho na linha 3 (ou detectado dinamicamente quando houver linhas introdutórias/vazias acima)
+ * - Ignora linhas em branco e linhas de instrução/aviso (ex.: linha 6 "Insira de 1.00 a...")
+ * - Prioriza Coluna E (índice 4: SKU de referência) e Coluna G (índice 6: Preço)
  */
 export function parseShopeeCommonWorkbook(workbook: XLSX.WorkBook): {
   rows: ShopeeCommonRow[];
@@ -375,98 +472,123 @@ export function parseShopeeCommonWorkbook(workbook: XLSX.WorkBook): {
 } {
   const parsed: ShopeeCommonRow[] = [];
   const errors: string[] = [];
-  const rawRows = extractSheetRows(workbook);
 
-  if (rawRows.length === 0) {
+  if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
     return { rows: parsed, errors: ['A planilha de Preço Comum da Shopee está vazia.'] };
   }
 
+  let bestSheetRows: any[][] = [];
   let headerRowIndex = -1;
   let bestScore = 0;
   let cols = { sku: -1, nome: -1, preco: -1 };
+  let hasAnyRow = false;
 
-  for (let r = 0; r < Math.min(15, rawRows.length); r++) {
-    const row = rawRows[r];
-    if (!Array.isArray(row)) continue;
+  for (const sheetName of workbook.SheetNames) {
+    const ws = workbook.Sheets[sheetName];
+    if (!ws) continue;
+    const rawRows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    if (!Array.isArray(rawRows) || rawRows.length === 0) continue;
+    hasAnyRow = true;
 
-    let skuIdx = -1;
-    let nomeIdx = -1;
-    let precoIdx = -1;
-    let score = 0;
+    for (let r = 0; r < Math.min(20, rawRows.length); r++) {
+      const row = rawRows[r];
+      if (!Array.isArray(row) || isShopeeInstructionOrMetaRow(row)) continue;
 
-    for (let c = 0; c < row.length; c++) {
-      const cell = normalizeHeaderText(row[c]);
-      if (!cell) continue;
+      let skuIdx = -1;
+      let nomeIdx = -1;
+      let precoIdx = -1;
+      let score = 0;
 
-      if (
-        skuIdx === -1 &&
-        (cell === 'sku de referencia' ||
-          cell.includes('sku de referencia') ||
-          cell === 'nº de ref. sku' ||
-          cell === 'no de ref. sku' ||
-          cell === 'sku')
-      ) {
-        skuIdx = c;
-        score += cell.includes('sku de referencia') ? 5 : 3;
-      } else if (
-        nomeIdx === -1 &&
-        (cell === 'nome do produto' ||
-          cell.includes('nome do produto') ||
-          cell === 'titulo' ||
-          cell === 'descricao')
-      ) {
-        nomeIdx = c;
-        score += cell === 'nome do produto' ? 4 : 2;
-      } else if (
-        precoIdx === -1 &&
-        (cell === 'preco' ||
-          cell === 'preco (r$)' ||
-          cell === 'preco atual' ||
-          cell === 'preco de venda' ||
-          (cell.includes('preco') && !cell.includes('desconto') && !cell.includes('custo')))
-      ) {
-        precoIdx = c;
-        score += cell === 'preco' ? 5 : 3;
+      // Prioriza o layout bruto da Shopee: Coluna E (4) = SKU de referência, Coluna G (6) = Preço
+      if (row.length >= 7) {
+        const colECell = normalizeHeaderText(row[4]);
+        const colGCell = normalizeHeaderText(row[6]);
+
+        if (colECell && (isShopeeSkuHeader(colECell) || colECell.includes('referencia'))) {
+          skuIdx = 4;
+          score += colECell === 'sku de referencia' ? 8 : 6;
+        }
+        if (colGCell && isShopeePriceHeader(colGCell)) {
+          precoIdx = 6;
+          score += colGCell === 'preco' ? 8 : 6;
+        }
+      }
+
+      for (let c = 0; c < row.length; c++) {
+        const cell = normalizeHeaderText(row[c]);
+        if (!cell) continue;
+
+        if (skuIdx === -1 && isShopeeSkuHeader(cell)) {
+          skuIdx = c;
+          score += cell.includes('sku de referencia') ? 5 : 3;
+        } else if (
+          nomeIdx === -1 &&
+          (cell === 'nome do produto' ||
+            cell.includes('nome do produto') ||
+            cell === 'titulo' ||
+            cell === 'descricao')
+        ) {
+          nomeIdx = c;
+          score += cell === 'nome do produto' ? 4 : 2;
+        } else if (precoIdx === -1 && isShopeePriceHeader(cell)) {
+          precoIdx = c;
+          score += cell === 'preco' ? 5 : 3;
+        }
+      }
+
+      // Bônus para o cabeçalho oficial da Shopee na linha 3 (índice 2)
+      if (r === 2 && skuIdx === 4 && precoIdx === 6) {
+        score += 5;
+      }
+
+      if (skuIdx !== -1 && precoIdx !== -1 && score > bestScore) {
+        bestScore = score;
+        bestSheetRows = rawRows;
+        headerRowIndex = r;
+        cols = { sku: skuIdx, nome: nomeIdx, preco: precoIdx };
       }
     }
 
-    if (score > bestScore) {
-      bestScore = score;
-      headerRowIndex = r;
-      cols = { sku: skuIdx, nome: nomeIdx, preco: precoIdx };
-    }
+    if (headerRowIndex !== -1) break;
+  }
+
+  if (!hasAnyRow) {
+    return { rows: parsed, errors: ['A planilha de Preço Comum da Shopee está vazia.'] };
   }
 
   if (headerRowIndex === -1 || cols.sku === -1 || cols.preco === -1) {
     return {
       rows: parsed,
       errors: [
-        'Cabeçalho da Shopee (Preço Comum) não reconhecido. Esperado: "SKU de referência", "Nome do Produto" e "Preço".',
+        'Cabeçalho da Shopee (Preço Comum) não reconhecido. Esperado: "SKU de referência" (Coluna E) e "Preço" (Coluna G) na linha 3 ou cabeçalho compatível.',
       ],
     };
   }
 
-  for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
-    const row = rawRows[r];
+  for (let r = headerRowIndex + 1; r < bestSheetRows.length; r++) {
+    const row = bestSheetRows[r];
     if (!Array.isArray(row) || row.length === 0) continue;
 
-    const skuOriginal = String(row[cols.sku] ?? '').trim();
-    const skuNormalizado = normalizeSkuKey(skuOriginal);
-    const nomeProduto = cols.nome !== -1 ? String(row[cols.nome] ?? '').trim() : '';
-    const precoComum = Math.max(0, parseBrazilianNumber(row[cols.preco]));
+    // Ignora linhas em branco ou de instrução onde o preço não é um número válido (ex.: "Insira de 1.00 a...")
+    const precoComum = parseStrictPriceValue(row[cols.preco]);
+    if (precoComum === null || precoComum <= 0) continue;
 
-    // Pula linhas auxiliares de template da Shopee (ex.: linha "Obrigatório"/"Opcional" sem preço e sem SKU real)
+    const skuOriginal = String(row[cols.sku] ?? '').trim();
     const skuHeaderLike = normalizeHeaderText(skuOriginal);
     if (
-      !skuNormalizado ||
       skuHeaderLike === 'opcional' ||
       skuHeaderLike === 'obrigatorio' ||
-      skuHeaderLike.startsWith('et_title_')
+      skuHeaderLike.startsWith('et_title_') ||
+      skuHeaderLike.startsWith('ps_') ||
+      skuHeaderLike.startsWith('insira ')
     ) {
-      if (precoComum <= 0) continue;
+      continue;
     }
 
-    if (!skuNormalizado && precoComum <= 0) continue;
+    const skuNormalizado = normalizeSkuKey(skuOriginal);
+    const nomeProduto = cols.nome !== -1 ? String(row[cols.nome] ?? '').trim() : '';
+
+    if (!skuNormalizado && !nomeProduto) continue;
 
     parsed.push({
       skuNormalizado,
@@ -484,9 +606,12 @@ export function parseShopeeCommonWorkbook(workbook: XLSX.WorkBook): {
 }
 
 /**
- * Lê o Arquivo de Promoção da Shopee (opcional):
- * - Cruza Nº de Ref. SKU (quando existir) ou Nº de Ref. Parent SKU. (Opcional)
- * - Lê Preço de desconto
+ * Lê o Arquivo de Promoção da Shopee (opcional, incluindo exportação bruta):
+ * - Cabeçalho na linha 1 e dados a partir da linha 2
+ * - Lê a referência do SKU da Coluna C (Nº de Ref. Parent SKU. (Opcional)),
+ *   com fallback para Nº de Ref. SKU. (Opcional) caso a Coluna C esteja vazia na linha
+ * - Lê o preço promocional da Coluna H (Preço de desconto)
+ * - Considera promoção ativa apenas quando Preço de desconto > 0
  */
 export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
   result: ShopeePromoParseResult;
@@ -505,16 +630,44 @@ export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
 
   let headerRowIndex = -1;
   let bestScore = 0;
-  let cols = { refSku: -1, parentSku: -1, discountPrice: -1 };
+  let cols = { parentSku: -1, refSku: -1, discountPrice: -1 };
 
   for (let r = 0; r < Math.min(15, rawRows.length); r++) {
     const row = rawRows[r];
-    if (!Array.isArray(row)) continue;
+    if (!Array.isArray(row) || isShopeeInstructionOrMetaRow(row)) continue;
 
-    let refSkuIdx = -1;
     let parentSkuIdx = -1;
+    let refSkuIdx = -1;
     let discountIdx = -1;
     let score = 0;
+
+    // Prioriza o layout bruto da Shopee Promoção: Coluna C (2) = Parent SKU, Coluna H (7) = Preço de desconto
+    if (row.length >= 8) {
+      const colCCell = normalizeHeaderText(row[2]);
+      const colHCell = normalizeHeaderText(row[7]);
+
+      if (
+        colCCell &&
+        (colCCell.includes('parent sku') ||
+          colCCell.includes('ref. parent') ||
+          colCCell.includes('sku parent'))
+      ) {
+        parentSkuIdx = 2;
+        score += 8;
+      }
+      if (
+        colHCell &&
+        (colHCell === 'preco de desconto' ||
+          colHCell.includes('preco de desconto') ||
+          colHCell.includes('preco com desconto') ||
+          colHCell.includes('preco promocional') ||
+          colHCell.includes('desconto') ||
+          colHCell.includes('discount'))
+      ) {
+        discountIdx = 7;
+        score += 8;
+      }
+    }
 
     for (let c = 0; c < row.length; c++) {
       const cell = normalizeHeaderText(row[c]);
@@ -527,47 +680,52 @@ export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
           cell.includes('sku parent'))
       ) {
         parentSkuIdx = c;
-        score += 4;
+        score += 5;
       } else if (
         refSkuIdx === -1 &&
+        !cell.includes('parent') &&
         (cell === 'nº de ref. sku' ||
           cell === 'no de ref. sku' ||
           cell.includes('de ref. sku') ||
           cell.includes('de ref sku') ||
+          cell.includes('ref. sku') ||
           cell === 'sku de referencia' ||
           cell === 'sku')
       ) {
         refSkuIdx = c;
-        score += 5;
+        score += 4;
       } else if (
         discountIdx === -1 &&
         (cell === 'preco de desconto' ||
           cell.includes('preco de desconto') ||
           cell.includes('preco com desconto') ||
           cell.includes('preco promocional') ||
-          cell === 'desconto')
+          cell === 'desconto' ||
+          cell === 'discount price')
       ) {
         discountIdx = c;
         score += 5;
       }
     }
 
-    if (score > bestScore) {
+    if (r === 0) score += 3;
+
+    if ((parentSkuIdx !== -1 || refSkuIdx !== -1) && discountIdx !== -1 && score > bestScore) {
       bestScore = score;
       headerRowIndex = r;
-      cols = { refSku: refSkuIdx, parentSku: parentSkuIdx, discountPrice: discountIdx };
+      cols = { parentSku: parentSkuIdx, refSku: refSkuIdx, discountPrice: discountIdx };
     }
   }
 
   if (
     headerRowIndex === -1 ||
-    (cols.refSku === -1 && cols.parentSku === -1) ||
+    (cols.parentSku === -1 && cols.refSku === -1) ||
     cols.discountPrice === -1
   ) {
     return {
       result: { promoMap, totalRows: 0 },
       errors: [
-        'Cabeçalho da Promoção Shopee não reconhecido. Esperado: "Nº de Ref. SKU" ou "Nº de Ref. Parent SKU. (Opcional)" e "Preço de desconto".',
+        'Cabeçalho da Promoção Shopee não reconhecido. Esperado: "Nº de Ref. Parent SKU. (Opcional)" (Coluna C) ou "Nº de Ref. SKU. (Opcional)" e "Preço de desconto" (Coluna H).',
       ],
     };
   }
@@ -577,12 +735,24 @@ export function parseShopeePromoWorkbook(workbook: XLSX.WorkBook): {
     const row = rawRows[r];
     if (!Array.isArray(row) || row.length === 0) continue;
 
-    const refSku = cols.refSku !== -1 ? normalizeSkuKey(row[cols.refSku]) : '';
     const parentSku = cols.parentSku !== -1 ? normalizeSkuKey(row[cols.parentSku]) : '';
-    const discountPrice = Math.max(0, parseBrazilianNumber(row[cols.discountPrice]));
+    const refSku = cols.refSku !== -1 ? normalizeSkuKey(row[cols.refSku]) : '';
 
-    const key = refSku || parentSku;
-    if (!key || discountPrice <= 0) continue;
+    // Coluna C (Parent SKU) tem prioridade; faz fallback para SKU de variação se Coluna C estiver vazia
+    const key = parentSku || refSku;
+    if (
+      !key ||
+      key === 'OPCIONAL' ||
+      key === 'OBRIGATORIO' ||
+      key.startsWith('ET_TITLE_') ||
+      key.startsWith('PS_') ||
+      key.startsWith('INSIRA ')
+    ) {
+      continue;
+    }
+
+    const discountPrice = parseStrictPriceValue(row[cols.discountPrice]);
+    if (discountPrice === null || discountPrice <= 0) continue;
 
     promoMap.set(key, discountPrice);
     totalRows++;
