@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useSettings } from './hooks/useSettings';
 import SettingsPanel from './components/SettingsPanel';
 import CalculatorSection from './components/CalculatorSection';
-import ExplanationSection from './components/ExplanationSection';
 import AutoPriceConference from './components/AutoPriceConference';
 import HelpSidebar from './components/HelpSidebar';
 import { Calculator, GitCompare, HelpCircle, Settings } from 'lucide-react';
@@ -90,13 +89,10 @@ export default function App() {
             setIsOpen={setShowSettings}
           />
           {activeTab === 'calculator' ? (
-            <>
-              <CalculatorSection 
-                settings={settings}
-                setSettings={setSettings}
-              />
-              <ExplanationSection />
-            </>
+            <CalculatorSection 
+              settings={settings}
+              setSettings={setSettings}
+            />
           ) : (
             <AutoPriceConference settings={settings} />
           )}

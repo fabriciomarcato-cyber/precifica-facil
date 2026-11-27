@@ -5,13 +5,10 @@ import {
     calculateIndividualPrices, 
     calculateMaxCost, 
     simulateMargin,
-    calcularFreteShein,
-    getSheinTierLabel,
-    formatCurrency,
     parseNumber,
     parseWeight
 } from '../lib/calculator';
-import { AlertTriangle, Scale, Calculator, TrendingUp, CornerDownLeft } from 'lucide-react';
+import { AlertTriangle, Scale, Calculator, TrendingUp, CornerDownLeft, Check } from 'lucide-react';
 
 import ResultsComparisonTable from './ResultsComparisonTable';
 import BatchConference from './BatchConference';
@@ -32,8 +29,23 @@ const Card: React.FC<React.PropsWithChildren<{ title: string; subtitle: string; 
     </div>
 );
 
+type ChannelFilterId =
+  | Platform.SHEIN
+  | 'ML'
+  | Platform.SHOPEE
+  | Platform.TIKTOK_SHOP
+  | Platform.INSTAGRAM;
+
+const ALL_CHANNEL_IDS: ChannelFilterId[] = [
+  'ML',
+  Platform.SHOPEE,
+  Platform.TIKTOK_SHOP,
+  Platform.SHEIN,
+  Platform.INSTAGRAM,
+];
+
 export default function CalculatorSection({ settings, setSettings }: CalculatorSectionProps) {
-  const [selectedMarketplace, setSelectedMarketplace] = useState<string>('all');
+  const [selectedChannels, setSelectedChannels] = useState<ChannelFilterId[]>(ALL_CHANNEL_IDS);
   const [productCost, setProductCost] = useState('');
   const [desiredPrice, setDesiredPrice] = useState('');
   const [simProductCost, setSimProductCost] = useState('');
@@ -60,13 +72,18 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const [inverseCalcError, setInverseCalcError] = useState('');
   const [marginSimError, setMarginSimError] = useState('');
 
+  const isAllSelected = ALL_CHANNEL_IDS.every((id) => selectedChannels.includes(id));
+  const hasSheinSelected = selectedChannels.includes(Platform.SHEIN);
+  const hasMLSelected = selectedChannels.includes('ML');
+  const isOnlyShein = selectedChannels.length === 1 && hasSheinSelected;
+  const requiresWeight = hasMLSelected || hasSheinSelected;
+
   useEffect(() => {
     priceResults.length > 0 && setPriceResults([]);
     priceCalcError && setPriceCalcError('');
   }, [
     productCost,
     mlWeightInput,
-    selectedMarketplace,
     settings.simplesNacional,
     settings.mercadoLivre.contributionMargin,
     settings.mercadoLivre.classicCommission,
@@ -83,7 +100,6 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   }, [
     desiredPrice,
     mlWeightInput,
-    selectedMarketplace,
     settings.simplesNacional,
     settings.mercadoLivre.contributionMargin,
     settings.mercadoLivre.classicCommission,
@@ -101,7 +117,6 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
     simProductCost,
     simSellingPrice,
     mlWeightInput,
-    selectedMarketplace,
     settings.simplesNacional,
     settings.mercadoLivre.contributionMargin,
     settings.mercadoLivre.classicCommission,
@@ -111,6 +126,12 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
     settings.instagram,
     settings.shein,
   ]);
+
+  useEffect(() => {
+    setPriceCalcError('');
+    setInverseCalcError('');
+    setMarginSimError('');
+  }, [selectedChannels]);
 
   const persistValidWeight = (weight: number) => {
     if (setSettings && weight >= 0.001 && settings.mercadoLivre.productWeight !== weight) {
@@ -123,11 +144,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
 
   const handlePriceCalculation = () => {
     const cost = parseNumber(productCost);
-    const weight = parseWeight(mlWeightInput);
+    const parsedWeight = parseWeight(mlWeightInput);
 
-    if (!weight || weight < 0.001) {
+    if (requiresWeight && (!parsedWeight || parsedWeight < 0.001)) {
       setPriceCalcError(
-        selectedMarketplace === Platform.SHEIN
+        isOnlyShein
           ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
           : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
       );
@@ -135,9 +156,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
       return;
     }
 
+    const weight = parsedWeight >= 0.001 ? parsedWeight : 0.5;
+
     if (cost > 0) {
       setPriceCalcError('');
-      persistValidWeight(weight);
+      if (parsedWeight >= 0.001) persistValidWeight(parsedWeight);
       setPriceResults(calculateIndividualPrices(cost, weight, settings));
     } else {
       setPriceCalcError('Insira um custo válido maior que zero.');
@@ -147,11 +170,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   
   const handleInverseCalculation = () => {
     const price = parseNumber(desiredPrice);
-    const weight = parseWeight(mlWeightInput);
+    const parsedWeight = parseWeight(mlWeightInput);
 
-    if (!weight || weight < 0.001) {
+    if (requiresWeight && (!parsedWeight || parsedWeight < 0.001)) {
       setInverseCalcError(
-        selectedMarketplace === Platform.SHEIN
+        isOnlyShein
           ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
           : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
       );
@@ -159,9 +182,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
       return;
     }
 
+    const weight = parsedWeight >= 0.001 ? parsedWeight : 0.5;
+
     if (price > 0) {
       setInverseCalcError('');
-      persistValidWeight(weight);
+      if (parsedWeight >= 0.001) persistValidWeight(parsedWeight);
       setInverseResults(calculateMaxCost(price, weight, settings));
     } else {
       setInverseCalcError('Insira um preço de venda válido maior que zero.');
@@ -172,11 +197,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
   const handleMarginSimulation = () => {
     const cost = parseNumber(simProductCost);
     const price = parseNumber(simSellingPrice);
-    const weight = parseWeight(mlWeightInput);
+    const parsedWeight = parseWeight(mlWeightInput);
 
-    if (!weight || weight < 0.001) {
+    if (requiresWeight && (!parsedWeight || parsedWeight < 0.001)) {
       setMarginSimError(
-        selectedMarketplace === Platform.SHEIN
+        isOnlyShein
           ? 'O peso do produto (mínimo 0,001 kg / 1g) é obrigatório para calcular na Shein.'
           : 'Informe um peso válido de no mínimo 0,001 kg (1 grama).'
       );
@@ -184,9 +209,11 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
       return;
     }
 
+    const weight = parsedWeight >= 0.001 ? parsedWeight : 0.5;
+
     if (cost > 0 && price > 0) {
       setMarginSimError('');
-      persistValidWeight(weight);
+      if (parsedWeight >= 0.001) persistValidWeight(parsedWeight);
       setMarginResults(simulateMargin(cost, price, weight, settings));
     } else {
       setMarginSimError('Insira custo e preço válidos (maiores que zero).');
@@ -205,46 +232,116 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
 
   const filterPlatformResults = (results: CalculationResult[]) => {
     const list = results.filter(r => allPlatforms.includes(r.platform));
-    if (selectedMarketplace === 'all') return list;
-    if (selectedMarketplace === 'ML') {
-      return list.filter(r => r.platform === Platform.ML_CLASSICO || r.platform === Platform.ML_PREMIUM);
-    }
-    return list.filter(r => r.platform === selectedMarketplace);
+    if (isAllSelected) return list;
+    return list.filter((r) => {
+      if (r.platform === Platform.ML_CLASSICO || r.platform === Platform.ML_PREMIUM) {
+        return selectedChannels.includes('ML');
+      }
+      return selectedChannels.includes(r.platform as ChannelFilterId);
+    });
   };
   
   const displayedPriceResults = filterPlatformResults(priceResults);
   const displayedInverseResults = filterPlatformResults(inverseResults);
   const displayedMarginResults = filterPlatformResults(marginResults);
 
+  const handleSelectAllChannels = () => {
+    setSelectedChannels(ALL_CHANNEL_IDS);
+  };
+
+  const handleToggleChannel = (channelId: ChannelFilterId) => {
+    setSelectedChannels((prev) => {
+      const allActive = ALL_CHANNEL_IDS.every((id) => prev.includes(id));
+      if (allActive) {
+        return [channelId];
+      }
+      if (prev.includes(channelId)) {
+        const next = prev.filter((id) => id !== channelId);
+        return next.length === 0 ? ALL_CHANNEL_IDS : next;
+      }
+      return [...prev, channelId];
+    });
+  };
+
+  const weightFieldLabel = 'Peso:';
+
+  const channelButtonStyles: Record<
+    ChannelFilterId,
+    { active: string; inactiveDot: string }
+  > = {
+    ML: {
+      active: 'bg-[#FFE600] text-[#111827] border-[#CA8A04] shadow-md ring-2 ring-[#FFE600]/60',
+      inactiveDot: 'bg-[#FFE600] ring-1 ring-[#CA8A04]/50',
+    },
+    [Platform.SHOPEE]: {
+      active: 'bg-[#EE4D2D] text-[#FFFFFF] border-[#C83B1F] shadow-md ring-2 ring-[#EE4D2D]/40',
+      inactiveDot: 'bg-[#EE4D2D]',
+    },
+    [Platform.TIKTOK_SHOP]: {
+      active: 'bg-[#010101] text-[#FFFFFF] border-[#FE2C55] shadow-md ring-2 ring-[#25F4EE]/70',
+      inactiveDot: 'bg-[#010101] ring-1 ring-[#FE2C55]',
+    },
+    [Platform.SHEIN]: {
+      active: 'bg-[#111111] text-[#FFFFFF] border-[#374151] shadow-md ring-2 ring-[#374151]/60',
+      inactiveDot: 'bg-[#111111] ring-1 ring-[#374151]/50',
+    },
+    [Platform.INSTAGRAM]: {
+      active:
+        'bg-[linear-gradient(45deg,#F58529,#DD2A7B,#8134AF,#515BD4)] text-[#FFFFFF] border-[#DD2A7B] shadow-md ring-2 ring-[#DD2A7B]/40',
+      inactiveDot: 'bg-[linear-gradient(45deg,#F58529,#DD2A7B,#8134AF,#515BD4)]',
+    },
+  };
+
   const renderMarketplaceSelector = () => (
     <div className="mb-6 flex flex-wrap items-center gap-2 border-b pb-4">
       <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Canal de Venda:</span>
-      {[
-        { id: 'all', label: 'Todos os Marketplaces' },
-        { id: Platform.SHEIN, label: 'Shein' },
+      <button
+        type="button"
+        aria-pressed={isAllSelected}
+        onClick={handleSelectAllChannels}
+        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
+          isAllSelected
+            ? 'bg-blue-600 text-white border-blue-700 shadow-md ring-2 ring-blue-300'
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+        }`}
+      >
+        Todos os Marketplaces
+      </button>
+      {([
         { id: 'ML', label: 'Mercado Livre' },
         { id: Platform.SHOPEE, label: 'Shopee' },
         { id: Platform.TIKTOK_SHOP, label: 'TikTok Shop' },
+        { id: Platform.SHEIN, label: 'Shein' },
         { id: Platform.INSTAGRAM, label: 'Instagram' },
-      ].map((item) => {
-        const isSelected = selectedMarketplace === item.id;
-        const isShein = item.id === Platform.SHEIN;
+      ] as Array<{ id: ChannelFilterId; label: string }>).map((item) => {
+        const isSelected = !isAllSelected && selectedChannels.includes(item.id);
+        const brandStyle = channelButtonStyles[item.id];
         return (
           <button
             key={item.id}
             type="button"
-            onClick={() => setSelectedMarketplace(item.id)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            aria-pressed={isSelected}
+            onClick={() => handleToggleChannel(item.id)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
               isSelected
-                ? (isShein ? 'bg-black text-white shadow-md ring-2 ring-neutral-400' : 'bg-blue-600 text-white shadow-md ring-2 ring-blue-300')
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? brandStyle.active
+                : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
             }`}
           >
-            {isShein && <span className="bg-white text-black px-1 rounded text-[9px] font-black">SHEIN</span>}
+            {isSelected ? (
+              <Check className="w-3.5 h-3.5 shrink-0" />
+            ) : (
+              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${brandStyle.inactiveDot}`} />
+            )}
             {item.label}
           </button>
         );
       })}
+      <span className="ml-auto text-[11px] font-medium text-gray-500">
+        {isAllSelected
+          ? 'Todos os canais ativos'
+          : `${selectedChannels.length} ${selectedChannels.length === 1 ? 'canal selecionado' : 'canais selecionados'}`}
+      </span>
     </div>
   );
 
@@ -288,9 +385,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="mlWeight" className="block text-xs font-bold text-gray-700 uppercase tracking-wider truncate">
-                  {selectedMarketplace === Platform.SHEIN ? 'Peso Shein:' : (selectedMarketplace === 'all' ? 'Peso (ML e Shein):' : 'Peso ML:')}
+                  {weightFieldLabel}
                 </label>
-                {selectedMarketplace === Platform.SHEIN && (
+                {isOnlyShein && (
                   <span className="text-[10px] font-black text-red-600 uppercase tracking-wider shrink-0">* Obrigatório</span>
                 )}
               </div>
@@ -314,17 +411,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
                   <span className="text-xs font-bold text-gray-400">kg/g</span>
                 </div>
               </div>
-              {(selectedMarketplace === 'all' || selectedMarketplace === Platform.SHEIN) ? (
-                <div className="mt-1.5 text-[11px] text-gray-600 leading-tight">
-                  <span className="font-semibold text-neutral-800">Frete Shein: </span>
-                  <span className="font-black text-blue-700">{formatCurrency(calcularFreteShein(currentWeight))}</span>
-                  <span className="text-[10px] text-gray-500 block truncate">{getSheinTierLabel(currentWeight)}</span>
-                </div>
-              ) : (
-                <p className="mt-1.5 text-[11px] text-gray-500 truncate">
-                  Faixa de peso para cálculo de frete
-                </p>
-              )}
+              <p className="mt-1.5 text-[11px] text-gray-500 truncate">
+                Faixa de peso para cálculo de frete
+              </p>
             </div>
 
             <div className="flex flex-col">
@@ -403,9 +492,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="mlWeight2" className="block text-xs font-bold text-gray-700 uppercase tracking-wider truncate">
-                  {selectedMarketplace === Platform.SHEIN ? 'Peso Shein:' : (selectedMarketplace === 'all' ? 'Peso (ML e Shein):' : 'Peso ML:')}
+                  {weightFieldLabel}
                 </label>
-                {selectedMarketplace === Platform.SHEIN && (
+                {isOnlyShein && (
                   <span className="text-[10px] font-black text-red-600 uppercase tracking-wider shrink-0">* Obrigatório</span>
                 )}
               </div>
@@ -429,17 +518,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
                   <span className="text-xs font-bold text-gray-400">kg/g</span>
                 </div>
               </div>
-              {(selectedMarketplace === 'all' || selectedMarketplace === Platform.SHEIN) ? (
-                <div className="mt-1.5 text-[11px] text-gray-600 leading-tight">
-                  <span className="font-semibold text-neutral-800">Frete Shein: </span>
-                  <span className="font-black text-blue-700">{formatCurrency(calcularFreteShein(currentWeight))}</span>
-                  <span className="text-[10px] text-gray-500 block truncate">{getSheinTierLabel(currentWeight)}</span>
-                </div>
-              ) : (
-                <p className="mt-1.5 text-[11px] text-gray-500 truncate">
-                  Faixa de peso para cálculo de frete
-                </p>
-              )}
+              <p className="mt-1.5 text-[11px] text-gray-500 truncate">
+                Faixa de peso para cálculo de frete
+              </p>
             </div>
 
             <div className="flex flex-col">
@@ -543,9 +624,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="simWeight" className="block text-xs font-bold text-gray-700 uppercase tracking-wider truncate">
-                  {selectedMarketplace === Platform.SHEIN ? 'Peso Shein:' : (selectedMarketplace === 'all' ? 'Peso (ML e Shein):' : 'Peso ML:')}
+                  {weightFieldLabel}
                 </label>
-                {selectedMarketplace === Platform.SHEIN && (
+                {isOnlyShein && (
                   <span className="text-[10px] font-black text-red-600 uppercase tracking-wider shrink-0">* Obrigatório</span>
                 )}
               </div>
@@ -569,17 +650,9 @@ export default function CalculatorSection({ settings, setSettings }: CalculatorS
                   <span className="text-xs font-bold text-gray-400">kg/g</span>
                 </div>
               </div>
-              {(selectedMarketplace === 'all' || selectedMarketplace === Platform.SHEIN) ? (
-                <div className="mt-1.5 text-[11px] text-gray-600 leading-tight">
-                  <span className="font-semibold text-neutral-800">Frete Shein: </span>
-                  <span className="font-black text-blue-700">{formatCurrency(calcularFreteShein(currentWeight))}</span>
-                  <span className="text-[10px] text-gray-500 block truncate">{getSheinTierLabel(currentWeight)}</span>
-                </div>
-              ) : (
-                <p className="mt-1.5 text-[11px] text-gray-500 truncate">
-                  Faixa de peso para cálculo de frete
-                </p>
-              )}
+              <p className="mt-1.5 text-[11px] text-gray-500 truncate">
+                Faixa de peso para cálculo de frete
+              </p>
             </div>
 
             <div className="flex flex-col">
